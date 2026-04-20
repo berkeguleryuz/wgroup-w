@@ -66,12 +66,14 @@
   "features": {
     "sectionTag": "Nasıl çalışır",
     "heading": "Profesyonel gelişim, <em>tıpkı</em> TV izler gibi.",
-    "f1Title": "Netflix gibi izle",
-    "f1Body": "Diziler, filmler, belgeseller. Tek abonelik, tüm kütüphane. Kurs kurs sepete eklemek yok.",
-    "f2Title": "Profesyoneller için üretildi",
-    "f2Body": "Her bölüm tek bir konuda derinleşir: liderlik kararları, marka sesi, kültür, büyüme. Dolgu yok.",
-    "f3Title": "Ekibin için hazır",
-    "f3Body": "Şirketini dakikalar içinde davet et. Koltuk bazlı fiyat, kullanım raporları, tek panel."
+    "f1Title": "Tek abonelik, tüm kütüphane",
+    "f1Body": "Dizileri, filmleri ve belgeselleri tek yerden izle. İçerikleri parça parça satın almak yerine kütüphanenin tamamına erişirsin.",
+    "f2Title": "Her içerik tek bir konuya odaklanır",
+    "f2Body": "Liderlik, kültür, karar anları ve büyüme üzerine derinlikli yapımlar. Her oturum, işine hemen taşıyabileceğin bir çıktı bırakır.",
+    "f3Title": "Nerede olursan ol izle",
+    "f3Body": "Telefon, tablet, bilgisayar ya da TV. İlerlemen seninle taşınır; kaldığın yerden dilediğin hızda devam edersin.",
+    "f4Title": "Ekibinle birlikte gelişin",
+    "f4Body": "Şirketini dakikalar içinde platforma ekle. Kullanıcı bazlı fiyatlandırma, izlenme istatistikleri ve tek panelden yönetim bir arada."
   },
   "categories": {
     "sectionTag": "Üç oda, tek kütüphane",

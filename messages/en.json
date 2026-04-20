@@ -66,12 +66,14 @@
   "features": {
     "sectionTag": "How it works",
     "heading": "Professional growth, <em>the way</em> you already watch TV.",
-    "f1Title": "Watch like Netflix",
-    "f1Body": "Series, films, documentaries. One subscription, the whole library. No course-by-course shopping cart.",
-    "f2Title": "Built for professionals",
-    "f2Body": "Each episode goes deep on one idea: leadership decisions, marketing voice, culture, scaling. No filler.",
-    "f3Title": "Ready for your team",
-    "f3Body": "Invite your whole company in minutes. Seat-based pricing, usage reports, one dashboard."
+    "f1Title": "One subscription, the full library",
+    "f1Body": "Watch every series, film and documentary from a single place. Full access to the library instead of buying content piece by piece.",
+    "f2Title": "Every piece focuses on one topic",
+    "f2Body": "In-depth productions on leadership, culture, decision-making and growth. Every session leaves you with something you can apply to your work right away.",
+    "f3Title": "Watch wherever you are",
+    "f3Body": "Phone, tablet, laptop or TV. Your progress follows you; pick up exactly where you left off, at your own pace.",
+    "f4Title": "Grow together with your team",
+    "f4Body": "Bring your whole company on board in minutes. Per-seat pricing, viewing analytics and a single admin dashboard, all in one place."
   },
   "categories": {
     "sectionTag": "Three rooms, one library",

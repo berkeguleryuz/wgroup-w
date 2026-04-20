@@ -66,12 +66,14 @@
   "features": {
     "sectionTag": "So funktioniert's",
     "heading": "Berufliche Entwicklung, <em>wie</em> du ohnehin TV schaust.",
-    "f1Title": "Schau wie Netflix",
-    "f1Body": "Serien, Filme, Dokus. Ein Abo, die ganze Bibliothek. Kein Kurs-für-Kurs-Warenkorb.",
-    "f2Title": "Für Profis gebaut",
-    "f2Body": "Jede Folge geht tief in ein Thema: Führungsentscheidungen, Markenstimme, Kultur, Skalierung. Kein Füllmaterial.",
-    "f3Title": "Bereit für dein Team",
-    "f3Body": "Lade dein ganzes Unternehmen in Minuten ein. Seat-basiertes Pricing, Nutzungsreports, ein Dashboard."
+    "f1Title": "Ein Abo, die ganze Bibliothek",
+    "f1Body": "Alle Serien, Filme und Dokus an einem einzigen Ort. Voller Zugriff auf die Bibliothek, statt Inhalte Stück für Stück zu kaufen.",
+    "f2Title": "Jeder Inhalt konzentriert sich auf ein Thema",
+    "f2Body": "Tiefgehende Produktionen zu Führung, Kultur, Entscheidungen und Wachstum. Jede Sitzung gibt dir etwas mit, das du direkt in deinen Arbeitsalltag übernehmen kannst.",
+    "f3Title": "Schau, wo immer du bist",
+    "f3Body": "Auf Handy, Tablet, Laptop oder TV. Dein Fortschritt reist mit dir; mach nahtlos dort weiter, wo du aufgehört hast.",
+    "f4Title": "Wachse gemeinsam mit deinem Team",
+    "f4Body": "Bring dein ganzes Unternehmen in wenigen Minuten an Bord. Preise pro Sitzplatz, Nutzungsstatistiken und ein zentrales Admin-Dashboard in einem."
   },
   "categories": {
     "sectionTag": "Drei Räume, eine Bibliothek",

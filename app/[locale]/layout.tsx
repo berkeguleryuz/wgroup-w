@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
 import {
+  Cormorant_Garamond,
   Fraunces,
   Geist,
   Geist_Mono,
@@ -23,6 +24,11 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   axes: ["SOFT", "opsz"],
+});
+const cormorant = Cormorant_Garamond({
+  variable: "--font-cormorant",
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -52,7 +58,7 @@ export default async function LocaleLayout({
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${geistMono.variable} ${patrickHandSC.variable} ${fraunces.variable} h-screen overflow-hidden antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${patrickHandSC.variable} ${fraunces.variable} ${cormorant.variable} h-screen overflow-hidden antialiased`}
     >
       <body className="h-screen overflow-hidden bg-surface-dark text-foreground">
         <div className="fixed inset-2 overflow-hidden rounded-11 bg-background">
