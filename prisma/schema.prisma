@@ -1,0 +1,279 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id              String    @id
+  name            String
+  email           String    @unique
+  emailVerified   Boolean   @default(false)
+  image           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  role            String?   @default("individual")
+  banned          Boolean?  @default(false)
+  banReason       String?
+  banExpires      DateTime?
+
+  sessions        Session[]
+  accounts        Account[]
+  memberships     Member[]
+  sentInvitations Invitation[]   @relation("Inviter")
+
+  progress                Progress[]
+  individualSubscription  IndividualSubscription?
+  instructorProfile       Instructor?
+
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  impersonatedBy       String?
+  activeOrganizationId String?
+
+  @@index([userId])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("account")
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([identifier])
+  @@map("verification")
+}
+
+model Organization {
+  id          String       @id
+  name        String
+  slug        String       @unique
+  logo        String?
+  metadata    String?
+  createdAt   DateTime     @default(now())
+  members     Member[]
+  invitations Invitation[]
+
+  companyProfile CompanyProfile?
+
+  @@map("organization")
+}
+
+model Member {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role           String       @default("member")
+  createdAt      DateTime     @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([organizationId])
+  @@index([userId])
+  @@map("member")
+}
+
+model Invitation {
+  id             String       @id
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  email          String
+  role           String?
+  status         String       @default("pending")
+  expiresAt      DateTime
+  createdAt      DateTime     @default(now())
+  inviterId      String
+  inviter        User         @relation("Inviter", fields: [inviterId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId])
+  @@index([email])
+  @@map("invitation")
+}
+
+enum Section {
+  SERIES
+  MOVIE
+  TALENT
+}
+
+enum TitleType {
+  SERIES
+  MOVIE
+}
+
+model Category {
+  id        String     @id @default(cuid())
+  slug      String     @unique
+  title     String
+  section   Section
+  parentId  String?
+  parent    Category?  @relation("Sub", fields: [parentId], references: [id])
+  children  Category[] @relation("Sub")
+  sortOrder Int        @default(0)
+  titles    Title[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([section, parentId])
+}
+
+model Title {
+  id           String    @id @default(cuid())
+  slug         String    @unique
+  type         TitleType
+  title        String
+  synopsis     String
+  heroImageUrl String?
+  trailerUrl   String?
+  categoryId   String
+  category     Category  @relation(fields: [categoryId], references: [id])
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+
+  episodes Episode[]
+  credits  TitleInstructor[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([categoryId, published])
+}
+
+model Episode {
+  id            String  @id @default(cuid())
+  titleId       String
+  title         Title   @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  seasonNumber  Int     @default(1)
+  episodeNumber Int
+  name          String
+  synopsis      String?
+  videoPath     String
+  durationSec   Int     @default(0)
+  previewSec    Int     @default(0)
+  sortOrder     Int     @default(0)
+
+  progress Progress[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([titleId, seasonNumber, episodeNumber])
+  @@index([titleId])
+}
+
+model Instructor {
+  id       String  @id @default(cuid())
+  name     String
+  bio      String?
+  photoUrl String?
+  userId   String? @unique
+  user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  credits TitleInstructor[]
+}
+
+model TitleInstructor {
+  titleId      String
+  instructorId String
+  role         String?
+  title        Title      @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  instructor   Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
+
+  @@id([titleId, instructorId])
+}
+
+model Progress {
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episodeId   String
+  episode     Episode   @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  positionSec Int       @default(0)
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@id([userId, episodeId])
+  @@index([userId, updatedAt])
+}
+
+model IndividualSubscription {
+  userId               String   @id
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stripeCustomerId     String   @unique
+  stripeSubscriptionId String   @unique
+  plan                 String
+  status               String
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CompanyProfile {
+  organizationId        String       @id
+  organization          Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  billingEmail          String
+  contactName           String?
+  contactPhone          String?
+  seatCount             Int          @default(0)
+  subscriptionStatus    String       @default("pending")
+  subscriptionStartedAt DateTime?
+  subscriptionEndsAt    DateTime?
+  notes                 String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CorporateLead {
+  id          String   @id @default(cuid())
+  companyName String
+  contactName String
+  email       String
+  phone       String?
+  seatTarget  Int?
+  message     String?
+  status      String   @default("new")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
