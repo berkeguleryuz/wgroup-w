@@ -1,10 +1,10 @@
 import { useTranslations } from "next-intl";
 
 type CardTheme = {
-  bg: string; // gradient from/to via CSS
-  text: string; // heading color
-  accent: string; // illustration accent
-  soft: string; // soft tint
+  bg: string;
+  text: string;
+  accent: string;
+  soft: string;
 };
 
 const CARD_THEMES: CardTheme[] = [
@@ -117,8 +117,6 @@ export function FeatureGrid() {
           transform: translateY(-6px);
           box-shadow: 0 30px 60px -30px rgba(16, 13, 8, 0.25);
         }
-        /* Align headings and bodies across cards so the illustration always
-           starts at the same vertical position. */
         .feature-card-heading { min-height: 5rem; }
         .feature-card-body    { min-height: 4.75rem; }
         @media (min-width: 768px) {
@@ -157,7 +155,6 @@ function ArtLibrary({ accent, soft }: ArtProps) {
         .art-lib-row-b  { animation: art-lib-slide 11s linear infinite reverse; }
         .art-lib-badge  { transform-origin: center; transform-box: fill-box; animation: art-lib-pulse 2.2s ease-in-out infinite; }
       `}</style>
-      {/* TV frame */}
       <rect
         x="18"
         y="12"
@@ -177,7 +174,6 @@ function ArtLibrary({ accent, soft }: ArtProps) {
         strokeWidth="1.4"
         opacity="0.4"
       />
-      {/* Content rows */}
       <g clipPath="url(#art-lib-clip)">
         <g className="art-lib-row">
           {Array.from({ length: 8 }).map((_, i) => (
@@ -208,7 +204,6 @@ function ArtLibrary({ accent, soft }: ArtProps) {
           ))}
         </g>
       </g>
-      {/* Featured badge */}
       <g className="art-lib-badge">
         <rect x="124" y="72" width="72" height="76" rx="10" fill="#fff" />
         <path d="M 152 96 L 172 110 L 152 124 Z" fill={accent} />
@@ -246,7 +241,6 @@ function ArtDepth({ accent, soft }: ArtProps) {
         .art-depth-tick:nth-child(3) { animation-delay: .4s; }
         .art-depth-tick:nth-child(4) { animation-delay: .6s; }
       `}</style>
-      {/* Episode card */}
       <rect
         x="20"
         y="14"
@@ -266,11 +260,9 @@ function ArtDepth({ accent, soft }: ArtProps) {
         strokeWidth="1.4"
         opacity="0.4"
       />
-      {/* Thumbnail */}
       <rect x="36" y="30" width="96" height="72" rx="10" fill={soft} />
       <circle cx="84" cy="66" r="16" fill="#fff" opacity="0.9" />
       <path d="M 79 58 L 92 66 L 79 74 Z" fill={accent} />
-      {/* Title lines */}
       <rect
         x="148"
         y="40"
@@ -298,7 +290,6 @@ function ArtDepth({ accent, soft }: ArtProps) {
         fill={accent}
         opacity="0.3"
       />
-      {/* Progress label */}
       <rect
         x="36"
         y="120"
@@ -324,7 +315,6 @@ function ArtDepth({ accent, soft }: ArtProps) {
           <rect x="36" y="120" width="248" height="10" rx="5" />
         </clipPath>
       </defs>
-      {/* Chapter ticks */}
       <g fill={accent}>
         <circle className="art-depth-tick" cx="60" cy="162" r="4" />
         <circle className="art-depth-tick" cx="130" cy="162" r="4" />
@@ -337,7 +327,6 @@ function ArtDepth({ accent, soft }: ArtProps) {
         strokeWidth="1.2"
         opacity="0.3"
       />
-      {/* Caption */}
       <rect
         x="36"
         y="184"
@@ -378,7 +367,6 @@ function ArtDevices({ accent, soft }: ArtProps) {
         .art-dev-sync-dot-b { animation-delay: .7s; }
         .art-dev-sync-dot-c { animation-delay: 1.4s; }
       `}</style>
-      {/* Laptop */}
       <g className="art-dev-laptop">
         <rect x="36" y="52" width="180" height="118" rx="10" fill="#fff" />
         <rect
@@ -412,7 +400,6 @@ function ArtDevices({ accent, soft }: ArtProps) {
           opacity="0.35"
         />
       </g>
-      {/* Phone */}
       <g className="art-dev-phone" transform="translate(234 58)">
         <rect x="0" y="0" width="62" height="112" rx="10" fill="#fff" />
         <rect
@@ -446,7 +433,6 @@ function ArtDevices({ accent, soft }: ArtProps) {
           opacity="0.4"
         />
       </g>
-      {/* Sync dots between devices */}
       <g fill={accent}>
         <circle className="art-dev-sync-dot" cx="218" cy="108" r="3" />
         <circle
@@ -516,7 +502,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
         .art-team-count-bar{ transform-box: fill-box; transform-origin: left center; animation: art-team-counter 2.4s ease-in-out infinite; }
       `}</style>
 
-      {/* Outer glow ring around hub */}
       <circle
         className="art-team-hub-ring"
         cx="160"
@@ -527,7 +512,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
         strokeDasharray="2 6"
       />
 
-      {/* Beams from hub to each member (pulsing invitation) */}
       <g stroke={accent} strokeWidth="1.2" fill="none">
         <path
           className="art-team-beam"
@@ -556,7 +540,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
         />
       </g>
 
-      {/* Central hub — admin dashboard */}
       <g>
         <rect x="128" y="82" width="64" height="56" rx="10" fill="#fff" />
         <rect
@@ -569,7 +552,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
           strokeWidth="1.4"
           opacity="0.55"
         />
-        {/* Title line */}
         <rect
           x="136"
           y="90"
@@ -588,7 +570,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
           fill={accent}
           opacity="0.35"
         />
-        {/* Seat counter bars */}
         <rect
           x="136"
           y="108"
@@ -626,11 +607,9 @@ function ArtTeam({ accent, soft }: ArtProps) {
           fill={accent}
           style={{ animationDelay: ".6s" }}
         />
-        {/* Tiny badge top-right */}
         <circle cx="188" cy="87" r="3" fill={accent} />
       </g>
 
-      {/* Member chips arriving around the hub */}
       {members.map((m, i) => (
         <g
           key={i}
@@ -638,7 +617,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
           style={{ animationDelay: `${m.delay}s` }}
           transform={`translate(${m.x} ${m.y})`}
         >
-          {/* Chip background */}
           <rect
             x="0"
             y="0"
@@ -658,12 +636,9 @@ function ArtTeam({ accent, soft }: ArtProps) {
             strokeWidth="1"
             opacity="0.4"
           />
-          {/* Avatar circle */}
           <circle cx="14" cy="16" r="9" fill={i % 2 === 0 ? accent : soft} />
-          {/* Avatar face hint */}
           <circle cx="14" cy="13.5" r="3" fill="#fff" opacity="0.9" />
           <path d="M 9 21 Q 14 17 19 21" fill="#fff" opacity="0.9" />
-          {/* Name line */}
           <rect
             x="28"
             y="11"
@@ -673,7 +648,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
             fill={accent}
             opacity="0.7"
           />
-          {/* Role line */}
           <rect
             x="28"
             y="18"
@@ -683,7 +657,6 @@ function ArtTeam({ accent, soft }: ArtProps) {
             fill={accent}
             opacity="0.35"
           />
-          {/* Online status dot */}
           <circle
             className={`art-team-status${i > 0 ? ` art-team-status-${"bcde"[i - 1]}` : ""}`}
             cx="65"

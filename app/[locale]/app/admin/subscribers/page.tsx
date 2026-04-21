@@ -14,6 +14,7 @@ export default async function AdminSubscribersPage({
     getTranslations("admin"),
     prisma.individualSubscription.findMany({
       orderBy: { updatedAt: "desc" },
+      take: 100,
       include: { user: { select: { name: true, email: true } } },
     }),
   ]);

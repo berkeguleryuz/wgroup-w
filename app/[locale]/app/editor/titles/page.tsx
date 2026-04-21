@@ -17,6 +17,7 @@ export default async function EditorTitlesPage({
     getTranslations("admin"),
     prisma.title.findMany({
       orderBy: { updatedAt: "desc" },
+      take: 200,
       include: { category: true, episodes: { select: { id: true } } },
     }),
   ]);
