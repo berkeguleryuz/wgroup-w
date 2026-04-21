@@ -8,8 +8,6 @@ import { requireSession, getEffectiveAccess } from "@/lib/access";
 import { Button } from "@/components/ui/Button";
 import { formatDuration } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
-
 export default async function TitleDetailPage({
   params,
 }: {

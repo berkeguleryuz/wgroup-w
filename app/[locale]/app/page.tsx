@@ -9,8 +9,6 @@ import { Carousel } from "@/components/app/Carousel";
 import { TitleCard } from "@/components/app/TitleCard";
 import { Button } from "@/components/ui/Button";
 
-export const dynamic = "force-dynamic";
-
 export default async function AppHomePage({
   params,
 }: {

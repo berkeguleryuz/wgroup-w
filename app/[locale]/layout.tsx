@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
@@ -63,7 +64,9 @@ export default async function LocaleLayout({
       <body className="h-screen overflow-hidden bg-surface-dark text-foreground">
         <div className="fixed inset-2 overflow-hidden rounded-11 bg-background">
           <div className="h-full w-full overflow-y-auto overflow-x-hidden">
-            <NextIntlClientProvider>{children}</NextIntlClientProvider>
+            <Suspense fallback={null}>
+              <NextIntlClientProvider>{children}</NextIntlClientProvider>
+            </Suspense>
           </div>
         </div>
       </body>

@@ -5,8 +5,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireOrgOwner } from "@/lib/corporate";
 
-export const dynamic = "force-dynamic";
-
 export default async function CorporateDashboard({
   params,
 }: {

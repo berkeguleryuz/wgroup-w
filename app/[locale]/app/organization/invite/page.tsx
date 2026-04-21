@@ -6,8 +6,6 @@ import { inviteSingle, inviteBulk } from "./actions";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 
-export const dynamic = "force-dynamic";
-
 export default async function CorporateInvitePage({
   params,
   searchParams,

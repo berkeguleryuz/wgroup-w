@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
+import { updateTag } from "next/cache";
 
 import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
@@ -8,8 +9,6 @@ import { requireRole } from "@/lib/access";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { formatDuration } from "@/lib/utils";
-
-export const dynamic = "force-dynamic";
 
 async function updateTitle(formData: FormData) {
   "use server";
@@ -24,6 +23,7 @@ async function updateTitle(formData: FormData) {
     where: { id },
     data: { title, synopsis, heroImageUrl, trailerUrl },
   });
+  updateTag("featured-titles");
   const locale = await getLocale();
   redirect(localizedPath(locale, `/app/editor/titles/${id}`));
 }
@@ -41,6 +41,7 @@ async function togglePublish(formData: FormData) {
       publishedAt: !current.published ? new Date() : current.publishedAt,
     },
   });
+  updateTag("featured-titles");
   const locale = await getLocale();
   redirect(localizedPath(locale, `/app/editor/titles/${id}`));
 }

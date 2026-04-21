@@ -6,8 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { SubscribeButton } from "./SubscribeButton";
 import { ManagePortalButton } from "./ManagePortalButton";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata({
   params,
 }: {

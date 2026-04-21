@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
+import { updateTag } from "next/cache";
 
 import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
@@ -8,8 +9,6 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { slugify } from "@/lib/utils";
 import { TitleType } from "@prisma/client";
-
-export const dynamic = "force-dynamic";
 
 async function createTitle(formData: FormData) {
   "use server";
@@ -25,6 +24,7 @@ async function createTitle(formData: FormData) {
   const created = await prisma.title.create({
     data: { slug, title, synopsis, type, categoryId, published: false },
   });
+  updateTag("featured-titles");
   const locale = await getLocale();
   redirect(localizedPath(locale, `/app/editor/titles/${created.id}`));
 }

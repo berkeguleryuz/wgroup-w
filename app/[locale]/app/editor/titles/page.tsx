@@ -5,8 +5,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/Button";
 
-export const dynamic = "force-dynamic";
-
 export default async function EditorTitlesPage({
   params,
 }: {

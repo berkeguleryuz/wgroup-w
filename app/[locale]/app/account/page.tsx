@@ -5,8 +5,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSession } from "@/lib/access";
 import { Button } from "@/components/ui/Button";
 
-export const dynamic = "force-dynamic";
-
 export async function generateMetadata({
   params,
 }: {
