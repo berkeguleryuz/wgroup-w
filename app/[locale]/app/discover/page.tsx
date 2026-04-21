@@ -68,6 +68,7 @@ export default async function BrowsePage({
       },
       include: { category: true, episodes: { select: { durationSec: true } } },
       orderBy: { publishedAt: "desc" },
+      take: 60,
     }),
   ]);
 

@@ -126,6 +126,7 @@ model Invitation {
 
   @@index([organizationId])
   @@index([email])
+  @@index([inviterId])
   @@map("invitation")
 }
 
@@ -155,6 +156,7 @@ model Category {
   updatedAt DateTime @updatedAt
 
   @@index([section, parentId])
+  @@index([parentId])
 }
 
 model Title {
@@ -177,6 +179,7 @@ model Title {
   updatedAt DateTime @updatedAt
 
   @@index([categoryId, published])
+  @@index([published, publishedAt(sort: Desc), createdAt(sort: Desc)])
 }
 
 model Episode {
@@ -220,6 +223,7 @@ model TitleInstructor {
   instructor   Instructor @relation(fields: [instructorId], references: [id], onDelete: Cascade)
 
   @@id([titleId, instructorId])
+  @@index([instructorId])
 }
 
 model Progress {
@@ -232,7 +236,8 @@ model Progress {
   updatedAt   DateTime  @updatedAt
 
   @@id([userId, episodeId])
-  @@index([userId, updatedAt])
+  @@index([userId, completedAt, updatedAt(sort: Desc)])
+  @@index([episodeId])
 }
 
 model IndividualSubscription {

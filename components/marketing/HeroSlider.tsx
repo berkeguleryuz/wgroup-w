@@ -437,7 +437,6 @@ function InfoBox({
               animation: infobox-tri-beat 1.4s ease-in-out infinite;
             }
           `}</style>
-          {/* Outer rotating arc — progress feel */}
           <circle
             className="infobox-arc"
             cx="16"

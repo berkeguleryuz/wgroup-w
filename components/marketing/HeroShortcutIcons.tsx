@@ -5,11 +5,6 @@ type IconProps = {
   className?: string;
 };
 
-/**
- * Animated shortcut icons for the hero's feature row.
- * Each one is a self-contained 24×24 SVG with scoped CSS animations.
- */
-
 export function Icon4K({ color, className }: IconProps) {
   return (
     <svg
@@ -46,11 +41,9 @@ export function Icon4K({ color, className }: IconProps) {
         .icon4k-pixel:nth-child(15){ animation-delay: 1.20s; }
         .icon4k-pixel:nth-child(16){ animation-delay: 1.35s; }
       `}</style>
-      {/* Monitor frame */}
       <rect x="2.5" y="4.5" width="19" height="13" rx="2" />
       <path d="M 9 20.5 H 15" />
       <path d="M 12 17.5 V 20.5" />
-      {/* Pixel grid 4x4 */}
       <g fill={color} stroke="none">
         {Array.from({ length: 16 }).map((_, i) => {
           const row = Math.floor(i / 4);
@@ -99,11 +92,9 @@ export function IconHD({ color, className }: IconProps) {
         .iconhd-bar:nth-child(6) { animation-delay: .60s; }
         .iconhd-bar:nth-child(7) { animation-delay: .72s; }
       `}</style>
-      {/* Monitor frame */}
       <rect x="2.5" y="4.5" width="19" height="13" rx="2" />
       <path d="M 9 20.5 H 15" />
       <path d="M 12 17.5 V 20.5" />
-      {/* Waveform bars */}
       <g fill={color} stroke="none">
         <rect className="iconhd-bar" x="5"    y="8"   width="1.4" height="6" rx="0.7" />
         <rect className="iconhd-bar" x="7.2"  y="8"   width="1.4" height="6" rx="0.7" />
@@ -140,11 +131,9 @@ export function IconPreview({ color, className }: IconProps) {
         .iconprev-ring-b { animation-delay: .75s; }
         .iconprev-ring-c { animation-delay: 1.5s; }
       `}</style>
-      {/* Expanding rings */}
       <circle className="iconprev-ring"                   cx="12" cy="12" r="8" stroke={color} />
       <circle className="iconprev-ring iconprev-ring-b"   cx="12" cy="12" r="8" stroke={color} />
       <circle className="iconprev-ring iconprev-ring-c"   cx="12" cy="12" r="8" stroke={color} />
-      {/* Core circle + play triangle */}
       <circle cx="12" cy="12" r="7.5" />
       <path d="M 10 9 L 15.5 12 L 10 15 Z" fill={color} stroke="none" />
     </svg>
@@ -179,9 +168,7 @@ export function IconSubtitles({ color, className }: IconProps) {
         .iconsubs-line-b { animation-delay: .35s; }
         .iconsubs-line-c { animation-delay: .70s; }
       `}</style>
-      {/* Caption frame */}
       <rect x="2.5" y="5.5" width="19" height="13" rx="2" />
-      {/* Animated caption lines */}
       <path
         className="iconsubs-line"
         style={{ ["--len" as string]: "8" }}

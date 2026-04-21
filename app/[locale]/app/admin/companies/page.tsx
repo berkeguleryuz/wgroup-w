@@ -15,9 +15,13 @@ export default async function AdminCorporatePage({
   setRequestLocale(locale);
   const [t, leads, companies] = await Promise.all([
     getTranslations("admin"),
-    prisma.corporateLead.findMany({ orderBy: { createdAt: "desc" } }),
+    prisma.corporateLead.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 100,
+    }),
     prisma.companyProfile.findMany({
       orderBy: { updatedAt: "desc" },
+      take: 100,
       include: { organization: true },
     }),
   ]);
