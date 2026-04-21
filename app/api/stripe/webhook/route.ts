@@ -4,8 +4,6 @@ import type Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
-
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 export async function POST(request: Request) {

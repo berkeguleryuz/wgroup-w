@@ -4,8 +4,6 @@ import { z } from "zod";
 import { getSession } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 
-export const runtime = "nodejs";
-
 const payloadSchema = z.object({
   episodeId: z.string().min(1),
   position: z.number().int().nonnegative(),
@@ -13,11 +11,13 @@ const payloadSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  const session = await getSession();
+  const sessionPromise = getSession();
+  const jsonPromise = request.json().catch(() => null);
+
+  const session = await sessionPromise;
   if (!session) return NextResponse.json({ ok: false }, { status: 401 });
 
-  const json = await request.json().catch(() => null);
-  const parsed = payloadSchema.safeParse(json);
+  const parsed = payloadSchema.safeParse(await jsonPromise);
   if (!parsed.success) return NextResponse.json({ ok: false }, { status: 400 });
 
   const { episodeId, position, completed } = parsed.data;

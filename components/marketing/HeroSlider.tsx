@@ -113,16 +113,35 @@ export function HeroSlider() {
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
+
+    let rafId: number | null = null;
+    let nextX = 0;
+    let nextY = 0;
+
+    const flush = () => {
+      rafId = null;
+      setParallax({ x: nextX, y: nextY });
+    };
+    const schedule = () => {
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(flush);
+    };
     const onMove = (e: MouseEvent) => {
       const r = el.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width - 0.5;
-      const y = (e.clientY - r.top) / r.height - 0.5;
-      setParallax({ x, y });
+      nextX = (e.clientX - r.left) / r.width - 0.5;
+      nextY = (e.clientY - r.top) / r.height - 0.5;
+      schedule();
     };
-    const onLeave = () => setParallax({ x: 0, y: 0 });
-    el.addEventListener("mousemove", onMove);
-    el.addEventListener("mouseleave", onLeave);
+    const onLeave = () => {
+      nextX = 0;
+      nextY = 0;
+      schedule();
+    };
+
+    el.addEventListener("mousemove", onMove, { passive: true });
+    el.addEventListener("mouseleave", onLeave, { passive: true });
     return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       el.removeEventListener("mousemove", onMove);
       el.removeEventListener("mouseleave", onLeave);
     };
