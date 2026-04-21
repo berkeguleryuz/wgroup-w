@@ -15,6 +15,7 @@ import { Autoplay, EffectFade, Keyboard } from "swiper/modules";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { HeroGlyph, HeroGlyphIcon } from "@/components/marketing/HeroGlyphs";
+import { HeroShortcutIcon } from "@/components/marketing/HeroShortcutIcons";
 
 import "swiper/css";
 import "swiper/css/effect-fade";
@@ -386,14 +387,53 @@ function InfoBox({
       }}
     >
       <div
-        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-11 border"
+        className="relative flex h-12 w-12 shrink-0 items-center justify-center rounded-11 border"
         style={{ borderColor: `${theme.accent}aa`, color: theme.accent }}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-          <path
-            d="M6 4.5v15l13-7.5-13-7.5z"
-            fill="currentColor"
+        <svg
+          viewBox="0 0 32 32"
+          width="28"
+          height="28"
+          fill="none"
+          aria-hidden
+        >
+          <style>{`
+            @keyframes infobox-arc-spin { to { transform: rotate(360deg); } }
+            @keyframes infobox-arc-spin-rev { to { transform: rotate(-360deg); } }
+            @keyframes infobox-tri-beat {
+              0%, 100% { transform: scale(1); }
+              50%      { transform: scale(1.12); }
+            }
+            .infobox-arc {
+              transform-origin: 16px 16px;
+              animation: infobox-arc-spin 2.8s linear infinite;
+            }
+            .infobox-arc-inner {
+              transform-origin: 16px 16px;
+              animation: infobox-arc-spin-rev 4.2s linear infinite;
+            }
+            .infobox-tri {
+              transform-box: fill-box;
+              transform-origin: center;
+              animation: infobox-tri-beat 1.4s ease-in-out infinite;
+            }
+          `}</style>
+          {/* Outer rotating arc — progress feel */}
+          <circle
+            className="infobox-arc"
+            cx="16"
+            cy="16"
+            r="12.5"
+            stroke={theme.accent}
+            strokeWidth="1.4"
+            strokeDasharray="22 60"
+            strokeLinecap="round"
+            opacity="0.9"
           />
+         
+          <g className="infobox-tri">
+            <path d="M 13 10 L 22.5 16 L 13 22 Z" fill={theme.accent} />
+          </g>
         </svg>
       </div>
       <div>
@@ -422,7 +462,7 @@ function ShortcutRow({ items, theme }: { items: string[]; theme: Theme }) {
             className="flex items-center justify-center py-4"
             style={{ color: theme.text }}
           >
-            <ShortcutIcon label={item} color={theme.accent} />
+            <HeroShortcutIcon label={item} color={theme.accent} />
           </div>
           <div
             className="border-t py-1.5 text-[11px] font-semibold uppercase tracking-[0.18em]"
@@ -437,41 +477,6 @@ function ShortcutRow({ items, theme }: { items: string[]; theme: Theme }) {
         </div>
       ))}
     </div>
-  );
-}
-
-function ShortcutIcon({ label, color }: { label: string; color: string }) {
-  const common = {
-    width: 18,
-    height: 18,
-    viewBox: "0 0 24 24",
-    fill: "none",
-    stroke: color,
-    strokeWidth: 1.8,
-    strokeLinecap: "round" as const,
-    strokeLinejoin: "round" as const,
-  };
-  if (/4K|HD/i.test(label)) {
-    return (
-      <svg {...common}>
-        <rect x="3" y="5" width="18" height="14" rx="2" />
-        <path d="M8 10v4M8 12h3M16 10v4M14 10l3 4" />
-      </svg>
-    );
-  }
-  if (/preview|önizleme|vorschau/i.test(label)) {
-    return (
-      <svg {...common}>
-        <circle cx="12" cy="12" r="8" />
-        <path d="M10 9l5 3-5 3V9z" fill={color} stroke="none" />
-      </svg>
-    );
-  }
-  return (
-    <svg {...common}>
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M7 13h4M13 13h4M7 16h10" />
-    </svg>
   );
 }
 

@@ -5,8 +5,6 @@ import { prisma } from "@/lib/prisma";
 import { AppSidebar } from "@/components/app/AppSidebar";
 import { AppTopbar } from "@/components/app/AppTopbar";
 
-export const dynamic = "force-dynamic";
-
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
@@ -26,4 +24,3 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-

@@ -23,7 +23,9 @@ export default async function HomePage({
 
   return (
     <>
-      <HeroSlider />
+      <Suspense fallback={null}>
+        <HeroSlider />
+      </Suspense>
       <LogoStrip />
       <FeatureGrid />
       <CategoryShowcase />

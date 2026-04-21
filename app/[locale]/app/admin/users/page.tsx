@@ -7,8 +7,6 @@ import { USER_ROLES } from "@/lib/auth";
 import { updateUserRole } from "./actions";
 import { Button } from "@/components/ui/Button";
 
-export const dynamic = "force-dynamic";
-
 export default async function AdminUsersPage({
   params,
 }: {

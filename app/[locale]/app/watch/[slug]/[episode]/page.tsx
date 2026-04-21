@@ -8,8 +8,6 @@ import { requireSession, getEffectiveAccess } from "@/lib/access";
 import { createVideoSignedUrl } from "@/lib/supabase-storage";
 import { PlayerClient } from "./PlayerClient";
 
-export const dynamic = "force-dynamic";
-
 export default async function PlayerPage({
   params,
 }: {

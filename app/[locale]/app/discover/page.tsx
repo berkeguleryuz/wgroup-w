@@ -6,8 +6,6 @@ import { prisma } from "@/lib/prisma";
 import { Section, TitleType } from "@prisma/client";
 import { TitleCard } from "@/components/app/TitleCard";
 
-export const dynamic = "force-dynamic";
-
 type SearchParams = {
   section?: string;
   type?: string;

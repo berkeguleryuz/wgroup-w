@@ -4,8 +4,6 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { requireRole } from "@/lib/access";
 
-export const dynamic = "force-dynamic";
-
 export default async function EditorLayout({ children }: { children: ReactNode }) {
   await requireRole(["platform_editor", "admin"]);
   const t = await getTranslations("editor");

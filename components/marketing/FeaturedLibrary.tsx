@@ -1,10 +1,15 @@
 import { getTranslations } from "next-intl/server";
+import { cacheLife, cacheTag } from "next/cache";
 
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { formatDuration } from "@/lib/utils";
 
 async function loadFeatured() {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("featured-titles");
+
   try {
     const titles = await prisma.title.findMany({
       where: { published: true },

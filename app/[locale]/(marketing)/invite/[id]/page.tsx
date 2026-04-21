@@ -7,8 +7,6 @@ import { getSession } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import { AcceptInviteButton } from "./AcceptInviteButton";
 
-export const dynamic = "force-dynamic";
-
 export default async function InvitePage({
   params,
 }: {

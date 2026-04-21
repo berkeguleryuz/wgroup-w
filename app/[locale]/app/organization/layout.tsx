@@ -6,8 +6,6 @@ import { Link } from "@/lib/i18n/navigation";
 import { requireSession } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = "force-dynamic";
-
 export default async function CorporateAdminLayout({
   children,
 }: {
