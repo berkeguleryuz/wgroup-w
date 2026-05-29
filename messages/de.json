@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Businessflix",
+    "appName": "Busyflix",
     "getStarted": "Loslegen",
     "login": "Anmelden",
     "logout": "Abmelden",
@@ -94,7 +94,7 @@
   },
   "featuredLibrary": {
     "sectionTag": "Empfohlen",
-    "heading": "Jetzt auf Businessflix.",
+    "heading": "Jetzt auf Busyflix.",
     "seeFull": "Ganze Bibliothek ansehen →",
     "empty": "Die Bibliothek wird vorbereitet. Empfohlene Titel erscheinen in Kürze.",
     "series": "Serie",
@@ -132,7 +132,7 @@
   },
   "corporateCTA": {
     "sectionTag": "Für Teams",
-    "tagline": "Für Unternehmen · Businessflix",
+    "tagline": "Für Unternehmen · Busyflix",
     "headingLine1": "Schule dein Team",
     "headingLine2": "an einem Tag.",
     "description": "Seat-basiertes Pricing, Sammel-Einladungen und unternehmensweite Nutzungsreports. Ein Dashboard, eine Rechnung, null Kursverwaltung.",
@@ -159,7 +159,7 @@
     "q2": "Was ist der Unterschied zwischen Privat- und Business-Plänen?",
     "a2": "Privat ist Self-Service mit einem Sitzplatz. Business wird pro Sitzplatz angeboten; der Firmen-Admin lädt Mitarbeitende ein und trackt Nutzung im Dashboard.",
     "q3": "Wer produziert die Inhalte?",
-    "a3": "Alle Inhalte werden vom Businessflix-Redaktionsteam produziert, zusammen mit Fachexpert:innen als Hosts.",
+    "a3": "Alle Inhalte werden vom Busyflix-Redaktionsteam produziert, zusammen mit Fachexpert:innen als Hosts.",
     "q4": "In welcher Qualität wird gestreamt?",
     "a4": "Alle Titel streamen in hoher Qualität auf Desktop und Mobile, mit automatischer Anpassung an deine Verbindung.",
     "q5": "Kann ich vor dem Abo testen?",
@@ -169,7 +169,7 @@
     "kicker": "Deine nächste Folge startet heute Abend.",
     "headingLine1": "Drück Play",
     "headingLine2": "auf deine Karriere.",
-    "description": "Tritt heute Businessflix bei. Sieben Tage Vorschau auf jeden Titel. Jederzeit kündbar. Dauerhaft wachsen.",
+    "description": "Tritt heute Busyflix bei. Sieben Tage Vorschau auf jeden Titel. Jederzeit kündbar. Dauerhaft wachsen.",
     "ctaPrimary": "Loslegen",
     "ctaSecondary": "Für Teams"
   },
@@ -226,7 +226,7 @@
     "formSuccess": "Danke! Deine Anfrage ist bei uns. Wir melden uns innerhalb von 24 Stunden."
   },
   "authShell": {
-    "sideTag": "Businessflix · Streaming",
+    "sideTag": "Busyflix · Streaming",
     "headingLine1": "Schau weiter,",
     "headingLine2": "wo du aufgehört hast.",
     "description": "Hochwertige Video-Serien zu Führung, Unternehmertum und Talententwicklung. Einmal abonnieren, alles schauen."
@@ -319,7 +319,7 @@
     "wrongAccountTitle": "Falsches Konto",
     "wrongAccountBody": "Diese Einladung wurde an {invitedEmail} gesendet. Du bist aktuell als {currentEmail} angemeldet. Melde dich ab und mit dem richtigen Konto an.",
     "joinTitle": "Dem Team {org} beitreten",
-    "joinBody": "Mit Annahme der Einladung wirst du zum Businessflix-Abo deiner Firma hinzugefügt.",
+    "joinBody": "Mit Annahme der Einladung wirst du zum Busyflix-Abo deiner Firma hinzugefügt.",
     "accept": "Einladung annehmen",
     "reject": "Ablehnen",
     "processing": "Wird verarbeitet…",
@@ -336,7 +336,11 @@
     "continueWatching": "Weitergucken",
     "newReleases": "Neu hinzugefügt",
     "newReleasesSub": "Diese Woche veröffentlicht",
-    "minutesWatched": "{name} · {minutes} Min. gesehen"
+    "minutesWatched": "{name} · {minutes} Min. gesehen",
+    "play": "Abspielen",
+    "moreInfo": "Mehr Infos",
+    "heroFallbackTitle": "Die Bibliothek ist unterwegs.",
+    "heroFallbackBody": "Inhalte folgen in Kürze. Schau dir solange alle Kategorien an."
   },
   "discover": {
     "kicker": "Bibliothek",
@@ -361,7 +365,15 @@
     "previewEndedBody": "Aktiviere dein Abo, um weiterzuschauen.",
     "subscribe": "Abonnieren",
     "videoUnavailable": "Video wird vorbereitet.",
-    "otherEpisodes": "Weitere Folgen"
+    "otherEpisodes": "Weitere Folgen",
+    "curriculum": "Kursinhalt",
+    "lessonCount": "{count, plural, =0 {keine Lektionen} one {# Lektion} other {# Lektionen}}",
+    "completed": "Abgeschlossen",
+    "nextLesson": "Nächste Lektion",
+    "prevLesson": "Vorherige Lektion",
+    "backToTitle": "Zurück zum Kurs",
+    "lessonProgress": "{done}/{total} abgeschlossen",
+    "previewBadge": "Vorschau"
   },
   "account": {
     "kicker": "Konto",
@@ -371,6 +383,10 @@
     "email": "E-Mail",
     "role": "Rolle",
     "verified": "E-Mail bestätigt",
+    "roleIndividual": "Privat",
+    "rolePlatformEditor": "Editor",
+    "roleAdmin": "Admin",
+    "roleInstructor": "Trainer",
     "subscription": "Abo",
     "manage": "Abo verwalten"
   },
@@ -443,6 +459,11 @@
     "duration": "Dauer (Sek.)",
     "episodeName": "Folgentitel",
     "videoPath": "Video-Pfad (Supabase Storage Key)",
+    "videoFile": "Videodatei",
+    "uploadSelect": "Videodatei auswählen",
+    "uploadHint": "MP4, WebM oder MOV. Upload zu Supabase Storage.",
+    "uploading": "Wird hochgeladen",
+    "uploadRemove": "Entfernen",
     "preview": "Vorschau (Sek.)",
     "addEpisode": "Folge hinzufügen"
   },

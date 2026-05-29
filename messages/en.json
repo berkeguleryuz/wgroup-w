@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Businessflix",
+    "appName": "Busyflix",
     "getStarted": "Get started",
     "login": "Log in",
     "logout": "Log out",
@@ -94,7 +94,7 @@
   },
   "featuredLibrary": {
     "sectionTag": "Featured",
-    "heading": "Currently on Businessflix.",
+    "heading": "Currently on Busyflix.",
     "seeFull": "See the full library →",
     "empty": "Library is being prepared. Featured titles will appear here shortly.",
     "series": "Series",
@@ -132,7 +132,7 @@
   },
   "corporateCTA": {
     "sectionTag": "For teams",
-    "tagline": "For business · Businessflix",
+    "tagline": "For business · Busyflix",
     "headingLine1": "Train your whole",
     "headingLine2": "team in a day.",
     "description": "Seat-based pricing, bulk invites and per-company usage reporting. One dashboard, one invoice, zero course management.",
@@ -159,7 +159,7 @@
     "q2": "What's the difference between personal and business plans?",
     "a2": "Personal is self-serve, one seat. Business is priced per seat, quoted by our sales team; the company admin invites employees and tracks usage from one dashboard.",
     "q3": "Who creates the content?",
-    "a3": "All content is produced by the Businessflix editorial team, featuring domain experts as hosts and collaborators.",
+    "a3": "All content is produced by the Busyflix editorial team, featuring domain experts as hosts and collaborators.",
     "q4": "What video quality do you ship?",
     "a4": "All titles stream at high quality on desktop and mobile, auto-adapting to your connection.",
     "q5": "Can I try before I subscribe?",
@@ -169,7 +169,7 @@
     "kicker": "Your next episode starts tonight.",
     "headingLine1": "Press play",
     "headingLine2": "on your career.",
-    "description": "Join Businessflix today. Seven-day free preview on every title. Cancel whenever. Grow forever.",
+    "description": "Join Busyflix today. Seven-day free preview on every title. Cancel whenever. Grow forever.",
     "ctaPrimary": "Get started",
     "ctaSecondary": "For teams"
   },
@@ -226,7 +226,7 @@
     "formSuccess": "Thanks! Your request reached us. We'll get back within 24 hours."
   },
   "authShell": {
-    "sideTag": "Businessflix · Streaming",
+    "sideTag": "Busyflix · Streaming",
     "headingLine1": "Keep watching",
     "headingLine2": "where you left off.",
     "description": "Premium video series on leadership, entrepreneurship and talent development. Subscribe once, watch everything."
@@ -319,7 +319,7 @@
     "wrongAccountTitle": "Wrong account",
     "wrongAccountBody": "This invitation was sent to {invitedEmail}. You're currently signed in as {currentEmail}. Sign out and log in with the correct account.",
     "joinTitle": "Join the {org} team",
-    "joinBody": "Accepting the invitation adds you to your company's Businessflix subscription.",
+    "joinBody": "Accepting the invitation adds you to your company's Busyflix subscription.",
     "accept": "Accept invitation",
     "reject": "Decline",
     "processing": "Processing…",
@@ -336,7 +336,11 @@
     "continueWatching": "Continue watching",
     "newReleases": "New releases",
     "newReleasesSub": "Published this week",
-    "minutesWatched": "{name} · {minutes} min watched"
+    "minutesWatched": "{name} · {minutes} min watched",
+    "play": "Play",
+    "moreInfo": "More Info",
+    "heroFallbackTitle": "The library is on its way.",
+    "heroFallbackBody": "Content is coming soon. Browse every category in the meantime."
   },
   "discover": {
     "kicker": "Library",
@@ -361,7 +365,15 @@
     "previewEndedBody": "Activate your subscription to keep watching.",
     "subscribe": "Subscribe",
     "videoUnavailable": "Video is being prepared.",
-    "otherEpisodes": "Other episodes"
+    "otherEpisodes": "Other episodes",
+    "curriculum": "Course content",
+    "lessonCount": "{count, plural, =0 {no lessons} one {# lesson} other {# lessons}}",
+    "completed": "Completed",
+    "nextLesson": "Next lesson",
+    "prevLesson": "Previous lesson",
+    "backToTitle": "Back to course",
+    "lessonProgress": "{done}/{total} completed",
+    "previewBadge": "Preview"
   },
   "account": {
     "kicker": "Account",
@@ -371,6 +383,10 @@
     "email": "Email",
     "role": "Role",
     "verified": "Email verified",
+    "roleIndividual": "Individual",
+    "rolePlatformEditor": "Editor",
+    "roleAdmin": "Admin",
+    "roleInstructor": "Instructor",
     "subscription": "Subscription",
     "manage": "Manage subscription"
   },
@@ -443,6 +459,11 @@
     "duration": "Duration (sec)",
     "episodeName": "Episode name",
     "videoPath": "Video path (Supabase Storage key)",
+    "videoFile": "Video file",
+    "uploadSelect": "Select a video file",
+    "uploadHint": "MP4, WebM or MOV. Uploaded to Supabase Storage.",
+    "uploading": "Uploading",
+    "uploadRemove": "Remove",
     "preview": "Preview (sec)",
     "addEpisode": "Add episode"
   },

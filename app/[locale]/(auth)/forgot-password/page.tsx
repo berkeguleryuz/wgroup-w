@@ -11,7 +11,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "forgotPassword" });
-  return { title: `${t("heading")} · Businessflix` };
+  return { title: `${t("heading")} · Busyflix` };
 }
 
 export default async function ForgotPasswordPage({

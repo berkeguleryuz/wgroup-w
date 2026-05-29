@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
+import { AddEpisodeForm } from "@/components/editor/AddEpisodeForm";
 import { formatDuration } from "@/lib/utils";
 
 async function updateTitle(formData: FormData) {
@@ -70,6 +71,7 @@ async function addEpisode(formData: FormData) {
       videoPath,
     },
   });
+  updateTag("featured-titles");
   const locale = await getLocale();
   redirect(localizedPath(locale, `/app/editor/titles/${titleId}`));
 }
@@ -199,73 +201,11 @@ export default async function EditorTitleDetail({
           )}
         </div>
 
-        <form
+        <AddEpisodeForm
           action={addEpisode}
-          className="mt-8 space-y-4 rounded-11 border border-border p-5"
-        >
-          <h3 className="font-semibold">{t("newEpisode")}</h3>
-          <input type="hidden" name="titleId" value={title.id} />
-          <div className="grid gap-4 md:grid-cols-3">
-            <div>
-              <Label htmlFor="seasonNumber">{t("season")}</Label>
-              <Input
-                id="seasonNumber"
-                name="seasonNumber"
-                type="number"
-                defaultValue={1}
-                min={1}
-              />
-            </div>
-            <div>
-              <Label htmlFor="episodeNumber">{t("episodeNumber")}</Label>
-              <Input
-                id="episodeNumber"
-                name="episodeNumber"
-                type="number"
-                defaultValue={nextEpisodeNumber}
-                min={1}
-              />
-            </div>
-            <div>
-              <Label htmlFor="durationSec">{t("duration")}</Label>
-              <Input
-                id="durationSec"
-                name="durationSec"
-                type="number"
-                min={0}
-                defaultValue={0}
-              />
-            </div>
-          </div>
-          <div>
-            <Label htmlFor="name">{t("episodeName")}</Label>
-            <Input id="name" name="name" required />
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="videoPath">{t("videoPath")}</Label>
-              <Input
-                id="videoPath"
-                name="videoPath"
-                placeholder={`${title.slug}/s1-eX.mp4`}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="previewSec">{t("preview")}</Label>
-              <Input
-                id="previewSec"
-                name="previewSec"
-                type="number"
-                min={0}
-                defaultValue={60}
-              />
-            </div>
-          </div>
-          <Button type="submit" variant="dark">
-            {t("addEpisode")}
-          </Button>
-        </form>
+          titleId={title.id}
+          nextEpisodeNumber={nextEpisodeNumber}
+        />
       </section>
     </div>
   );

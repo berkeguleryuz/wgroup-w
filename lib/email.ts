@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 
-const FROM = process.env.EMAIL_FROM || "Businessflix <noreply@businessflix.app>";
+const FROM = process.env.EMAIL_FROM || "Busyflix <noreply@businessflix.app>";
 
 let client: Resend | null = null;
 function getClient() {
@@ -25,8 +25,16 @@ async function send({ to, subject, html }: SendArgs) {
     console.info({ to, subject, html });
     return;
   }
-  const { error } = await resend.emails.send({ from: FROM, to, subject, html });
-  if (error) throw new Error(`Resend error: ${error.message}`);
+  try {
+    const { error } = await resend.emails.send({ from: FROM, to, subject, html });
+    if (error) {
+      console.error(`[email] Resend error: ${error.message}`);
+      console.info({ to, subject, html });
+    }
+  } catch (err) {
+    console.error("[email] send failed:", err);
+    console.info({ to, subject, html });
+  }
 }
 
 function wrap(title: string, body: string, cta?: { label: string; url: string }) {
@@ -37,14 +45,14 @@ function wrap(title: string, body: string, cta?: { label: string; url: string })
     <h1 style="font-size:22px;margin:0 0 16px;font-weight:600">${title}</h1>
     <div style="font-size:15px;line-height:1.55">${body}</div>
     ${buttonHtml}
-    <p style="margin-top:32px;color:#5b534a;font-size:13px">Businessflix</p>
+    <p style="margin-top:32px;color:#5b534a;font-size:13px">Busyflix</p>
   </div>`;
 }
 
 export async function sendVerificationEmail(to: string, url: string) {
   await send({
     to,
-    subject: "Businessflix — E-posta doğrulama",
+    subject: "Busyflix — E-posta doğrulama",
     html: wrap(
       "E-postanı doğrula",
       "<p>Hesabını aktif etmek için aşağıdaki butona tıkla.</p>",
@@ -56,7 +64,7 @@ export async function sendVerificationEmail(to: string, url: string) {
 export async function sendPasswordResetEmail(to: string, url: string) {
   await send({
     to,
-    subject: "Businessflix — Şifre sıfırlama",
+    subject: "Busyflix — Şifre sıfırlama",
     html: wrap(
       "Şifreni sıfırla",
       "<p>Şifreni sıfırlamak için aşağıdaki butona tıkla. Bu linki sen talep etmediysen bu e-postayı yok say.</p>",
@@ -73,10 +81,10 @@ export async function sendOrganizationInviteEmail(args: {
 }) {
   await send({
     to: args.to,
-    subject: `${args.organizationName} seni Businessflix'e davet etti`,
+    subject: `${args.organizationName} seni Busyflix'e davet etti`,
     html: wrap(
       `${args.organizationName} ekibine katıl`,
-      `<p><strong>${args.inviterName}</strong> seni <strong>${args.organizationName}</strong> adına Businessflix'e davet etti.</p>`,
+      `<p><strong>${args.inviterName}</strong> seni <strong>${args.organizationName}</strong> adına Busyflix'e davet etti.</p>`,
       { label: "Accept invitation", url: args.inviteUrl },
     ),
   });

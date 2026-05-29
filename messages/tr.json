@@ -1,6 +1,6 @@
 {
   "common": {
-    "appName": "Businessflix",
+    "appName": "Busyflix",
     "getStarted": "Üye ol",
     "login": "Giriş yap",
     "logout": "Çıkış yap",
@@ -94,7 +94,7 @@
   },
   "featuredLibrary": {
     "sectionTag": "Öne çıkan",
-    "heading": "Şu an Businessflix'te.",
+    "heading": "Şu an Busyflix'te.",
     "seeFull": "Tüm kütüphaneyi gör →",
     "empty": "Kütüphane hazırlanıyor. Öne çıkan içerikler yakında burada olacak.",
     "series": "Dizi",
@@ -132,7 +132,7 @@
   },
   "corporateCTA": {
     "sectionTag": "Kurumsal",
-    "tagline": "İş dünyası için · Businessflix",
+    "tagline": "İş dünyası için · Busyflix",
     "headingLine1": "Ekibini bir günde",
     "headingLine2": "eğitime başlat.",
     "description": "Koltuk bazlı fiyatlandırma, toplu davet ve şirket bazlı kullanım raporları. Tek panel, tek fatura, sıfır kurs yönetimi.",
@@ -159,7 +159,7 @@
     "q2": "Bireysel ve kurumsal plan farkı ne?",
     "a2": "Bireysel self-servistir, tek kişiliktir. Kurumsal koltuk bazlı tekliflendirilir; şirket yöneticisi çalışanları tek panelden davet eder ve kullanımı takip eder.",
     "q3": "İçerikleri kim hazırlıyor?",
-    "a3": "Tüm içerikler Businessflix editöryal ekibi tarafından, alanında uzman isimlerin sunuculuğunda hazırlanır.",
+    "a3": "Tüm içerikler Busyflix editöryal ekibi tarafından, alanında uzman isimlerin sunuculuğunda hazırlanır.",
     "q4": "Video kalitesi nasıl?",
     "a4": "Tüm içerikler web ve mobilde yüksek kalitede yayınlanır; bağlantına göre otomatik optimize edilir.",
     "q5": "Üye olmadan deneyebilir miyim?",
@@ -169,7 +169,7 @@
     "kicker": "Bu akşam yeni bir bölüm seni bekliyor.",
     "headingLine1": "Kariyerinde",
     "headingLine2": "oynat tuşuna bas.",
-    "description": "Bugün Businessflix'e katıl. Her başlıkta 7 gün ücretsiz önizleme. İstediğin zaman iptal. Sürekli büyü.",
+    "description": "Bugün Busyflix'e katıl. Her başlıkta 7 gün ücretsiz önizleme. İstediğin zaman iptal. Sürekli büyü.",
     "ctaPrimary": "Üye ol",
     "ctaSecondary": "Ekip için"
   },
@@ -226,7 +226,7 @@
     "formSuccess": "Teşekkürler, talebin bize ulaştı. 24 saat içinde döneceğiz."
   },
   "authShell": {
-    "sideTag": "Businessflix · Streaming",
+    "sideTag": "Busyflix · Streaming",
     "headingLine1": "Bugün",
     "headingLine2": "izlemeye devam et.",
     "description": "Liderlik, girişimcilik ve yetenek gelişimi için premium video serileri. Bir kez abone ol, her şeyi izle."
@@ -319,7 +319,7 @@
     "wrongAccountTitle": "Yanlış hesap",
     "wrongAccountBody": "Bu davet {invitedEmail} için gönderilmiş. Şu anda {currentEmail} ile giriş yapmışsın. Çıkış yapıp doğru hesapla giriş yap.",
     "joinTitle": "{org} ekibine katıl",
-    "joinBody": "Daveti kabul ettiğinde şirketinin Businessflix aboneliğine eklenirsin.",
+    "joinBody": "Daveti kabul ettiğinde şirketinin Busyflix aboneliğine eklenirsin.",
     "accept": "Daveti kabul et",
     "reject": "Reddet",
     "processing": "İşleniyor…",
@@ -336,7 +336,11 @@
     "continueWatching": "İzlemeye devam et",
     "newReleases": "Yeni eklenenler",
     "newReleasesSub": "Bu hafta yayınlandı",
-    "minutesWatched": "{name} · {minutes}dk izlendi"
+    "minutesWatched": "{name} · {minutes}dk izlendi",
+    "play": "Oynat",
+    "moreInfo": "Daha Fazla Bilgi",
+    "heroFallbackTitle": "Kütüphane hazırlanıyor.",
+    "heroFallbackBody": "İçerikler çok yakında. Şimdiden tüm kategorilere göz at."
   },
   "discover": {
     "kicker": "Kütüphane",
@@ -361,7 +365,15 @@
     "previewEndedBody": "Geri kalan kısmı izlemek için aboneliğini aktive et.",
     "subscribe": "Abone ol",
     "videoUnavailable": "Video hazırlanıyor.",
-    "otherEpisodes": "Diğer bölümler"
+    "otherEpisodes": "Diğer bölümler",
+    "curriculum": "Eğitim içeriği",
+    "lessonCount": "{count, plural, =0 {bölüm yok} other {# bölüm}}",
+    "completed": "Tamamlandı",
+    "nextLesson": "Sonraki bölüm",
+    "prevLesson": "Önceki bölüm",
+    "backToTitle": "Eğitime dön",
+    "lessonProgress": "{done}/{total} tamamlandı",
+    "previewBadge": "Önizleme"
   },
   "account": {
     "kicker": "Hesap",
@@ -371,6 +383,10 @@
     "email": "E-posta",
     "role": "Rol",
     "verified": "E-posta doğrulandı",
+    "roleIndividual": "Bireysel",
+    "rolePlatformEditor": "Editör",
+    "roleAdmin": "Admin",
+    "roleInstructor": "Eğitmen",
     "subscription": "Abonelik",
     "manage": "Aboneliği yönet"
   },
@@ -443,6 +459,11 @@
     "duration": "Süre (sn)",
     "episodeName": "Bölüm adı",
     "videoPath": "Video path (Supabase Storage key)",
+    "videoFile": "Video dosyası",
+    "uploadSelect": "Video dosyası seç",
+    "uploadHint": "MP4, WebM veya MOV. Yükleme Supabase Storage'a yapılır.",
+    "uploading": "Yükleniyor",
+    "uploadRemove": "Kaldır",
     "preview": "Önizleme (sn)",
     "addEpisode": "Bölüm ekle"
   },

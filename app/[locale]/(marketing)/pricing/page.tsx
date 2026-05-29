@@ -11,7 +11,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "pricingPage" });
-  return { title: `${t("kicker")} · Businessflix` };
+  return { title: `${t("kicker")} · Busyflix` };
 }
 
 export default async function PricingPage({

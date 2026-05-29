@@ -22,7 +22,7 @@ export const USER_ROLES = [
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const auth = betterAuth({
-  appName: "Businessflix",
+  appName: "Busyflix",
   baseURL: APP_URL,
   secret: process.env.BETTER_AUTH_SECRET,
 
@@ -30,7 +30,8 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification:
+      process.env.AUTH_SKIP_EMAIL_VERIFICATION !== "true",
     autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
       void sendPasswordResetEmail(user.email, url);

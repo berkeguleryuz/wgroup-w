@@ -33,7 +33,7 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Businessflix",
+  title: "Busyflix",
   description:
     "The Netflix of business education. Leadership, entrepreneurship and talent development as streaming series.",
 };

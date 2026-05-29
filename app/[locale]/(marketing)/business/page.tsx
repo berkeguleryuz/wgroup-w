@@ -13,7 +13,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "businessPage" });
-  return { title: `${t("kicker")} · Businessflix` };
+  return { title: `${t("kicker")} · Busyflix` };
 }
 
 async function submitLead(formData: FormData) {
