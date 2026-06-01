@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/access";
-import { createUploadSignedUrl } from "@/lib/supabase-storage";
+import { getStorage } from "@/lib/storage";
 
 const STAFF = new Set(["admin", "platform_editor"]);
 
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
   }
 
   const body = (await request.json().catch(() => null)) as
-    | { filename?: string }
+    | { filename?: string; contentType?: string }
     | null;
   const filename = body?.filename?.trim();
   if (!filename) {
@@ -22,13 +22,17 @@ export async function POST(request: Request) {
 
   const safe = filename.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
   const path = `uploads/${Date.now()}-${safe}`;
+  const contentType = body?.contentType?.trim() || "video/mp4";
 
   try {
-    const signed = await createUploadSignedUrl(path);
+    const { uploadUrl, key, headers } = await getStorage().createSignedUploadUrl(
+      path,
+      contentType,
+    );
     return NextResponse.json({
-      uploadUrl: signed.signedUrl,
-      token: signed.token,
-      path: signed.path,
+      uploadUrl,
+      path: key,
+      headers,
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

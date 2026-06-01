@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
+import { HlsVideo } from "@/components/video/HlsVideo";
 
 type Props = {
   episodeId: string;
@@ -77,11 +78,11 @@ export function PlayerClient({ episodeId, src, capSeconds, startAt, hasAccess }:
 
   return (
     <div className="relative overflow-hidden rounded-11 border border-border/60 bg-black">
-      <video
-        ref={videoRef}
+      <HlsVideo
+        videoRef={videoRef}
+        src={src}
         controls
         playsInline
-        src={src}
         className="aspect-video w-full"
       />
       {previewEnded && !hasAccess ? (

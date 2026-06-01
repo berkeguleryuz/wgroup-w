@@ -27,11 +27,15 @@ export function VideoUpload({ name, required }: Props) {
       const res = await fetch("/api/editor/video-upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name }),
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: file.type || "video/mp4",
+        }),
       });
       const data = (await res.json()) as {
         uploadUrl?: string;
         path?: string;
+        headers?: Record<string, string>;
         error?: string;
       };
       if (!res.ok || !data.uploadUrl || !data.path) {
@@ -41,7 +45,15 @@ export function VideoUpload({ name, required }: Props) {
       await new Promise<void>((resolve, reject) => {
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", data.uploadUrl!);
-        xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+        // Send exactly the headers the upload URL was signed with (R2), or fall
+        // back to the file's content type (Supabase).
+        if (data.headers && Object.keys(data.headers).length > 0) {
+          for (const [k, v] of Object.entries(data.headers)) {
+            xhr.setRequestHeader(k, v);
+          }
+        } else {
+          xhr.setRequestHeader("Content-Type", file.type || "video/mp4");
+        }
         xhr.upload.onprogress = (e) => {
           if (e.lengthComputable) {
             setProgress(Math.round((e.loaded / e.total) * 100));

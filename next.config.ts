@@ -13,6 +13,10 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },
       { protocol: "https", hostname: "images.unsplash.com" },
+      // Cloudflare R2 public host (HLS posterleri vb.). r2.dev gelistirme
+      // alt alan adi icin. Ozel domain kullanirsan onu da buraya ekle, orn:
+      // { protocol: "https", hostname: "cdn.busyflix.app" }
+      { protocol: "https", hostname: "**.r2.dev" },
     ],
   },
 };

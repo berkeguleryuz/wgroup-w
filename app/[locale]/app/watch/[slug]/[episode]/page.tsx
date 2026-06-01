@@ -5,23 +5,9 @@ import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
-import { createVideoSignedUrl } from "@/lib/supabase-storage";
+import { resolveVideoUrl } from "@/lib/storage";
 import { Curriculum } from "@/components/app/Curriculum";
 import { PlayerClient } from "./PlayerClient";
-
-async function resolveVideoUrl(
-  videoPath: string,
-): Promise<{ url: string | null; error: string | null }> {
-  if (/^https?:\/\//i.test(videoPath)) {
-    return { url: videoPath, error: null };
-  }
-  try {
-    const url = await createVideoSignedUrl(videoPath, 60 * 60);
-    return { url, error: null };
-  } catch (e) {
-    return { url: null, error: (e as Error).message };
-  }
-}
 
 export default async function PlayerPage({
   params,
@@ -51,7 +37,7 @@ export default async function PlayerPage({
   ]);
   if (!ep || ep.title.slug !== slug) notFound();
 
-  const [progress, allProgress, video] = await Promise.all([
+  const [progress, allProgress, videoUrl] = await Promise.all([
     prisma.progress.findUnique({
       where: { userId_episodeId: { userId: user.id, episodeId: ep.id } },
     }),
@@ -93,17 +79,17 @@ export default async function PlayerPage({
           ← {ep.title.title}
         </Link>
 
-        {video.url ? (
+        {videoUrl ? (
           <PlayerClient
             episodeId={ep.id}
-            src={video.url}
+            src={videoUrl}
             capSeconds={capSeconds}
             startAt={progress?.positionSec ?? 0}
             hasAccess={access.hasAccess}
           />
         ) : (
           <div className="flex aspect-video items-center justify-center rounded-11 border border-dashed border-border bg-muted/40 text-center text-sm text-muted-foreground">
-            {t("videoUnavailable")} {video.error ? `(${video.error})` : null}
+            {t("videoUnavailable")}
           </div>
         )}
 
