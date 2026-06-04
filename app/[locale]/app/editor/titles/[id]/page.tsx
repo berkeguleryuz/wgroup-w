@@ -9,7 +9,17 @@ import { requireRole } from "@/lib/access";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { AddEpisodeForm } from "@/components/editor/AddEpisodeForm";
+import { SubtitleUpload } from "@/components/editor/SubtitleUpload";
 import { formatDuration } from "@/lib/utils";
+
+const LANG_LABELS: Record<string, string> = {
+  tr: "Türkçe",
+  en: "English",
+  de: "Deutsch",
+  fr: "Français",
+  es: "Español",
+  ar: "العربية",
+};
 
 async function updateTitle(formData: FormData) {
   "use server";
@@ -76,6 +86,35 @@ async function addEpisode(formData: FormData) {
   redirect(localizedPath(locale, `/app/editor/titles/${titleId}`));
 }
 
+async function addSubtitle(formData: FormData) {
+  "use server";
+  await requireRole(["platform_editor", "admin"]);
+  const titleId = String(formData.get("titleId"));
+  const episodeId = String(formData.get("episodeId"));
+  const lang = String(formData.get("lang") || "").trim().toLowerCase();
+  const vttPath = String(formData.get("vttPath") || "").trim();
+  if (!episodeId || !lang || !vttPath) throw new Error("Missing fields");
+
+  const label = LANG_LABELS[lang] ?? lang.toUpperCase();
+  await prisma.subtitle.upsert({
+    where: { episodeId_lang: { episodeId, lang } },
+    create: { episodeId, lang, label, vttPath },
+    update: { vttPath, label },
+  });
+  const locale = await getLocale();
+  redirect(localizedPath(locale, `/app/editor/titles/${titleId}`));
+}
+
+async function deleteSubtitle(formData: FormData) {
+  "use server";
+  await requireRole(["platform_editor", "admin"]);
+  const id = String(formData.get("id"));
+  const titleId = String(formData.get("titleId"));
+  await prisma.subtitle.delete({ where: { id } });
+  const locale = await getLocale();
+  redirect(localizedPath(locale, `/app/editor/titles/${titleId}`));
+}
+
 export default async function EditorTitleDetail({
   params,
 }: {
@@ -92,6 +131,7 @@ export default async function EditorTitleDetail({
         category: { include: { parent: true } },
         episodes: {
           orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
+          include: { subtitles: { orderBy: { label: "asc" } } },
         },
       },
     }),
@@ -183,19 +223,69 @@ export default async function EditorTitleDetail({
             </p>
           ) : (
             title.episodes.map((ep) => (
-              <div
-                key={ep.id}
-                className="flex items-center justify-between py-3 text-sm"
-              >
-                <div>
-                  <p className="font-medium">
-                    S{ep.seasonNumber}E{ep.episodeNumber} · {ep.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {ep.videoPath} · {formatDuration(ep.durationSec)} ·{" "}
-                    {t("preview")}: {ep.previewSec}s
-                  </p>
+              <div key={ep.id} className="py-3 text-sm">
+                <p className="font-medium">
+                  S{ep.seasonNumber}E{ep.episodeNumber} · {ep.name}
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  {ep.videoPath} · {formatDuration(ep.durationSec)} ·{" "}
+                  {t("preview")}: {ep.previewSec}s
+                </p>
+
+                <div className="mt-2 flex flex-wrap items-center gap-2">
+                  <span className="text-xs text-muted-foreground">
+                    {t("subtitles")}:
+                  </span>
+                  {ep.subtitles.length === 0 ? (
+                    <span className="text-xs text-muted-foreground/70">—</span>
+                  ) : (
+                    ep.subtitles.map((s) => (
+                      <span
+                        key={s.id}
+                        className="inline-flex items-center gap-1 rounded-full border border-border bg-muted px-2 py-0.5 text-xs"
+                      >
+                        {s.label}
+                        <form action={deleteSubtitle} className="inline-flex">
+                          <input type="hidden" name="id" value={s.id} />
+                          <input type="hidden" name="titleId" value={title.id} />
+                          <button
+                            type="submit"
+                            title={t("delete")}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            ×
+                          </button>
+                        </form>
+                      </span>
+                    ))
+                  )}
                 </div>
+
+                <form
+                  action={addSubtitle}
+                  className="mt-2 flex flex-wrap items-center gap-2"
+                >
+                  <input type="hidden" name="titleId" value={title.id} />
+                  <input type="hidden" name="episodeId" value={ep.id} />
+                  <select
+                    name="lang"
+                    defaultValue="tr"
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs"
+                  >
+                    {Object.entries(LANG_LABELS).map(([code, label]) => (
+                      <option key={code} value={code}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  <SubtitleUpload name="vttPath" required />
+                  <button
+                    type="submit"
+                    className="rounded-md bg-foreground px-3 py-1 text-xs font-medium text-background transition-colors hover:bg-foreground/90"
+                  >
+                    {t("addSubtitle")}
+                  </button>
+                </form>
               </div>
             ))
           )}

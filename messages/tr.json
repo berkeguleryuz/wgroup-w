@@ -247,7 +247,8 @@
     "noAccount": "Hesabın yok mu?",
     "signUp": "Üye ol",
     "resetSuccess": "Şifren güncellendi. Yeni şifren ile giriş yap.",
-    "error": "Giriş başarısız"
+    "error": "Giriş başarısız",
+    "networkError": "Bağlantı hatası. Lütfen tekrar deneyin."
   },
   "register": {
     "kicker": "Başlayalım",
@@ -337,6 +338,8 @@
     "newReleases": "Yeni eklenenler",
     "newReleasesSub": "Bu hafta yayınlandı",
     "minutesWatched": "{name} · {minutes}dk izlendi",
+    "timeLeft": "{name} · {time} kaldı",
+    "removeFromList": "İzleme listesinden kaldır",
     "play": "Oynat",
     "moreInfo": "Daha Fazla Bilgi",
     "heroFallbackTitle": "Kütüphane hazırlanıyor.",
@@ -373,7 +376,27 @@
     "prevLesson": "Önceki bölüm",
     "backToTitle": "Eğitime dön",
     "lessonProgress": "{done}/{total} tamamlandı",
-    "previewBadge": "Önizleme"
+    "previewBadge": "Önizleme",
+    "episodeCompleted": "Bölüm tamamlandı",
+    "nextUp": "Sonraki bölüm",
+    "autoAdvanceIn": "{sec} saniye içinde geçiliyor…",
+    "playNext": "Şimdi geç",
+    "cancelAuto": "İptal",
+    "markCompleted": "Tamamlandı işaretle",
+    "markUnwatched": "İzlenmedi işaretle",
+    "close": "Kapat",
+    "courseFinished": "Bu eğitimin son bölümünü tamamladın.",
+    "pause": "Duraklat",
+    "mute": "Sessiz",
+    "volume": "Ses",
+    "captions": "Alt yazı",
+    "settings": "Ayarlar",
+    "speed": "Hız",
+    "quality": "Kalite",
+    "auto": "Otomatik",
+    "fullscreen": "Tam ekran",
+    "off": "Kapalı",
+    "play": "Oynat"
   },
   "account": {
     "kicker": "Hesap",
@@ -465,7 +488,10 @@
     "uploading": "Yükleniyor",
     "uploadRemove": "Kaldır",
     "preview": "Önizleme (sn)",
-    "addEpisode": "Bölüm ekle"
+    "addEpisode": "Bölüm ekle",
+    "subtitles": "Alt yazılar",
+    "addSubtitle": "Alt yazı ekle",
+    "delete": "Sil"
   },
   "admin": {
     "kicker": "Admin",

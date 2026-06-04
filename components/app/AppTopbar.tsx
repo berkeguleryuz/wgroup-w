@@ -32,18 +32,20 @@ export function AppTopbar({ userName, userEmail, role, orgOwner }: Props) {
   const segs = pathname.split("/").filter(Boolean);
   const isTitleDetail =
     segs[0] === "app" && segs[1] === "watch" && segs.length === 3;
+  const isPlayer =
+    segs[0] === "app" && segs[1] === "watch" && segs.length === 4;
   const heroPage = isHome || isTitleDetail;
+  // Pages whose bar blends with the content at the top and only gains a
+  // background after scrolling.
+  const scrollAware = heroPage || isPlayer;
 
   useEffect(() => {
-    if (!heroPage) {
-      setScrolled(false);
-      return;
-    }
+    if (!scrollAware) return;
     const onScroll = () => setScrolled(window.scrollY > 80);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [heroPage]);
+  }, [scrollAware]);
 
   const navItems = [
     { href: "/app", label: t("home"), active: isHome },
@@ -90,12 +92,17 @@ export function AppTopbar({ userName, userEmail, role, orgOwner }: Props) {
 
   const dark = heroPage;
   const overlay = heroPage && !scrolled;
+  // Player page: transparent at the top so it merges with the page, then the
+  // same solid light bar once scrolled.
+  const transparentLight = isPlayer && !scrolled;
 
   const headerBg = overlay
     ? "bg-gradient-to-b from-black/80 via-black/35 to-transparent"
-    : dark
-      ? "bg-surface-dark shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)]"
-      : "bg-background border-b border-border/60 shadow-[0_8px_30px_-16px_rgba(16,13,8,0.35)]";
+    : transparentLight
+      ? "bg-transparent"
+      : dark
+        ? "bg-surface-dark shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)]"
+        : "bg-background border-b border-border/60 shadow-[0_8px_30px_-16px_rgba(16,13,8,0.35)]";
 
   return (
     <header

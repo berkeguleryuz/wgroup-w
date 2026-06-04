@@ -247,7 +247,8 @@
     "noAccount": "Don't have an account?",
     "signUp": "Sign up",
     "resetSuccess": "Password updated. Log in with the new one.",
-    "error": "Login failed"
+    "error": "Login failed",
+    "networkError": "Connection error. Please try again."
   },
   "register": {
     "kicker": "Get started",
@@ -337,6 +338,8 @@
     "newReleases": "New releases",
     "newReleasesSub": "Published this week",
     "minutesWatched": "{name} · {minutes} min watched",
+    "timeLeft": "{name} · {time} left",
+    "removeFromList": "Remove from list",
     "play": "Play",
     "moreInfo": "More Info",
     "heroFallbackTitle": "The library is on its way.",
@@ -373,7 +376,27 @@
     "prevLesson": "Previous lesson",
     "backToTitle": "Back to course",
     "lessonProgress": "{done}/{total} completed",
-    "previewBadge": "Preview"
+    "previewBadge": "Preview",
+    "episodeCompleted": "Episode completed",
+    "nextUp": "Next episode",
+    "autoAdvanceIn": "Continuing in {sec}s…",
+    "playNext": "Play next",
+    "cancelAuto": "Cancel",
+    "markCompleted": "Mark completed",
+    "markUnwatched": "Mark unwatched",
+    "close": "Close",
+    "courseFinished": "You've finished the last lesson of this course.",
+    "pause": "Pause",
+    "mute": "Mute",
+    "volume": "Volume",
+    "captions": "Subtitles",
+    "settings": "Settings",
+    "speed": "Speed",
+    "quality": "Quality",
+    "auto": "Auto",
+    "fullscreen": "Fullscreen",
+    "off": "Off",
+    "play": "Play"
   },
   "account": {
     "kicker": "Account",
@@ -465,7 +488,10 @@
     "uploading": "Uploading",
     "uploadRemove": "Remove",
     "preview": "Preview (sec)",
-    "addEpisode": "Add episode"
+    "addEpisode": "Add episode",
+    "subtitles": "Subtitles",
+    "addSubtitle": "Add subtitle",
+    "delete": "Delete"
   },
   "admin": {
     "kicker": "Admin",

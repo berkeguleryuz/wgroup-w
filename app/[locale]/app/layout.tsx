@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { requireSession } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import { AppTopbar } from "@/components/app/AppTopbar";
+import { AppFooter } from "@/components/app/AppFooter";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
@@ -14,16 +16,19 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   });
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <AppTopbar
-        userName={user.name || user.email}
-        userEmail={user.email}
-        role={user.role}
-        orgOwner={!!ownerMembership}
-      />
-      <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 pb-12 pt-[88px] md:px-10">
-        {children}
-      </main>
-    </div>
+    <QueryProvider>
+      <div className="flex min-h-screen flex-col bg-background">
+        <AppTopbar
+          userName={user.name || user.email}
+          userEmail={user.email}
+          role={user.role}
+          orgOwner={!!ownerMembership}
+        />
+        <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 pb-12 pt-[88px] md:px-10">
+          {children}
+        </main>
+        <AppFooter />
+      </div>
+    </QueryProvider>
   );
 }

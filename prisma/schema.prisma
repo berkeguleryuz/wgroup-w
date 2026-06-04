@@ -195,13 +195,29 @@ model Episode {
   previewSec    Int     @default(0)
   sortOrder     Int     @default(0)
 
-  progress Progress[]
+  progress  Progress[]
+  subtitles Subtitle[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([titleId, seasonNumber, episodeNumber])
   @@index([titleId])
+}
+
+model Subtitle {
+  id        String  @id @default(cuid())
+  episodeId String
+  episode   Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+  lang      String // e.g. "tr", "en"
+  label     String // display name, e.g. "Türkçe"
+  vttPath   String // storage key or URL to the WebVTT file
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([episodeId, lang])
+  @@index([episodeId])
 }
 
 model Instructor {

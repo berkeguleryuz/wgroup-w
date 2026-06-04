@@ -8,7 +8,9 @@ import { Section } from "@prisma/client";
 import { AppHero } from "@/components/app/AppHero";
 import { Carousel } from "@/components/app/Carousel";
 import { TitleCard } from "@/components/app/TitleCard";
+import { ContinueWatchingCard } from "@/components/app/ContinueWatchingCard";
 import { Button } from "@/components/ui/Button";
+import { formatDuration } from "@/lib/utils";
 
 const titleInclude = {
   category: true,
@@ -32,7 +34,7 @@ export default async function AppHomePage({
     tLib,
     access,
     featured,
-    continueWatching,
+    continueRaw,
     newReleases,
     series,
     movies,
@@ -50,7 +52,7 @@ export default async function AppHomePage({
     prisma.progress.findMany({
       where: { userId: user.id, completedAt: null },
       orderBy: { updatedAt: "desc" },
-      take: 8,
+      take: 50,
       include: {
         episode: {
           include: {
@@ -84,6 +86,18 @@ export default async function AppHomePage({
       include: titleInclude,
     }),
   ]);
+
+  // One card per series: keep only the most recently watched in-progress
+  // episode for each title (rows are already ordered by updatedAt desc).
+  const seenTitles = new Set<string>();
+  const continueWatching = continueRaw
+    .filter((p) => {
+      const titleId = p.episode.title.id;
+      if (seenTitles.has(titleId)) return false;
+      seenTitles.add(titleId);
+      return true;
+    })
+    .slice(0, 8);
 
   return (
     <div>
@@ -132,17 +146,30 @@ export default async function AppHomePage({
 
         {continueWatching.length > 0 ? (
           <Carousel title={t("continueWatching")}>
-            {continueWatching.map((p, i) => (
-              <div key={p.episodeId} className="w-72 shrink-0">
-                <TitleCard title={p.episode.title} variant="wide" index={i} />
-                <p className="mt-2 text-xs text-muted-foreground">
-                  {t("minutesWatched", {
-                    name: p.episode.name,
-                    minutes: Math.round(p.positionSec / 60),
-                  })}
-                </p>
-              </div>
-            ))}
+            {continueWatching.map((p, i) => {
+              const dur = p.episode.durationSec;
+              const remaining = dur > 0 ? Math.max(0, dur - p.positionSec) : 0;
+              const percent = dur > 0 ? (p.positionSec / dur) * 100 : 0;
+              return (
+                <ContinueWatchingCard
+                  key={p.episodeId}
+                  title={p.episode.title}
+                  titleId={p.episode.title.id}
+                  href={`/app/watch/${p.episode.title.slug}/${p.episodeId}`}
+                  index={i}
+                  percent={percent}
+                  caption={
+                    dur > 0
+                      ? t("timeLeft", {
+                          name: p.episode.name,
+                          time: formatDuration(remaining),
+                        })
+                      : p.episode.name
+                  }
+                  removeLabel={t("removeFromList")}
+                />
+              );
+            })}
           </Carousel>
         ) : null}
 

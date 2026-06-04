@@ -8,6 +8,10 @@ type Props = {
   title: Title & { category: Category; episodes: Pick<Episode, "durationSec">[] };
   variant?: "wide" | "tall";
   index?: number;
+  /** Override the link target (e.g. resume a specific episode). Defaults to the title page. */
+  href?: string;
+  /** Watched fraction 0–100. When > 0, renders a progress bar pinned to the card's bottom edge. */
+  progressPercent?: number;
 };
 
 const palette = [
@@ -17,22 +21,28 @@ const palette = [
   "linear-gradient(135deg, #100D08 0%, #5b4630 100%)",
 ];
 
-export function TitleCard({ title, variant = "tall", index = 0 }: Props) {
+export function TitleCard({
+  title,
+  variant = "tall",
+  index = 0,
+  href,
+  progressPercent,
+}: Props) {
   const t = useTranslations("featuredLibrary");
   const total = title.episodes.reduce((s, e) => s + e.durationSec, 0);
   const aspect = variant === "wide" ? "aspect-[16/9]" : "aspect-[3/4]";
 
   return (
     <Link
-      href={`/app/watch/${title.slug}`}
-      className="group block overflow-hidden rounded-11 border border-border/60 transition-transform hover:-translate-y-0.5"
+      href={href ?? `/app/watch/${title.slug}`}
+      className="group block overflow-hidden rounded-11 border border-border/60 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-primary/70 hover:shadow-2xl hover:shadow-foreground/25 motion-reduce:transition-none"
     >
       <div className={`relative ${aspect}`}>
         {title.heroImageUrl ? (
           <img
             src={title.heroImageUrl}
             alt={title.title}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
           <div
@@ -66,6 +76,17 @@ export function TitleCard({ title, variant = "tall", index = 0 }: Props) {
             </div>
           </div>
         </div>
+
+        {progressPercent && progressPercent > 0 ? (
+          <div className="absolute inset-x-0 bottom-0 h-1.5 bg-surface-dark/55">
+            <div
+              className="h-full bg-primary"
+              style={{
+                width: `${Math.min(100, Math.max(2, progressPercent))}%`,
+              }}
+            />
+          </div>
+        ) : null}
       </div>
     </Link>
   );

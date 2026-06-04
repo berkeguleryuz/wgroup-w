@@ -247,7 +247,8 @@
     "noAccount": "Noch kein Konto?",
     "signUp": "Registrieren",
     "resetSuccess": "Passwort aktualisiert. Mit dem neuen anmelden.",
-    "error": "Anmeldung fehlgeschlagen"
+    "error": "Anmeldung fehlgeschlagen",
+    "networkError": "Verbindungsfehler. Bitte versuche es erneut."
   },
   "register": {
     "kicker": "Los geht's",
@@ -337,6 +338,8 @@
     "newReleases": "Neu hinzugefügt",
     "newReleasesSub": "Diese Woche veröffentlicht",
     "minutesWatched": "{name} · {minutes} Min. gesehen",
+    "timeLeft": "{name} · {time} übrig",
+    "removeFromList": "Aus der Liste entfernen",
     "play": "Abspielen",
     "moreInfo": "Mehr Infos",
     "heroFallbackTitle": "Die Bibliothek ist unterwegs.",
@@ -373,7 +376,27 @@
     "prevLesson": "Vorherige Lektion",
     "backToTitle": "Zurück zum Kurs",
     "lessonProgress": "{done}/{total} abgeschlossen",
-    "previewBadge": "Vorschau"
+    "previewBadge": "Vorschau",
+    "episodeCompleted": "Folge abgeschlossen",
+    "nextUp": "Nächste Folge",
+    "autoAdvanceIn": "Weiter in {sec}s…",
+    "playNext": "Jetzt abspielen",
+    "cancelAuto": "Abbrechen",
+    "markCompleted": "Als abgeschlossen markieren",
+    "markUnwatched": "Als ungesehen markieren",
+    "close": "Schließen",
+    "courseFinished": "Du hast die letzte Folge dieses Kurses abgeschlossen.",
+    "pause": "Pause",
+    "mute": "Stumm",
+    "volume": "Lautstärke",
+    "captions": "Untertitel",
+    "settings": "Einstellungen",
+    "speed": "Geschwindigkeit",
+    "quality": "Qualität",
+    "auto": "Automatisch",
+    "fullscreen": "Vollbild",
+    "off": "Aus",
+    "play": "Abspielen"
   },
   "account": {
     "kicker": "Konto",
@@ -465,7 +488,10 @@
     "uploading": "Wird hochgeladen",
     "uploadRemove": "Entfernen",
     "preview": "Vorschau (Sek.)",
-    "addEpisode": "Folge hinzufügen"
+    "addEpisode": "Folge hinzufügen",
+    "subtitles": "Untertitel",
+    "addSubtitle": "Untertitel hinzufügen",
+    "delete": "Löschen"
   },
   "admin": {
     "kicker": "Admin",

@@ -50,3 +50,4 @@ next-env.d.ts
 # ingest / HLS video pipeline (generated, not committed)
 public/hls/
 content/hls-manifest.json
+public/subtitles/

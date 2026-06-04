@@ -64,9 +64,16 @@ export function AppHero({
         aria-hidden
         className="absolute inset-0 bg-gradient-to-r from-surface-dark via-surface-dark/55 to-transparent"
       />
+      {/* Soft mood + text legibility over the lower hero — image stays visible */}
       <div
         aria-hidden
-        className="absolute inset-x-0 bottom-0 h-72 bg-gradient-to-t from-background via-background/70 to-transparent"
+        className="absolute inset-x-0 bottom-0 h-3/4 bg-gradient-to-t from-surface-dark/70 via-surface-dark/15 to-transparent"
+      />
+      {/* Long, gradual blend into the cream page — alpha-composited so there is
+          no hard edge and no muddy midtones */}
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0 h-[55vh] bg-gradient-to-t from-background to-transparent"
       />
 
       <div className="relative z-10 mx-auto flex h-full max-w-[1800px] items-end px-6 pb-40 md:items-center md:px-10 md:pb-24">

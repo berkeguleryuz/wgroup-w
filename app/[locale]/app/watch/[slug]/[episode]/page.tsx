@@ -25,6 +25,7 @@ export default async function PlayerPage({
     prisma.episode.findUnique({
       where: { id: episodeId },
       include: {
+        subtitles: { orderBy: { label: "asc" } },
         title: {
           include: {
             episodes: {
@@ -43,21 +44,38 @@ export default async function PlayerPage({
     }),
     prisma.progress.findMany({
       where: { userId: user.id, episode: { titleId: ep.titleId } },
-      select: { episodeId: true, completedAt: true },
+      select: { episodeId: true, completedAt: true, positionSec: true },
     }),
     resolveVideoUrl(ep.videoPath),
   ]);
 
-  const completedSet = new Set(
-    allProgress.filter((p) => p.completedAt).map((p) => p.episodeId),
-  );
+  // Seed TanStack Query so curriculum + player share one consistent source.
+  const initialProgress: Record<
+    string,
+    { completed: boolean; positionSec: number }
+  > = {};
+  for (const p of allProgress) {
+    initialProgress[p.episodeId] = {
+      completed: !!p.completedAt,
+      positionSec: p.positionSec,
+    };
+  }
+
+  // Subtitle tracks must be same-origin (cross-origin <track> needs CORS +
+  // crossOrigin on the video, which would break the sample MP4s). Local
+  // `/...` paths are served directly; storage-backed ones go through a proxy.
+  const subtitles = ep.subtitles.map((s) => ({
+    lang: s.lang,
+    label: s.label,
+    src: s.vttPath.startsWith("/") ? s.vttPath : `/api/subtitles/${s.id}`,
+  }));
+
   const lessons = ep.title.episodes.map((e) => ({
     id: e.id,
     episodeNumber: e.episodeNumber,
     name: e.name,
     durationSec: e.durationSec,
     previewSec: e.previewSec,
-    completed: completedSet.has(e.id),
   }));
 
   const currentIndex = ep.title.episodes.findIndex((e) => e.id === ep.id);
@@ -81,11 +99,18 @@ export default async function PlayerPage({
 
         {videoUrl ? (
           <PlayerClient
+            titleId={ep.titleId}
+            slug={slug}
             episodeId={ep.id}
             src={videoUrl}
+            poster={ep.title.heroImageUrl}
+            subtitles={subtitles}
             capSeconds={capSeconds}
             startAt={progress?.positionSec ?? 0}
             hasAccess={access.hasAccess}
+            nextHref={next ? `/app/watch/${slug}/${next.id}` : null}
+            nextName={next?.name ?? null}
+            initialProgress={initialProgress}
           />
         ) : (
           <div className="flex aspect-video items-center justify-center rounded-11 border border-dashed border-border bg-muted/40 text-center text-sm text-muted-foreground">
@@ -135,11 +160,13 @@ export default async function PlayerPage({
       </div>
 
       <Curriculum
+        titleId={ep.titleId}
         slug={slug}
         titleName={ep.title.title}
         lessons={lessons}
         currentId={ep.id}
         hasAccess={access.hasAccess}
+        initialProgress={initialProgress}
       />
     </div>
   );

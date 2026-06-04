@@ -36,23 +36,35 @@ export function SignInForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-      callbackURL: next,
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message || t("error"));
-      return;
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: next,
+      });
+      if (error) {
+        setError(error.message || t("error"));
+        return;
+      }
+      router.push(next);
+      router.refresh();
+    } catch {
+      // Network failure (server down, offline, etc.) — surface it instead of
+      // throwing an unhandled rejection.
+      setError(t("networkError"));
+    } finally {
+      setLoading(false);
     }
-    router.push(next);
-    router.refresh();
   }
 
   async function onGoogle() {
     setGoogleLoading(true);
-    await authClient.signIn.social({ provider: "google", callbackURL: next });
+    try {
+      await authClient.signIn.social({ provider: "google", callbackURL: next });
+    } catch {
+      setError(t("networkError"));
+      setGoogleLoading(false);
+    }
   }
 
   const busy = loading || googleLoading;
