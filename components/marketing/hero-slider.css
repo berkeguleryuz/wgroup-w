@@ -17,7 +17,14 @@
   animation-name: hero-rain-fall;
   animation-iteration-count: infinite;
   animation-timing-function: linear;
-  will-change: transform, opacity;
+}
+
+/* The fade effect keeps every slide mounted (only opacity changes), so the
+   off-screen slides' decorative SVGs would otherwise keep animating forever.
+   Pause everything inside any slide that isn't the active one — invisible to
+   the user, but it stops the bulk of the hero's idle CPU/GPU work. */
+.hero-slider .swiper-slide:not(.swiper-slide-active) * {
+  animation-play-state: paused !important;
 }
 
 @keyframes hero-rain-fall {
@@ -33,7 +40,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .hero-rain {
-    animation: none;
-    opacity: 0;
+    display: none;
   }
 }

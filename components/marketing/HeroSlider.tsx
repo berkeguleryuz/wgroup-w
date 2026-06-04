@@ -105,11 +105,9 @@ export function HeroSlider() {
   const theme = slides[active].theme;
 
   const stageRef = useRef<HTMLDivElement>(null);
-  const [parallax, setParallax] = useState<{ x: number; y: number }>({
-    x: 0,
-    y: 0,
-  });
 
+  // Parallax is written straight to CSS variables on the stage element, so the
+  // pointer moving never triggers a React re-render of the slider and slides.
   useEffect(() => {
     const el = stageRef.current;
     if (!el) return;
@@ -120,7 +118,8 @@ export function HeroSlider() {
 
     const flush = () => {
       rafId = null;
-      setParallax({ x: nextX, y: nextY });
+      el.style.setProperty("--hero-px", nextX.toFixed(4));
+      el.style.setProperty("--hero-py", nextY.toFixed(4));
     };
     const schedule = () => {
       if (rafId !== null) return;
@@ -152,6 +151,8 @@ export function HeroSlider() {
     color: theme.text,
     ["--hero-accent" as string]: theme.accent,
     ["--hero-letter" as string]: theme.letter,
+    ["--hero-px" as string]: 0,
+    ["--hero-py" as string]: 0,
     transition: "background 900ms ease, color 600ms ease",
   };
 
@@ -175,17 +176,23 @@ export function HeroSlider() {
         autoplay={{
           delay: 10000,
           disableOnInteraction: false,
-          pauseOnMouseEnter: false,
+          pauseOnMouseEnter: true,
         }}
         onSwiper={(s) => {
           swiperRef.current = s;
+          if (
+            typeof window !== "undefined" &&
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          ) {
+            s.autoplay?.stop();
+          }
         }}
         onSlideChange={(s) => setActive(s.realIndex)}
-        className="relative z-10 h-[calc(100vh-1rem)] min-h-[1020px]"
+        className="relative z-10 h-[calc(100vh-1rem)] min-h-[720px]"
       >
         {slides.map((slide, i) => (
           <SwiperSlide key={slide.title}>
-            <div className="mx-auto grid h-full w-full max-w-[1600px] grid-cols-12 items-center gap-6 px-6 pb-16 pt-48 md:px-12 md:pb-20 md:pt-56 xl:px-16">
+            <div className="mx-auto grid h-full w-full max-w-[1600px] grid-cols-12 items-center gap-6 px-6 pb-16 pt-32 md:px-12 md:pb-20 md:pt-40 xl:px-16">
               <aside className="col-span-1 hidden flex-col items-center gap-6 self-center md:flex">
                 <span
                   className="text-[11px] font-semibold tracking-[0.42em]"
@@ -209,11 +216,7 @@ export function HeroSlider() {
               </aside>
 
               <div className="relative col-span-12 flex h-[360px] items-center justify-center md:col-span-6 md:h-[560px]">
-                <Monogram
-                  mark={slide.theme.mark}
-                  color={slide.theme.letter}
-                  parallax={parallax}
-                />
+                <Monogram mark={slide.theme.mark} color={slide.theme.letter} />
               </div>
 
               <div className="col-span-12 md:col-span-5">
@@ -317,18 +320,7 @@ export function HeroSlider() {
   );
 }
 
-function Monogram({
-  mark,
-  color,
-  parallax,
-}: {
-  mark: string;
-  color: string;
-  parallax: { x: number; y: number };
-}) {
-  const tx = parallax.x * 30;
-  const ty = parallax.y * 22;
-
+function Monogram({ mark, color }: { mark: string; color: string }) {
   return (
     <div className="relative flex h-full w-full items-center justify-center">
       <div
@@ -336,7 +328,8 @@ function Monogram({
         className="absolute inset-0 blur-3xl opacity-60"
         style={{
           background: `radial-gradient(closest-side, ${color}44, transparent 70%)`,
-          transform: `translate3d(${tx * 0.4}px, ${ty * 0.4}px, 0)`,
+          transform:
+            "translate3d(calc(var(--hero-px, 0) * 12px), calc(var(--hero-py, 0) * 8.8px), 0)",
           transition: "transform 120ms ease-out",
         }}
       />
@@ -346,7 +339,8 @@ function Monogram({
         className="relative flex h-full w-full items-center justify-center"
         style={{
           filter: `drop-shadow(0 20px 80px ${color}55)`,
-          transform: `translate3d(${tx}px, ${ty}px, 0)`,
+          transform:
+            "translate3d(calc(var(--hero-px, 0) * 30px), calc(var(--hero-py, 0) * 22px), 0)",
           transition: "transform 120ms ease-out",
         }}
       >
@@ -511,7 +505,7 @@ function Rain() {
 
   useEffect(() => {
     setDrops(
-      Array.from({ length: 40 }).map(() => ({
+      Array.from({ length: 26 }).map(() => ({
         left: Math.random() * 100,
         top: -20 - Math.random() * 60,
         delay: Math.random() * 12,

@@ -76,6 +76,21 @@ select:not(:disabled) {
   cursor: pointer;
 }
 
+/* Global reduced-motion reset. Components scatter decorative @keyframes through
+   inline <style> blocks (hero glyphs, feature-grid art, shortcut icons, ...);
+   this single rule neutralizes all of them — plus any transitions — for users
+   who ask for less motion, without each component needing its own guard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Marketing feature-grid icon micro-animations. Subtle, looping, and disabled
    for users who prefer reduced motion (icons then render in their rest state). */
 @media (prefers-reduced-motion: no-preference) {

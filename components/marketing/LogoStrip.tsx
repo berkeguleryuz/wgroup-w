@@ -35,6 +35,7 @@ export function LogoStrip() {
           {loop.map((name, i) => (
             <span
               key={i}
+              aria-hidden={i >= companies.length}
               className="logo-strip-item font-cormorant text-3xl font-medium text-muted-foreground md:text-4xl"
               style={{ fontFamily: "var(--font-cormorant), serif" }}
             >
