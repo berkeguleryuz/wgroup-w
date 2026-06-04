@@ -6,13 +6,14 @@ import { Button } from "@/components/ui/Button";
 export function ClosingCTA() {
   const t = useTranslations("closing");
   return (
-    <section className="relative overflow-hidden bg-surface-dark text-surface-dark-foreground">
+    <section className="relative overflow-hidden rounded-11 bg-surface-dark text-surface-dark-foreground">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-30"
+        className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
           backgroundImage:
-            "radial-gradient(circle at 10% 10%, #edddb9 0%, transparent 40%), radial-gradient(circle at 90% 80%, #5b4630 0%, transparent 40%)",
+            "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
+          backgroundSize: "80px 80px",
         }}
       />
       <div className="relative mx-auto max-w-5xl px-6 py-24 text-center md:py-32">

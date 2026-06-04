@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
+import { Wordmark } from "@/components/Wordmark";
 
 export function AppFooter() {
   const t = useTranslations();
@@ -10,12 +11,7 @@ export function AppFooter() {
     <footer className="border-t border-border/60 bg-muted/40">
       <div className="mx-auto grid max-w-[1800px] gap-10 px-6 py-12 md:grid-cols-4 md:px-10">
         <div className="md:col-span-2">
-          <Link
-            href="/app"
-            className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl"
-          >
-            {t("common.appName").toLowerCase()}
-          </Link>
+          <Wordmark href="/app" />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
             {t("footer.tagline")}
           </p>

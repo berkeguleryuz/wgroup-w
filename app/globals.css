@@ -65,3 +65,77 @@ h6 {
   font-family: var(--font-display-hero), var(--font-sans), serif;
   font-optical-sizing: auto;
 }
+
+/* Tailwind v4's Preflight no longer sets a pointer cursor on buttons.
+   Restore it for interactive elements (explicit cursor-* utilities still win). */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+label[for],
+summary,
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Marketing feature-grid icon micro-animations. Subtle, looping, and disabled
+   for users who prefer reduced motion (icons then render in their rest state). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bf-bob {
+    0%,
+    100% {
+      transform: translateY(0.5px);
+    }
+    50% {
+      transform: translateY(-1.6px);
+    }
+  }
+  @keyframes bf-pulse {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes bf-grow {
+    0%,
+    100% {
+      transform: scaleY(0.5);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes bf-sweep {
+    0% {
+      stroke-dashoffset: var(--bf-len, 40);
+    }
+    40% {
+      stroke-dashoffset: 0;
+    }
+    72% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: var(--bf-len, 40);
+    }
+  }
+
+  .bf-bob {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bf-bob 2.8s ease-in-out infinite;
+  }
+  .bf-pulse {
+    animation: bf-pulse 2.6s ease-in-out infinite;
+  }
+  .bf-grow {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    animation: bf-grow 2.4s ease-in-out infinite;
+  }
+  .bf-sweep {
+    stroke-dasharray: var(--bf-len, 40);
+    animation: bf-sweep 3.2s ease-in-out infinite;
+  }
+}

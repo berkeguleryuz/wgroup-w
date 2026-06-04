@@ -2,18 +2,14 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { Wordmark } from "@/components/Wordmark";
 
 export function MarketingHeader() {
   const t = useTranslations();
   return (
     <header className="pointer-events-none fixed inset-x-0 top-4 z-40 px-4 md:top-6 md:px-6">
-      <div className="pointer-events-auto mx-auto flex h-12 max-w-7xl items-center justify-between rounded-11 border border-border/60 bg-background/95 pl-5 pr-1.5 shadow-[0_10px_40px_-20px_rgba(16,13,8,0.25)] backdrop-blur md:h-[50px] md:pl-6 md:pr-2">
-        <Link
-          href="/"
-          className="font-display text-xl font-semibold tracking-tight text-foreground md:text-2xl"
-        >
-          {t("common.appName").toLowerCase()}
-        </Link>
+      <div className="pointer-events-auto mx-auto flex h-12 max-w-7xl items-center justify-between rounded-11 border border-border/60 bg-background/95 px-3 shadow-[0_10px_40px_-20px_rgba(16,13,8,0.25)] backdrop-blur md:h-[50px] md:px-4">
+        <Wordmark href="/" />
 
         <nav className="hidden items-center gap-8 md:flex lg:gap-10">
           <Link

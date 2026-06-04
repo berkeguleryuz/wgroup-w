@@ -153,14 +153,14 @@ function PlanCard({
     <div
       className={`relative flex flex-col overflow-hidden rounded-11 border ${shell}`}
     >
-      <div className="flex items-center justify-between border-b border-current/10 px-7 pt-6 pb-5 md:px-8">
+      <div className="flex items-start justify-between gap-3 border-b border-current/10 px-7 pt-6 pb-5 md:px-8">
         <span
-          className={`font-mono text-[11px] uppercase tracking-[0.22em] ${microColor}`}
+          className={`flex min-h-[2lh] items-start font-mono text-[11px] uppercase leading-relaxed tracking-[0.22em] ${microColor}`}
         >
           {cadenceLabel}
         </span>
         {highlight && badge ? (
-          <span className="inline-flex items-center gap-1.5 rounded-11 border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary-foreground">
+          <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-11 border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary-foreground">
             <SparkIcon />
             {badge}
           </span>

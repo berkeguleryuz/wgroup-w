@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { Wordmark } from "@/components/Wordmark";
 
 type Props = {
   userName: string;
@@ -109,15 +110,7 @@ export function AppTopbar({ userName, userEmail, role, orgOwner }: Props) {
       className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${headerBg}`}
     >
       <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-7 px-6 md:px-10">
-        <Link href="/app" className="flex shrink-0 items-center">
-          <span
-            className={`font-display text-xl font-semibold tracking-tight ${
-              dark ? "text-surface-dark-foreground" : "text-foreground"
-            }`}
-          >
-            {tc("appName").toLowerCase()}
-          </span>
-        </Link>
+        <Wordmark href="/app" onDark={dark} className="shrink-0" />
 
         <nav className="hidden items-center gap-6 lg:flex">
           {navItems.map((item) => (
