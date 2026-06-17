@@ -14,9 +14,16 @@ type Props = {
   userEmail: string;
   role: string | null | undefined;
   orgOwner: boolean;
+  corporateMember?: boolean;
 };
 
-export function AppTopbar({ userName, userEmail, role, orgOwner }: Props) {
+export function AppTopbar({
+  userName,
+  userEmail,
+  role,
+  orgOwner,
+  corporateMember,
+}: Props) {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -66,7 +73,22 @@ export function AppTopbar({ userName, userEmail, role, orgOwner }: Props) {
       active: onDiscover && section === "TALENT",
     },
     { href: "/app/discover", label: t("discover"), active: onDiscover && !section },
+    {
+      href: "/app/talent-lab",
+      label: t("talentLab"),
+      active: pathname === "/app/talent-lab",
+    },
   ];
+
+  // Corporate members (who aren't owners — owners have the full org panel) get
+  // a quick link to their member-facing company view.
+  if (corporateMember && !orgOwner) {
+    navItems.push({
+      href: "/app/my-company",
+      label: t("myCompany"),
+      active: pathname === "/app/my-company",
+    });
+  }
 
   const staffItems: { href: string; label: string }[] = [];
   if (role === "platform_editor" || role === "admin") {
@@ -109,7 +131,7 @@ export function AppTopbar({ userName, userEmail, role, orgOwner }: Props) {
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${headerBg}`}
     >
-      <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-7 px-6 md:px-10">
+      <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-7 px-6 md:px-10 xl:px-16">
         <Wordmark href="/app" onDark={dark} className="shrink-0" />
 
         <nav className="hidden items-center gap-6 lg:flex">

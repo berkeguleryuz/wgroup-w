@@ -5,6 +5,7 @@ import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
+import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
 import { Button } from "@/components/ui/Button";
 import { formatDuration } from "@/lib/utils";
 
@@ -28,11 +29,15 @@ export default async function TitleDetailPage({
         category: true,
         episodes: { orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }] },
         credits: { include: { instructor: true } },
+        orgAudience: { select: { organizationId: true } },
       },
     }),
   ]);
 
   if (!title || !title.published) notFound();
+
+  const orgIds = await getMembershipOrgIds(user.id);
+  if (!canViewTitle(title, user.role, orgIds)) notFound();
 
   const completedSet = new Set(
     (
@@ -48,7 +53,7 @@ export default async function TitleDetailPage({
 
   return (
     <div className="space-y-10">
-      <section className="relative -mx-6 -mt-[88px] overflow-hidden md:-mx-10">
+      <section className="relative -mx-6 -mt-[104px] overflow-hidden md:-mx-10 xl:-mx-16">
         <div className="relative min-h-[60vh]">
           {title.heroImageUrl ? (
             <img
@@ -74,7 +79,7 @@ export default async function TitleDetailPage({
             className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent"
           />
 
-          <div className="relative mx-auto flex min-h-[60vh] max-w-[1800px] items-end px-6 pb-16 pt-32 text-surface-dark-foreground md:px-10">
+          <div className="relative mx-auto flex min-h-[60vh] max-w-[1800px] items-end px-6 pb-16 pt-32 text-surface-dark-foreground md:px-10 xl:px-16">
             <div className="max-w-2xl">
               <span className="font-accent text-lg text-primary md:text-xl">
                 {(title.type === "SERIES" ? tFl("series") : tFl("film")) +

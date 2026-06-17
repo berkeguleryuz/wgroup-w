@@ -1,6 +1,7 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 
-import type { Locale } from "@/lib/i18n/routing";
+import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { sendCorporateLeadNotification } from "@/lib/email";
 import { Button } from "@/components/ui/Button";
@@ -28,17 +29,22 @@ async function submitLead(formData: FormData) {
   if (!companyName || !contactName || !email) throw new Error("Missing fields");
   const seatTarget = seatTargetRaw ? Number(seatTargetRaw) : null;
 
-  await prisma.corporateLead.create({
-    data: { companyName, contactName, email, phone, seatTarget, message },
-  });
-
-  void sendCorporateLeadNotification({
-    companyName,
-    contactName,
-    email,
-    seatTarget,
-    message,
-  });
+  const locale = await getLocale();
+  try {
+    await prisma.corporateLead.create({
+      data: { companyName, contactName, email, phone, seatTarget, message },
+    });
+    void sendCorporateLeadNotification({
+      companyName,
+      contactName,
+      email,
+      seatTarget,
+      message,
+    });
+  } catch {
+    redirect(`${localizedPath(locale, "/business")}?err=1`);
+  }
+  redirect(`${localizedPath(locale, "/business")}?ok=1`);
 }
 
 export default async function BusinessPage({
@@ -46,7 +52,7 @@ export default async function BusinessPage({
   searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
-  searchParams?: Promise<{ ok?: string }>;
+  searchParams?: Promise<{ ok?: string; err?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -121,6 +127,11 @@ export default async function BusinessPage({
           {sp?.ok === "1" ? (
             <p className="mt-4 rounded-11 border border-border bg-primary/60 px-4 py-3 text-sm">
               {t("formSuccess")}
+            </p>
+          ) : null}
+          {sp?.err === "1" ? (
+            <p className="mt-4 rounded-11 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {t("formError")}
             </p>
           ) : null}
         </form>

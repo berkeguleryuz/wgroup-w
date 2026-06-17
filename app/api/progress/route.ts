@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSession } from "@/lib/access";
+import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 
 // Per-title progress map for the watch page (consumed by TanStack Query).
@@ -47,6 +48,33 @@ export async function POST(request: Request) {
 
   const { episodeId, position, completed } = parsed.data;
   const userId = session.user.id;
+
+  // Entitlement gate: never seed progress for unpublished or company-only
+  // content the caller can't see.
+  const episode = await prisma.episode.findUnique({
+    where: { id: episodeId },
+    select: {
+      title: {
+        select: {
+          published: true,
+          visibility: true,
+          orgAudience: { select: { organizationId: true } },
+        },
+      },
+    },
+  });
+  if (!episode) return NextResponse.json({ ok: false }, { status: 404 });
+  const role = (session.user as { role?: string | null }).role;
+  const isStaff = role === "admin" || role === "platform_editor";
+  if (!isStaff) {
+    if (!episode.title.published) {
+      return NextResponse.json({ ok: false }, { status: 404 });
+    }
+    const orgIds = await getMembershipOrgIds(userId);
+    if (!canViewTitle(episode.title, role, orgIds)) {
+      return NextResponse.json({ ok: false }, { status: 404 });
+    }
+  }
 
   // undefined => leave completedAt as-is; null => unwatched; Date => completed.
   const completedAt =

@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
-import { Input, Label } from "@/components/ui/Input";
+import { Input, Label, Textarea } from "@/components/ui/Input";
 import { VideoUpload } from "@/components/editor/VideoUpload";
 
 type Props = {
@@ -59,6 +59,11 @@ export function AddEpisodeForm({ action, titleId, nextEpisodeNumber }: Props) {
       <div>
         <Label htmlFor="name">{t("episodeName")}</Label>
         <Input id="name" name="name" required />
+      </div>
+
+      <div>
+        <Label htmlFor="synopsis">{t("formSynopsis")}</Label>
+        <Textarea id="synopsis" name="synopsis" rows={2} />
       </div>
 
       <div>

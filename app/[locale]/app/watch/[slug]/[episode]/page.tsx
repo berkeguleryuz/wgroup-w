@@ -5,6 +5,7 @@ import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
+import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
 import { resolveVideoUrl } from "@/lib/storage";
 import { Curriculum } from "@/components/app/Curriculum";
 import { PlayerClient } from "./PlayerClient";
@@ -31,12 +32,16 @@ export default async function PlayerPage({
             episodes: {
               orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
             },
+            orgAudience: { select: { organizationId: true } },
           },
         },
       },
     }),
   ]);
   if (!ep || ep.title.slug !== slug) notFound();
+
+  const orgIds = await getMembershipOrgIds(user.id);
+  if (!canViewTitle(ep.title, user.role, orgIds)) notFound();
 
   const [progress, allProgress, videoUrl] = await Promise.all([
     prisma.progress.findUnique({

@@ -3,6 +3,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
+import {
+  getMembershipOrgIds,
+  audienceWhere,
+  canViewTitle,
+} from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { Section } from "@prisma/client";
 import { AppHero } from "@/components/app/AppHero";
@@ -15,6 +20,7 @@ import { formatDuration } from "@/lib/utils";
 const titleInclude = {
   category: true,
   episodes: { select: { durationSec: true } },
+  orgAudience: { select: { organizationId: true } },
 } as const;
 
 export default async function AppHomePage({
@@ -27,6 +33,8 @@ export default async function AppHomePage({
 
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
+  const orgIds = await getMembershipOrgIds(user.id);
+  const audience = audienceWhere(user.role, orgIds);
 
   const [
     t,
@@ -45,12 +53,18 @@ export default async function AppHomePage({
     getTranslations("featuredLibrary"),
     getEffectiveAccess(user.id, user.role),
     prisma.title.findFirst({
-      where: { published: true },
+      where: { published: true, AND: [audience] },
       orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       include: { category: true },
     }),
     prisma.progress.findMany({
-      where: { userId: user.id, completedAt: null },
+      where: {
+        userId: user.id,
+        completedAt: null,
+        // Never resurface titles the viewer can no longer see (unpublished or
+        // company-only they've left).
+        episode: { title: { published: true, AND: [audience] } },
+      },
       orderBy: { updatedAt: "desc" },
       take: 50,
       include: {
@@ -62,25 +76,37 @@ export default async function AppHomePage({
       },
     }),
     prisma.title.findMany({
-      where: { published: true },
+      where: { published: true, AND: [audience] },
       orderBy: { publishedAt: "desc" },
       take: 12,
       include: titleInclude,
     }),
     prisma.title.findMany({
-      where: { published: true, category: { section: Section.SERIES } },
+      where: {
+        published: true,
+        category: { section: Section.SERIES },
+        AND: [audience],
+      },
       orderBy: { publishedAt: "desc" },
       take: 12,
       include: titleInclude,
     }),
     prisma.title.findMany({
-      where: { published: true, category: { section: Section.MOVIE } },
+      where: {
+        published: true,
+        category: { section: Section.MOVIE },
+        AND: [audience],
+      },
       orderBy: { publishedAt: "desc" },
       take: 12,
       include: titleInclude,
     }),
     prisma.title.findMany({
-      where: { published: true, category: { section: Section.TALENT } },
+      where: {
+        published: true,
+        category: { section: Section.TALENT },
+        AND: [audience],
+      },
       orderBy: { publishedAt: "desc" },
       take: 12,
       include: titleInclude,
@@ -91,6 +117,8 @@ export default async function AppHomePage({
   // episode for each title (rows are already ordered by updatedAt desc).
   const seenTitles = new Set<string>();
   const continueWatching = continueRaw
+    // Defense-in-depth on top of the query filter above.
+    .filter((p) => canViewTitle(p.episode.title, user.role, orgIds))
     .filter((p) => {
       const titleId = p.episode.title.id;
       if (seenTitles.has(titleId)) return false;

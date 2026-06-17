@@ -39,3 +39,19 @@ export async function createUploadSignedUrl(videoPath: string) {
   if (error || !data) throw new Error(`Upload URL error: ${error?.message}`);
   return data;
 }
+
+export async function createImageUploadSignedUrl(imagePath: string) {
+  const supabase = getStorageClient();
+  const { data, error } = await supabase.storage
+    .from(IMAGE_BUCKET)
+    .createSignedUploadUrl(imagePath);
+  if (error || !data) throw new Error(`Upload URL error: ${error?.message}`);
+  return data;
+}
+
+/** Public URL for an object in the (public) image bucket. */
+export function getImagePublicUrl(imagePath: string) {
+  const supabase = getStorageClient();
+  return supabase.storage.from(IMAGE_BUCKET).getPublicUrl(imagePath).data
+    .publicUrl;
+}

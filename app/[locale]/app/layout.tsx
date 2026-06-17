@@ -10,10 +10,19 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
 
-  const ownerMembership = await prisma.member.findFirst({
-    where: { userId: user.id, role: "owner" },
-    select: { id: true },
-  });
+  const [ownerMembership, corporateMembership] = await Promise.all([
+    prisma.member.findFirst({
+      where: { userId: user.id, role: "owner" },
+      select: { id: true },
+    }),
+    prisma.member.findFirst({
+      where: {
+        userId: user.id,
+        organization: { companyProfile: { isNot: null } },
+      },
+      select: { id: true },
+    }),
+  ]);
 
   return (
     <QueryProvider>
@@ -23,8 +32,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
           userEmail={user.email}
           role={user.role}
           orgOwner={!!ownerMembership}
+          corporateMember={!!corporateMembership}
         />
-        <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 pb-12 pt-[88px] md:px-10">
+        <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 pb-16 pt-[104px] md:px-10 xl:px-16">
           {children}
         </main>
         <AppFooter />

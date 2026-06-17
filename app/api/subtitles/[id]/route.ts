@@ -1,4 +1,5 @@
 import { getSession } from "@/lib/access";
+import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { resolveVideoUrl } from "@/lib/storage";
 
@@ -13,8 +14,32 @@ export async function GET(
   if (!session) return new Response("unauthorized", { status: 401 });
 
   const { id } = await params;
-  const sub = await prisma.subtitle.findUnique({ where: { id } });
+  const sub = await prisma.subtitle.findUnique({
+    where: { id },
+    include: {
+      episode: {
+        include: {
+          title: {
+            include: { orgAudience: { select: { organizationId: true } } },
+          },
+        },
+      },
+    },
+  });
   if (!sub) return new Response("not found", { status: 404 });
+
+  // Entitlement gate: never leak transcripts for unpublished or company-only
+  // titles the viewer can't see. 404 (not 403) so we don't confirm the id.
+  const title = sub.episode.title;
+  const role = (session.user as { role?: string | null }).role;
+  const isStaff = role === "admin" || role === "platform_editor";
+  if (!isStaff) {
+    if (!title.published) return new Response("not found", { status: 404 });
+    const orgIds = await getMembershipOrgIds(session.user.id);
+    if (!canViewTitle(title, role, orgIds)) {
+      return new Response("not found", { status: 404 });
+    }
+  }
 
   const url = await resolveVideoUrl(sub.vttPath);
   if (!url || url.startsWith("/")) {
@@ -28,7 +53,7 @@ export async function GET(
   return new Response(body, {
     headers: {
       "Content-Type": "text/vtt; charset=utf-8",
-      "Cache-Control": "public, max-age=300",
+      "Cache-Control": "private, max-age=300",
     },
   });
 }

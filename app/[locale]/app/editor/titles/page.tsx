@@ -74,10 +74,16 @@ export default async function EditorTitlesPage({
                     className={`rounded-11 px-2 py-1 text-xs ${
                       item.published
                         ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-foreground"
+                        : item.scheduledFor
+                          ? "bg-surface-dark text-surface-dark-foreground"
+                          : "bg-muted text-foreground"
                     }`}
                   >
-                    {item.published ? t("statusPublished") : t("statusDraft")}
+                    {item.published
+                      ? t("statusPublished")
+                      : item.scheduledFor
+                        ? t("statusScheduled")
+                        : t("statusDraft")}
                   </span>
                 </td>
                 <td className="px-5 py-3 text-muted-foreground">

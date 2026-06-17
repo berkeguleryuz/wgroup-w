@@ -28,6 +28,7 @@ model User {
   progress                Progress[]
   individualSubscription  IndividualSubscription?
   instructorProfile       Instructor?
+  agentConversations      AgentConversation[]
 
   @@map("user")
 }
@@ -91,8 +92,10 @@ model Organization {
   createdAt   DateTime     @default(now())
   members     Member[]
   invitations Invitation[]
+  departments Department[]
 
   companyProfile CompanyProfile?
+  titleAudience  TitleOrganization[]
 
   @@map("organization")
 }
@@ -106,10 +109,29 @@ model Member {
   role           String       @default("member")
   createdAt      DateTime     @default(now())
 
+  departmentId String?
+  department   Department? @relation(fields: [departmentId], references: [id], onDelete: SetNull)
+
   @@unique([organizationId, userId])
   @@index([organizationId])
   @@index([userId])
+  @@index([departmentId])
   @@map("member")
+}
+
+model Department {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  name           String
+
+  members Member[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([organizationId, name])
+  @@index([organizationId])
 }
 
 model Invitation {
@@ -139,6 +161,11 @@ enum Section {
 enum TitleType {
   SERIES
   MOVIE
+}
+
+enum TitleVisibility {
+  PUBLIC // visible to every subscriber (default)
+  ORG_ONLY // visible only to members of the assigned organizations (+ staff)
 }
 
 model Category {
@@ -171,15 +198,36 @@ model Title {
   category     Category  @relation(fields: [categoryId], references: [id])
   published    Boolean   @default(false)
   publishedAt  DateTime?
+  // Scheduled publish: a cron promotes the title to published once this passes.
+  scheduledFor DateTime?
+  // Audience gate: PUBLIC (all subscribers) or ORG_ONLY (only assigned orgs).
+  visibility   TitleVisibility @default(PUBLIC)
 
-  episodes Episode[]
-  credits  TitleInstructor[]
+  episodes    Episode[]
+  credits     TitleInstructor[]
+  orgAudience TitleOrganization[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([categoryId, published])
   @@index([published, publishedAt(sort: Desc), createdAt(sort: Desc)])
+  @@index([published, scheduledFor])
+  @@index([published, visibility])
+}
+
+// Which organizations an ORG_ONLY title is exposed to. No rows = visible to
+// no one but staff (until orgs are assigned).
+model TitleOrganization {
+  titleId        String
+  organizationId String
+  title          Title        @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([titleId, organizationId])
+  @@index([organizationId])
 }
 
 model Episode {
@@ -277,13 +325,44 @@ model CompanyProfile {
   contactName           String?
   contactPhone          String?
   seatCount             Int          @default(0)
+  // "pending" | "active" | "grace" | "expired"
   subscriptionStatus    String       @default("pending")
   subscriptionStartedAt DateTime?
   subscriptionEndsAt    DateTime?
   notes                 String?
 
+  // Originating sales lead this company was activated from (if any).
+  leadId String?        @unique
+  lead   CorporateLead? @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AgentConversation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title  String
+
+  messages AgentMessage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId, updatedAt(sort: Desc)])
+}
+
+model AgentMessage {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   AgentConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  role           String // "user" | "assistant"
+  content        String
+
+  createdAt DateTime @default(now())
+
+  @@index([conversationId, createdAt])
 }
 
 model CorporateLead {
@@ -294,7 +373,10 @@ model CorporateLead {
   phone       String?
   seatTarget  Int?
   message     String?
+  // "new" | "contacted" | "converted"
   status      String   @default("new")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+
+  company CompanyProfile?
 }

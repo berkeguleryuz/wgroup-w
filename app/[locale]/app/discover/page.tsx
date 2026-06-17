@@ -4,6 +4,8 @@ import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { Section, TitleType } from "@prisma/client";
+import { requireSession } from "@/lib/access";
+import { getMembershipOrgIds, audienceWhere } from "@/lib/content-visibility";
 import { TitleCard } from "@/components/app/TitleCard";
 
 type SearchParams = {
@@ -38,6 +40,11 @@ export default async function BrowsePage({
   const type = toType(sp.type);
   const q = sp.q?.trim();
 
+  const session = await requireSession();
+  const user = session.user as typeof session.user & { role?: string | null };
+  const orgIds = await getMembershipOrgIds(user.id);
+  const audience = audienceWhere(user.role, orgIds);
+
   const [t, tNav, topCategories, subCategories, titles] = await Promise.all([
     getTranslations("discover"),
     getTranslations("nav"),
@@ -65,6 +72,7 @@ export default async function BrowsePage({
               ],
             }
           : {}),
+        AND: [audience],
       },
       include: { category: true, episodes: { select: { durationSec: true } } },
       orderBy: { publishedAt: "desc" },

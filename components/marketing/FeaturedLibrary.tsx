@@ -12,7 +12,8 @@ async function loadFeatured() {
 
   try {
     const titles = await prisma.title.findMany({
-      where: { published: true },
+      // Public marketing never surfaces company-only titles.
+      where: { published: true, visibility: "PUBLIC" },
       orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       take: 6,
       include: {

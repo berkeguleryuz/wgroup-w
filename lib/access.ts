@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 
 import { auth, type UserRole } from "./auth";
 import { prisma } from "./prisma";
+import { isCompanyAccessValid } from "./company";
 import { routing, localizedPath, type Locale } from "./i18n/routing";
 
 const STAFF_ROLES: UserRole[] = ["admin", "platform_editor"];
@@ -54,16 +55,18 @@ export const getEffectiveAccess = cache(async function getEffectiveAccess(
     return { hasAccess: true as const, reason: "staff" as const };
   }
 
-  const [individual, activeMembership] = await Promise.all([
+  const [individual, memberships] = await Promise.all([
     prisma.individualSubscription.findUnique({ where: { userId } }),
-    prisma.member.findFirst({
+    // All memberships — a user can belong to several orgs; access is granted if
+    // ANY of them has a valid corporate subscription.
+    prisma.member.findMany({
       where: { userId },
       include: {
         organization: {
           include: { companyProfile: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
     }),
   ]);
 
@@ -75,14 +78,16 @@ export const getEffectiveAccess = cache(async function getEffectiveAccess(
     };
   }
 
-  const company = activeMembership?.organization.companyProfile;
-  if (company && company.subscriptionStatus === "active") {
-    return {
-      hasAccess: true as const,
-      reason: "corporate" as const,
-      membership: activeMembership,
-      company,
-    };
+  for (const membership of memberships) {
+    const company = membership.organization.companyProfile;
+    if (company && isCompanyAccessValid(company)) {
+      return {
+        hasAccess: true as const,
+        reason: "corporate" as const,
+        membership,
+        company,
+      };
+    }
   }
 
   return { hasAccess: false as const, reason: "none" as const };

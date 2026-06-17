@@ -492,28 +492,27 @@ function ShortcutRow({ items, theme }: { items: string[]; theme: Theme }) {
   );
 }
 
-function Rain() {
-  const [drops, setDrops] = useState<
-    Array<{
-      left: number;
-      top: number;
-      delay: number;
-      duration: number;
-      opacity: number;
-    }>
-  >([]);
+// Deterministic (seeded) drop placement — identical on server and client, so
+// no hydration mismatch and no client-only effect needed.
+const RAIN_DROPS = Array.from({ length: 26 }).map((_, i) => {
+  let s = (i + 1) * 2654435761;
+  const rand = () => {
+    s = (s ^ (s << 13)) >>> 0;
+    s = (s ^ (s >> 17)) >>> 0;
+    s = (s ^ (s << 5)) >>> 0;
+    return s / 4294967296;
+  };
+  return {
+    left: rand() * 100,
+    top: -20 - rand() * 60,
+    delay: rand() * 12,
+    duration: 5 + rand() * 6,
+    opacity: 0.25 + rand() * 0.3,
+  };
+});
 
-  useEffect(() => {
-    setDrops(
-      Array.from({ length: 26 }).map(() => ({
-        left: Math.random() * 100,
-        top: -20 - Math.random() * 60,
-        delay: Math.random() * 12,
-        duration: 5 + Math.random() * 6,
-        opacity: 0.25 + Math.random() * 0.3,
-      })),
-    );
-  }, []);
+function Rain() {
+  const drops = RAIN_DROPS;
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
