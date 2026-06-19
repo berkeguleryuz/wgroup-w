@@ -10,12 +10,12 @@ import { prisma } from "@/lib/prisma";
  * when the env var is set.
  */
 export async function GET(request: Request) {
+  // Fail closed: without a configured secret the endpoint is not callable.
+  // Vercel Cron sends `Authorization: Bearer <CRON_SECRET>` automatically.
   const secret = process.env.CRON_SECRET;
-  if (secret) {
-    const auth = request.headers.get("authorization");
-    if (auth !== `Bearer ${secret}`) {
-      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
-    }
+  const auth = request.headers.get("authorization");
+  if (!secret || auth !== `Bearer ${secret}`) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const now = new Date();

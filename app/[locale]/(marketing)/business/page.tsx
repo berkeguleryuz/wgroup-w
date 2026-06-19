@@ -26,10 +26,28 @@ async function submitLead(formData: FormData) {
   const seatTargetRaw = String(formData.get("seatTarget") || "").trim();
   const message = String(formData.get("message") || "").trim() || null;
 
-  if (!companyName || !contactName || !email) throw new Error("Missing fields");
+  const locale = await getLocale();
+  const fail = () => redirect(`${localizedPath(locale, "/business")}?err=1`);
+
+  // Honeypot: real users never fill this hidden field; bots do. Pretend success.
+  if (String(formData.get("website") || "").trim()) {
+    redirect(`${localizedPath(locale, "/business")}?ok=1`);
+  }
+
+  const emailOk = /^\S+@\S+\.\S+$/.test(email);
+  if (
+    !companyName ||
+    companyName.length > 200 ||
+    !contactName ||
+    contactName.length > 200 ||
+    !emailOk ||
+    email.length > 200 ||
+    (message && message.length > 2000)
+  ) {
+    fail();
+  }
   const seatTarget = seatTargetRaw ? Number(seatTargetRaw) : null;
 
-  const locale = await getLocale();
   try {
     await prisma.corporateLead.create({
       data: { companyName, contactName, email, phone, seatTarget, message },
@@ -84,6 +102,15 @@ export default async function BusinessPage({
           className="rounded-11 border border-border bg-background p-8"
         >
           <h2 className="font-display text-2xl">{t("formTitle")}</h2>
+          {/* Honeypot — hidden from humans, catches bots. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="hidden"
+          />
           <div className="mt-6 grid gap-4">
             <div>
               <Label htmlFor="companyName">{t("formCompany")}</Label>

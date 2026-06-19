@@ -20,15 +20,26 @@ export async function startCheckout(plan: PlanInterval): Promise<string | null> 
 
   const userId = session.user.id;
   const email = session.user.email;
+  const returnUrl = `${APP_URL}${localizedPath(locale, "/app/account/subscription")}`;
 
   const existing = await prisma.individualSubscription.findUnique({
     where: { userId },
   });
+
+  // Already subscribed → send to the billing portal instead of opening a second
+  // checkout (which would create a duplicate, double-billing subscription).
+  if (existing && (existing.status === "active" || existing.status === "trialing")) {
+    const portal = await stripe.billingPortal.sessions.create({
+      customer: existing.stripeCustomerId,
+      return_url: returnUrl,
+    });
+    return portal.url;
+  }
+
   const customerId =
     existing?.stripeCustomerId ||
     (await stripe.customers.create({ email, metadata: { userId } })).id;
 
-  const returnUrl = `${APP_URL}${localizedPath(locale, "/app/account/subscription")}`;
   const checkout = await stripe.checkout.sessions.create({
     mode: "subscription",
     customer: customerId,

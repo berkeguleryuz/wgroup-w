@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Wordmark } from "@/components/Wordmark";
 
 export function MarketingHeader() {
@@ -39,6 +40,7 @@ export function MarketingHeader() {
         </nav>
 
         <div className="flex items-center gap-2 md:gap-3">
+          <ThemeToggle />
           <div className="hidden md:block">
             <LocaleSwitcher />
           </div>
@@ -50,7 +52,7 @@ export function MarketingHeader() {
           </Link>
           <Link
             href="/register"
-            className="inline-flex h-9 items-center justify-center rounded-11 bg-surface-dark px-4 text-sm font-semibold text-surface-dark-foreground transition-colors hover:bg-surface-dark/90"
+            className="inline-flex h-9 items-center justify-center rounded-11 bg-surface-dark px-4 text-sm font-semibold text-surface-dark-foreground transition-colors hover:bg-surface-dark/90 dark:bg-foreground dark:text-background dark:hover:bg-foreground/90"
           >
             {t("common.getStarted")}
           </Link>

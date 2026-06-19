@@ -14,7 +14,13 @@
     "no": "Hayır",
     "or": "veya",
     "search": "Ara",
-    "learnMore": "Daha fazla"
+    "learnMore": "Daha fazla",
+    "errorTitle": "Bir şeyler ters gitti",
+    "errorBody": "Beklenmedik bir hata oluştu. Lütfen tekrar dene.",
+    "retry": "Tekrar dene",
+    "notFoundTitle": "Sayfa bulunamadı",
+    "notFoundBody": "Aradığın sayfa taşınmış ya da hiç var olmamış olabilir.",
+    "backHome": "Ana sayfaya dön"
   },
   "nav": {
     "library": "Kütüphane",
@@ -399,7 +405,8 @@
     "auto": "Otomatik",
     "fullscreen": "Tam ekran",
     "off": "Kapalı",
-    "play": "Oynat"
+    "play": "Oynat",
+    "subscribeToWatch": "Tamamını izlemek için abone ol."
   },
   "account": {
     "kicker": "Hesap",
@@ -532,7 +539,8 @@
     "noCompaniesYet": "Henüz aktif şirket yok.",
     "noAssignedCompanies": "Henüz şirket atanmadı — bu içerik kimseye görünmez.",
     "company": "Şirket",
-    "assignCompany": "Şirket ata"
+    "assignCompany": "Şirket ata",
+    "subtitleSelect": ".vtt dosyası seç"
   },
   "admin": {
     "kicker": "Admin",
@@ -656,7 +664,16 @@
     "colCompleted": "Tamamlanan",
     "colInProgress": "Devam eden",
     "colLastActivity": "Son aktivite",
-    "noMembersYet": "Henüz üye yok."
+    "noMembersYet": "Henüz üye yok.",
+    "errEmail": "Davet e-postası gönderilemedi. Lütfen tekrar dene.",
+    "copyLink": "Linki kopyala",
+    "copied": "Kopyalandı",
+    "inviteLinkHint": "Daveti doğrudan paylaşmak için linki şuradan kopyala:"
+  },
+  "themeToggle": {
+    "label": "Tema",
+    "toDark": "Koyu moda geç",
+    "toLight": "Aydınlık moda geç"
   },
   "localeSwitcher": {
     "label": "Dil",
@@ -700,5 +717,9 @@
     "exclusiveTitle": "Şirkete özel içerikler",
     "exclusiveBody": "Yalnızca şirketin üyelerine açık eğitimler.",
     "noExclusive": "Şirketine özel içerik henüz yok."
+  },
+  "seo": {
+    "homeTitle": "Busyflix — İş eğitiminin Netflix'i",
+    "homeDescription": "Liderlik, girişimcilik ve yetenek gelişimi; dizi formatında akan iş eğitimi."
   }
 }

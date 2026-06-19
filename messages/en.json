@@ -14,7 +14,13 @@
     "no": "No",
     "or": "or",
     "search": "Search",
-    "learnMore": "Learn more"
+    "learnMore": "Learn more",
+    "errorTitle": "Something went wrong",
+    "errorBody": "An unexpected error occurred. Please try again.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundBody": "The page you're looking for may have moved or never existed.",
+    "backHome": "Back home"
   },
   "nav": {
     "library": "Library",
@@ -399,7 +405,8 @@
     "auto": "Auto",
     "fullscreen": "Fullscreen",
     "off": "Off",
-    "play": "Play"
+    "play": "Play",
+    "subscribeToWatch": "Subscribe to watch the full lesson."
   },
   "account": {
     "kicker": "Account",
@@ -532,7 +539,8 @@
     "noCompaniesYet": "No active companies yet.",
     "noAssignedCompanies": "No companies assigned — this title is visible to no one.",
     "company": "Company",
-    "assignCompany": "Assign company"
+    "assignCompany": "Assign company",
+    "subtitleSelect": "Select .vtt file"
   },
   "admin": {
     "kicker": "Admin",
@@ -656,7 +664,16 @@
     "colCompleted": "Completed",
     "colInProgress": "In progress",
     "colLastActivity": "Last activity",
-    "noMembersYet": "No members yet."
+    "noMembersYet": "No members yet.",
+    "errEmail": "The invitation email couldn't be sent. Please try again.",
+    "copyLink": "Copy link",
+    "copied": "Copied",
+    "inviteLinkHint": "To share the invite directly, copy its link from:"
+  },
+  "themeToggle": {
+    "label": "Theme",
+    "toDark": "Switch to dark mode",
+    "toLight": "Switch to light mode"
   },
   "localeSwitcher": {
     "label": "Language",
@@ -700,5 +717,9 @@
     "exclusiveTitle": "Company-exclusive content",
     "exclusiveBody": "Training available only to your company's members.",
     "noExclusive": "No company-exclusive content yet."
+  },
+  "seo": {
+    "homeTitle": "Busyflix — The Netflix of business education",
+    "homeDescription": "Leadership, entrepreneurship and talent development — business education that streams like a series."
   }
 }

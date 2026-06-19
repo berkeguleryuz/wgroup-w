@@ -192,8 +192,15 @@ export async function resolveVideoUrl(
   // and identical in shape to an R2 public path once content is ingested there.
   if (videoPath.startsWith("/")) return videoPath;
 
-  // Bare storage object key.
-  if (isR2Configured()) return r2Provider.getPublicUrl(videoPath);
+  // Bare storage object key → short-lived signed URL (never a permanent public
+  // URL), so an observed playback URL can't be replayed indefinitely.
+  if (isR2Configured()) {
+    try {
+      return await r2Provider.createSignedReadUrl(videoPath, 60 * 60);
+    } catch {
+      return null;
+    }
+  }
   try {
     return await createVideoSignedUrl(videoPath, 60 * 60);
   } catch {

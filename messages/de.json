@@ -14,7 +14,13 @@
     "no": "Nein",
     "or": "oder",
     "search": "Suchen",
-    "learnMore": "Mehr erfahren"
+    "learnMore": "Mehr erfahren",
+    "errorTitle": "Etwas ist schiefgelaufen",
+    "errorBody": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es erneut.",
+    "retry": "Erneut versuchen",
+    "notFoundTitle": "Seite nicht gefunden",
+    "notFoundBody": "Die gesuchte Seite wurde möglicherweise verschoben oder existiert nicht.",
+    "backHome": "Zur Startseite"
   },
   "nav": {
     "library": "Bibliothek",
@@ -399,7 +405,8 @@
     "auto": "Automatisch",
     "fullscreen": "Vollbild",
     "off": "Aus",
-    "play": "Abspielen"
+    "play": "Abspielen",
+    "subscribeToWatch": "Abonniere, um die vollständige Lektion zu sehen."
   },
   "account": {
     "kicker": "Konto",
@@ -532,7 +539,8 @@
     "noCompaniesYet": "Noch keine aktiven Unternehmen.",
     "noAssignedCompanies": "Keine Unternehmen zugewiesen — dieser Inhalt ist für niemanden sichtbar.",
     "company": "Unternehmen",
-    "assignCompany": "Unternehmen zuweisen"
+    "assignCompany": "Unternehmen zuweisen",
+    "subtitleSelect": ".vtt-Datei wählen"
   },
   "admin": {
     "kicker": "Admin",
@@ -656,7 +664,16 @@
     "colCompleted": "Abgeschlossen",
     "colInProgress": "Laufend",
     "colLastActivity": "Letzte Aktivität",
-    "noMembersYet": "Noch keine Mitglieder."
+    "noMembersYet": "Noch keine Mitglieder.",
+    "errEmail": "Die Einladungs-E-Mail konnte nicht gesendet werden. Bitte versuche es erneut.",
+    "copyLink": "Link kopieren",
+    "copied": "Kopiert",
+    "inviteLinkHint": "Um die Einladung direkt zu teilen, kopiere den Link unter:"
+  },
+  "themeToggle": {
+    "label": "Erscheinungsbild",
+    "toDark": "Zum dunklen Modus wechseln",
+    "toLight": "Zum hellen Modus wechseln"
   },
   "localeSwitcher": {
     "label": "Sprache",
@@ -700,5 +717,9 @@
     "exclusiveTitle": "Unternehmensexklusive Inhalte",
     "exclusiveBody": "Schulungen nur für Mitglieder deines Unternehmens.",
     "noExclusive": "Noch keine unternehmensexklusiven Inhalte."
+  },
+  "seo": {
+    "homeTitle": "Busyflix — Das Netflix der Wirtschaftsbildung",
+    "homeDescription": "Führung, Unternehmertum und Talententwicklung — Wirtschaftsbildung, die wie eine Serie streamt."
   }
 }

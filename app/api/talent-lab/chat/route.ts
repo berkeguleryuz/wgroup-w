@@ -40,6 +40,20 @@ export async function POST(request: Request) {
   }
 
   const userId = session.user.id;
+
+  // Lightweight per-user rate limit (DB-based; serverless-safe). Caps expensive
+  // Claude calls / runaway scripting. 12 user messages / 60s.
+  const recent = await prisma.agentMessage.count({
+    where: {
+      role: "user",
+      conversation: { userId },
+      createdAt: { gte: new Date(Date.now() - 60_000) },
+    },
+  });
+  if (recent >= 12) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
   let conversationId = body?.conversationId ?? null;
 
   if (conversationId) {
@@ -104,18 +118,23 @@ export async function POST(request: Request) {
         controller.enqueue(encoder.encode(fallback));
         console.error("talent-lab chat error:", e);
       } finally {
-        if (full.trim()) {
-          await prisma.$transaction([
-            prisma.agentMessage.create({
-              data: { conversationId: convId, role: "assistant", content: full },
-            }),
-            prisma.agentConversation.update({
-              where: { id: convId },
-              data: { updatedAt: new Date() },
-            }),
-          ]);
+        try {
+          if (full.trim()) {
+            await prisma.$transaction([
+              prisma.agentMessage.create({
+                data: { conversationId: convId, role: "assistant", content: full },
+              }),
+              prisma.agentConversation.update({
+                where: { id: convId },
+                data: { updatedAt: new Date() },
+              }),
+            ]);
+          }
+        } catch (e) {
+          console.error("talent-lab persist error:", e);
+        } finally {
+          controller.close();
         }
-        controller.close();
       }
     },
   });

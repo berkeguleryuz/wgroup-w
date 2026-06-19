@@ -9,7 +9,7 @@ export function AppFooter() {
 
   return (
     <footer className="border-t border-border/60 bg-muted/40">
-      <div className="mx-auto grid max-w-[1800px] gap-10 px-6 py-12 md:grid-cols-4 md:px-10 xl:px-16">
+      <div className="grid w-full gap-10 px-4 py-12 md:grid-cols-4 md:px-6 lg:px-8">
         <div className="md:col-span-2">
           <Wordmark href="/app" />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">

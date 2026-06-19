@@ -51,3 +51,6 @@ next-env.d.ts
 public/hls/
 content/hls-manifest.json
 public/subtitles/
+
+# Local-only demo account reference (private, do not commit)
+DEMO-ACCOUNTS.md

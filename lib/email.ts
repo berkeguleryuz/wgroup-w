@@ -18,22 +18,36 @@ type SendArgs = {
   html: string;
 };
 
-async function send({ to, subject, html }: SendArgs) {
+/** Escape user-supplied text before interpolating into email HTML. */
+export function escapeHtml(s: string) {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Returns true when the email was sent (or dev-logged); false on a real failure. */
+async function send({ to, subject, html }: SendArgs): Promise<boolean> {
   const resend = getClient();
   if (!resend) {
     console.warn("[email] RESEND_API_KEY missing — logging instead of sending");
     console.info({ to, subject, html });
-    return;
+    return true; // dev no-op is not a user-facing failure
   }
   try {
     const { error } = await resend.emails.send({ from: FROM, to, subject, html });
     if (error) {
       console.error(`[email] Resend error: ${error.message}`);
       console.info({ to, subject, html });
+      return false;
     }
+    return true;
   } catch (err) {
     console.error("[email] send failed:", err);
     console.info({ to, subject, html });
+    return false;
   }
 }
 
@@ -50,7 +64,7 @@ function wrap(title: string, body: string, cta?: { label: string; url: string })
 }
 
 export async function sendVerificationEmail(to: string, url: string) {
-  await send({
+  return send({
     to,
     subject: "Busyflix — E-posta doğrulama",
     html: wrap(
@@ -62,7 +76,7 @@ export async function sendVerificationEmail(to: string, url: string) {
 }
 
 export async function sendPasswordResetEmail(to: string, url: string) {
-  await send({
+  return send({
     to,
     subject: "Busyflix — Şifre sıfırlama",
     html: wrap(
@@ -79,12 +93,14 @@ export async function sendOrganizationInviteEmail(args: {
   inviterName: string;
   inviteUrl: string;
 }) {
-  await send({
+  const org = escapeHtml(args.organizationName);
+  const inviter = escapeHtml(args.inviterName);
+  return send({
     to: args.to,
-    subject: `${args.organizationName} seni Busyflix'e davet etti`,
+    subject: `${org} seni Busyflix'e davet etti`,
     html: wrap(
-      `${args.organizationName} ekibine katıl`,
-      `<p><strong>${args.inviterName}</strong> seni <strong>${args.organizationName}</strong> adına Busyflix'e davet etti.</p>`,
+      `${org} ekibine katıl`,
+      `<p><strong>${inviter}</strong> seni <strong>${org}</strong> adına Busyflix'e davet etti.</p>`,
       { label: "Accept invitation", url: args.inviteUrl },
     ),
   });
@@ -98,18 +114,22 @@ export async function sendCorporateLeadNotification(args: {
   message?: string | null;
 }) {
   const to = process.env.ADMIN_NOTIFICATION_EMAIL;
-  if (!to) return;
-  await send({
+  if (!to) return true;
+  const company = escapeHtml(args.companyName);
+  const contact = escapeHtml(args.contactName);
+  const email = escapeHtml(args.email);
+  const message = escapeHtml(args.message ?? "");
+  return send({
     to,
-    subject: `Yeni kurumsal talep: ${args.companyName}`,
+    subject: `Yeni kurumsal talep: ${company}`,
     html: wrap(
       "Yeni kurumsal talep",
       `<ul style="padding-left:18px;margin:0">
-        <li><strong>Şirket:</strong> ${args.companyName}</li>
-        <li><strong>İletişim:</strong> ${args.contactName} &lt;${args.email}&gt;</li>
+        <li><strong>Şirket:</strong> ${company}</li>
+        <li><strong>İletişim:</strong> ${contact} &lt;${email}&gt;</li>
         <li><strong>Koltuk hedefi:</strong> ${args.seatTarget ?? "-"}</li>
       </ul>
-      <p style="margin-top:12px">${args.message ?? ""}</p>`,
+      <p style="margin-top:12px">${message}</p>`,
     ),
   });
 }

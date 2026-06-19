@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 type Props = {
   name: string;
@@ -9,6 +10,7 @@ type Props = {
 
 /** Uploads a .vtt file to storage and exposes the resulting key via a hidden input. */
 export function SubtitleUpload({ name, required }: Props) {
+  const t = useTranslations("editor");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -89,14 +91,16 @@ export function SubtitleUpload({ name, required }: Props) {
           </button>
         </p>
       ) : uploading ? (
-        <p className="text-xs text-muted-foreground">Yükleniyor… {progress}%</p>
+        <p className="text-xs text-muted-foreground">
+          {t("uploading")} {progress}%
+        </p>
       ) : (
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
           className="text-xs text-muted-foreground underline-offset-2 hover:text-foreground hover:underline"
         >
-          .vtt dosyası seç
+          {t("subtitleSelect")}
         </button>
       )}
       {error ? <p className="mt-1 text-xs text-red-600">{error}</p> : null}

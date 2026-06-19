@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
+/* Enable the `dark:` variant driven by a `.dark` class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
   --background: #fbf7f6;
   --foreground: #100d08;
   --primary: #edddb9;
@@ -10,6 +14,35 @@
   --muted: #f1ebe7;
   --muted-foreground: #5b534a;
   --border: #e6dccc;
+}
+
+/* Dark theme — the inverse of the light palette. Background/foreground swap;
+   muted/border use warm-toned dark equivalents (literal hex inversion would
+   read cold and off-brand). The bej --primary accent is intentionally preserved
+   across both themes.
+
+   IMPORTANT: --surface-dark / --surface-dark-foreground are NOT overridden here.
+   They are a fixed-contrast "always-dark" surface used by the hero, cards, CTAs
+   and video controls — which layer hardcoded dark gradients/images that don't
+   flip. Inverting them turned those surfaces cream while the overlays stayed
+   dark, making hero/title/video text unreadable in dark mode. They stay
+   constant in both themes; use a theme-aware token (e.g. bg-background/bg-muted)
+   for surfaces that should follow the theme. */
+.dark {
+  color-scheme: dark;
+  /* Warm, layered dark — not a flat pure-black. The page sits slightly above
+     pure black; --surface-dark is kept a touch deeper so cinematic panels
+     (hero, video, dark sections) recede and read with real depth; --muted is
+     clearly elevated for cards. The bej --primary accent is preserved. */
+  --background: #17120a;
+  --foreground: #f4efe6;
+  --primary: #edddb9;
+  --primary-foreground: #100d08;
+  --surface-dark: #0e0b07;
+  --surface-dark-foreground: #f4efe6;
+  --muted: #221b11;
+  --muted-foreground: #a89d8b;
+  --border: #2d2617;
 }
 
 @theme inline {
@@ -37,6 +70,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1 {

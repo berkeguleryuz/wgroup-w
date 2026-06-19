@@ -313,9 +313,19 @@ model IndividualSubscription {
   status               String
   currentPeriodEnd     DateTime
   cancelAtPeriodEnd    Boolean  @default(false)
+  // Unix-time of the most recent Stripe event applied — guards against
+  // out-of-order webhook redelivery overwriting newer state with older.
+  lastEventAt          DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Processed Stripe webhook event ids — idempotency / dedup of redelivered events.
+model StripeEvent {
+  id        String   @id
+  type      String
+  createdAt DateTime @default(now())
 }
 
 model CompanyProfile {

@@ -21,6 +21,7 @@ alter table "CompanyProfile"         enable row level security;
 alter table "CorporateLead"          enable row level security;
 alter table "AgentConversation"      enable row level security;
 alter table "AgentMessage"           enable row level security;
+alter table "StripeEvent"            enable row level security;
 
 create index if not exists title_published_recent_idx
   on "Title" ("publishedAt" desc, "createdAt" desc)

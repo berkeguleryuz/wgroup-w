@@ -53,7 +53,7 @@ export default async function TitleDetailPage({
 
   return (
     <div className="space-y-10">
-      <section className="relative -mx-6 -mt-[104px] overflow-hidden md:-mx-10 xl:-mx-16">
+      <section className="relative -mx-4 -mt-[104px] overflow-hidden md:-mx-6 lg:-mx-8">
         <div className="relative min-h-[60vh]">
           {title.heroImageUrl ? (
             <img
@@ -79,7 +79,7 @@ export default async function TitleDetailPage({
             className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-background to-transparent"
           />
 
-          <div className="relative mx-auto flex min-h-[60vh] max-w-[1800px] items-end px-6 pb-16 pt-32 text-surface-dark-foreground md:px-10 xl:px-16">
+          <div className="relative flex min-h-[60vh] w-full items-end px-4 pb-16 pt-32 text-surface-dark-foreground md:px-6 lg:px-8">
             <div className="max-w-2xl">
               <span className="font-accent text-lg text-primary md:text-xl">
                 {(title.type === "SERIES" ? tFl("series") : tFl("film")) +

@@ -1,4 +1,4 @@
-import { getSession } from "@/lib/access";
+import { getSession, getEffectiveAccess } from "@/lib/access";
 import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { resolveVideoUrl } from "@/lib/storage";
@@ -39,6 +39,10 @@ export async function GET(
     if (!canViewTitle(title, role, orgIds)) {
       return new Response("not found", { status: 404 });
     }
+    // Full transcript = full content; preview-only (non-subscriber) users don't
+    // get captions, matching the video preview gate.
+    const access = await getEffectiveAccess(session.user.id, role);
+    if (!access.hasAccess) return new Response("forbidden", { status: 403 });
   }
 
   const url = await resolveVideoUrl(sub.vttPath);

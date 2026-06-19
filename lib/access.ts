@@ -9,6 +9,19 @@ import { routing, localizedPath, type Locale } from "./i18n/routing";
 
 const STAFF_ROLES: UserRole[] = ["admin", "platform_editor"];
 
+/** True for platform staff (admin / platform_editor). Single source of truth. */
+export function isStaff(role: string | null | undefined): boolean {
+  return !!role && (STAFF_ROLES as string[]).includes(role);
+}
+
+/** Typed role accessor — avoids the repeated `as { role }` cast at call sites. */
+export function userRole(
+  session: { user?: { role?: string | null } } | null | undefined,
+): UserRole | null {
+  const r = session?.user?.role ?? null;
+  return (r as UserRole | null) ?? null;
+}
+
 export type AccessSession = Awaited<ReturnType<typeof auth.api.getSession>>;
 
 export const getSession = cache(async () => {
@@ -70,7 +83,7 @@ export const getEffectiveAccess = cache(async function getEffectiveAccess(
     }),
   ]);
 
-  if (individual && individual.status === "active") {
+  if (individual && (individual.status === "active" || individual.status === "trialing")) {
     return {
       hasAccess: true as const,
       reason: "individual" as const,

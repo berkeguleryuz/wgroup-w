@@ -24,16 +24,18 @@ async function loadStats() {
       _sum: { seatCount: true },
       where: { subscriptionStatus: "active" },
     }),
-    prisma.title.findMany({
-      where: { published: true },
-      select: {
-        id: true,
-        title: true,
-        episodes: {
-          select: { progress: { select: { userId: true } } },
-        },
-      },
-    }),
+    // Top titles by unique viewers — aggregated in Postgres (distinct-count,
+    // sort, limit) instead of loading every Progress row into memory.
+    prisma.$queryRaw<Array<{ id: string; title: string; viewers: bigint }>>`
+      SELECT t.id, t.title, COUNT(DISTINCT p."userId") AS viewers
+      FROM "Title" t
+      JOIN "Episode" e ON e."titleId" = t.id
+      JOIN "Progress" p ON p."episodeId" = e.id
+      WHERE t.published = true
+      GROUP BY t.id, t.title
+      ORDER BY viewers DESC
+      LIMIT 5
+    `,
   ]);
 }
 
@@ -57,7 +59,7 @@ export default async function AdminDashboard({
       totalProgress,
       recentSignups,
       seatAgg,
-      titlesWithViewers,
+      topTitlesRaw,
     ],
   ] = await Promise.all([getTranslations("admin"), loadStats()]);
 
@@ -68,17 +70,9 @@ export default async function AdminDashboard({
     totalProgress > 0 ? Math.round((completedCount / totalProgress) * 100) : 0;
   const corporateSeats = seatAgg._sum.seatCount ?? 0;
 
-  const topTitles = titlesWithViewers
-    .map((title) => ({
-      id: title.id,
-      title: title.title,
-      viewers: new Set(
-        title.episodes.flatMap((e) => e.progress.map((p) => p.userId)),
-      ).size,
-    }))
-    .filter((x) => x.viewers > 0)
-    .sort((a, b) => b.viewers - a.viewers)
-    .slice(0, 5);
+  const topTitles = topTitlesRaw
+    .map((t) => ({ id: t.id, title: t.title, viewers: Number(t.viewers) }))
+    .filter((x) => x.viewers > 0);
 
   return (
     <div className="space-y-10">

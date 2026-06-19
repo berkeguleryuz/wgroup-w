@@ -97,7 +97,12 @@ export function TalentLabChat({ conversationId, initialMessages }: Props) {
 
   return (
     <div className="flex h-[calc(100vh-12rem)] min-h-[420px] flex-col rounded-11 border border-border/60 bg-background">
-      <div className="flex-1 space-y-4 overflow-y-auto p-5">
+      <div
+        className="flex-1 space-y-4 overflow-y-auto p-5"
+        role="log"
+        aria-live="polite"
+        aria-atomic="false"
+      >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center text-center">
             <span className="font-accent text-2xl text-muted-foreground">
@@ -135,7 +140,10 @@ export function TalentLabChat({ conversationId, initialMessages }: Props) {
       </div>
 
       {error ? (
-        <p className="border-t border-border/60 px-5 py-2 text-xs text-red-600">
+        <p
+          role="alert"
+          className="border-t border-border/60 px-5 py-2 text-xs text-red-600"
+        >
           {error}
         </p>
       ) : null}

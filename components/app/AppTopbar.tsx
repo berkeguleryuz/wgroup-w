@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { Wordmark } from "@/components/Wordmark";
 
 type Props = {
@@ -80,9 +81,9 @@ export function AppTopbar({
     },
   ];
 
-  // Corporate members (who aren't owners — owners have the full org panel) get
-  // a quick link to their member-facing company view.
-  if (corporateMember && !orgOwner) {
+  // Anyone who belongs to a company gets a quick link to their company space
+  // (company-exclusive trainings + info) — owners too, alongside the org panel.
+  if (corporateMember) {
     navItems.push({
       href: "/app/my-company",
       label: t("myCompany"),
@@ -131,7 +132,7 @@ export function AppTopbar({
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${headerBg}`}
     >
-      <div className="mx-auto flex h-16 max-w-[1800px] items-center gap-7 px-6 md:px-10 xl:px-16">
+      <div className="flex h-16 w-full items-center gap-7 px-4 md:px-6 lg:px-8">
         <Wordmark href="/app" onDark={dark} className="shrink-0" />
 
         <nav className="hidden items-center gap-6 lg:flex">
@@ -154,9 +155,14 @@ export function AppTopbar({
           ))}
         </nav>
 
-        <form onSubmit={onSearch} className="ml-auto hidden max-w-xs flex-1 md:block">
+        <form
+          onSubmit={onSearch}
+          role="search"
+          className="ml-auto hidden max-w-xs flex-1 md:block"
+        >
           <input
             placeholder={tc("search")}
+            aria-label={tc("search")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className={`h-9 w-full rounded-11 border px-3 text-sm transition-colors focus:outline-none ${
@@ -168,6 +174,7 @@ export function AppTopbar({
         </form>
 
         <div className="ml-auto flex items-center gap-3 md:ml-0">
+          <ThemeToggle onDark={dark} />
           <LocaleSwitcher />
 
           <div className="relative">

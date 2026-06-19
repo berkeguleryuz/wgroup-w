@@ -22,7 +22,16 @@ export function SignInForm() {
   const tc = useTranslations("common");
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app";
+  // Only accept same-origin relative paths — never an absolute/protocol-relative
+  // URL — so `?next=` can't be used as an open-redirect to phish post-login.
+  const rawNext = params.get("next") || "/app";
+  const next =
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.includes(":") &&
+    !rawNext.includes("\\")
+      ? rawNext
+      : "/app";
   const resetSuccess = params.get("reset") === "1";
 
   const [email, setEmail] = useState("");

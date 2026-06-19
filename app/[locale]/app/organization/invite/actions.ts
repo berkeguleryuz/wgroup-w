@@ -100,7 +100,9 @@ export async function inviteBulk(formData: FormData) {
         },
       });
       ok++;
-    } catch {}
+    } catch (e) {
+      console.error(`[invite] failed for ${email}:`, (e as Error).message);
+    }
   }
   redirect(`${base}?sent=${ok}`);
 }

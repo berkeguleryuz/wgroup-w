@@ -11,6 +11,8 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts",
+    "db:seed:users": "tsx scripts/seed-test-users.ts",
+    "db:seed:demo": "tsx prisma/seed.ts && node scripts/wire-real-episodes.mjs && tsx scripts/seed-demo-extras.ts && tsx scripts/seed-test-users.ts && tsx scripts/seed-demo-full.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

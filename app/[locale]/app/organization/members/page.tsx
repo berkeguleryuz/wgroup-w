@@ -4,6 +4,7 @@ import type { Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { requireOrgOwner } from "@/lib/corporate";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
+import { CopyInviteLink } from "@/components/app/CopyInviteLink";
 import {
   setMemberDepartment,
   updateMemberRole,
@@ -72,6 +73,11 @@ export default async function CorporateMembersPage({
       {sp?.err === "self" ? (
         <p className="rounded-11 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
           {t("errSelf")}
+        </p>
+      ) : null}
+      {sp?.err === "email" ? (
+        <p className="rounded-11 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {t("errEmail")}
         </p>
       ) : null}
 
@@ -218,6 +224,7 @@ export default async function CorporateMembersPage({
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-3">
+                        <CopyInviteLink path={`/invite/${i.id}`} />
                         <form action={resendInvitation}>
                           <input type="hidden" name="invitationId" value={i.id} />
                           <button

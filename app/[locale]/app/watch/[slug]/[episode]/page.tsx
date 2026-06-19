@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
 import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
 import { resolveVideoUrl } from "@/lib/storage";
+import { Button } from "@/components/ui/Button";
 import { Curriculum } from "@/components/app/Curriculum";
 import { PlayerClient } from "./PlayerClient";
 
@@ -39,6 +40,10 @@ export default async function PlayerPage({
     }),
   ]);
   if (!ep || ep.title.slug !== slug) notFound();
+
+  const isStaff = user.role === "admin" || user.role === "platform_editor";
+  // Draft / scheduled titles are watchable only by staff (mirrors the detail page).
+  if (!ep.title.published && !isStaff) notFound();
 
   const orgIds = await getMembershipOrgIds(user.id);
   if (!canViewTitle(ep.title, user.role, orgIds)) notFound();
@@ -92,6 +97,18 @@ export default async function PlayerPage({
 
   const capSeconds = access.hasAccess ? null : ep.previewSec || 60;
 
+  // Entitlement boundary: subscribers/staff stream the real (signed) URL;
+  // non-subscribers only ever get the byte-capped preview proxy — the full
+  // media URL is never sent to a client without access. HLS/local previews
+  // aren't proxied, so those fall through to the paywall.
+  const isHlsOrLocal =
+    !videoUrl || videoUrl.startsWith("/") || /\.m3u8(\?|$)/i.test(videoUrl);
+  const playbackSrc = access.hasAccess
+    ? videoUrl
+    : ep.previewSec > 0 && !isHlsOrLocal
+      ? `/api/preview/${ep.id}`
+      : null;
+
   return (
     <div className="flex flex-col gap-6 lg:flex-row">
       <div className="min-w-0 flex-1 space-y-6">
@@ -102,21 +119,35 @@ export default async function PlayerPage({
           ← {ep.title.title}
         </Link>
 
-        {videoUrl ? (
+        {playbackSrc ? (
           <PlayerClient
             titleId={ep.titleId}
             slug={slug}
             episodeId={ep.id}
-            src={videoUrl}
+            src={playbackSrc}
             poster={ep.title.heroImageUrl}
             subtitles={subtitles}
             capSeconds={capSeconds}
-            startAt={progress?.positionSec ?? 0}
+            startAt={access.hasAccess ? (progress?.positionSec ?? 0) : 0}
             hasAccess={access.hasAccess}
             nextHref={next ? `/app/watch/${slug}/${next.id}` : null}
             nextName={next?.name ?? null}
             initialProgress={initialProgress}
           />
+        ) : !access.hasAccess ? (
+          <div className="relative flex aspect-video flex-col items-center justify-center gap-4 rounded-11 border border-border/60 bg-surface-dark px-6 text-center text-surface-dark-foreground">
+            <div>
+              <h3 className="font-display text-2xl md:text-3xl">
+                {t("previewEndedTitle")}
+              </h3>
+              <p className="mt-2 text-sm opacity-85">{t("subscribeToWatch")}</p>
+            </div>
+            <Link href="/app/account/subscription">
+              <Button variant="primary" size="lg">
+                {t("subscribe")}
+              </Button>
+            </Link>
+          </div>
         ) : (
           <div className="flex aspect-video items-center justify-center rounded-11 border border-dashed border-border bg-muted/40 text-center text-sm text-muted-foreground">
             {t("videoUnavailable")}

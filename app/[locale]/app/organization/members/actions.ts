@@ -102,11 +102,11 @@ export async function resendInvitation(formData: FormData) {
     where: { id },
     data: { expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) },
   });
-  await sendOrganizationInviteEmail({
+  const ok = await sendOrganizationInviteEmail({
     to: invite.email,
     organizationName: membership.organization.name,
     inviterName: session.user.name || session.user.email,
     inviteUrl: `${APP_URL}/invite/${id}`,
   });
-  await back("?resent=1");
+  await back(ok ? "?resent=1" : "?err=email");
 }

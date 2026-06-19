@@ -25,20 +25,26 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   ]);
 
   return (
-    <QueryProvider>
-      <div className="flex min-h-screen flex-col bg-background">
-        <AppTopbar
-          userName={user.name || user.email}
-          userEmail={user.email}
-          role={user.role}
-          orgOwner={!!ownerMembership}
-          corporateMember={!!corporateMembership}
-        />
-        <main className="mx-auto w-full max-w-[1800px] flex-1 px-6 pb-16 pt-[104px] md:px-10 xl:px-16">
-          {children}
-        </main>
-        <AppFooter />
+    // Full-screen shell for the app — no inset frame / rounding (unlike the
+    // public site), so content runs edge-to-edge.
+    <div className="fixed inset-0 overflow-hidden bg-background">
+      <div className="h-full w-full overflow-y-auto overflow-x-hidden">
+        <QueryProvider>
+          <div className="flex min-h-full flex-col bg-background">
+            <AppTopbar
+              userName={user.name || user.email}
+              userEmail={user.email}
+              role={user.role}
+              orgOwner={!!ownerMembership}
+              corporateMember={!!corporateMembership}
+            />
+            <main className="w-full flex-1 px-4 pb-16 pt-[104px] md:px-6 lg:px-8">
+              {children}
+            </main>
+            <AppFooter />
+          </div>
+        </QueryProvider>
       </div>
-    </QueryProvider>
+    </div>
   );
 }

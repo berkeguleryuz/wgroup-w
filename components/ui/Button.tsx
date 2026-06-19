@@ -8,7 +8,7 @@ const variants: Record<Variant, string> = {
   primary: "bg-primary text-primary-foreground hover:bg-primary/90 border border-primary",
   secondary: "bg-muted text-foreground hover:bg-muted/80 border border-border",
   ghost: "bg-transparent text-foreground hover:bg-muted",
-  dark: "bg-surface-dark text-surface-dark-foreground hover:bg-surface-dark/90 border border-surface-dark",
+  dark: "bg-surface-dark text-surface-dark-foreground hover:bg-surface-dark/90 border border-surface-dark dark:bg-foreground dark:text-background dark:border-foreground dark:hover:bg-foreground/90",
 };
 
 const sizes: Record<Size, string> = {

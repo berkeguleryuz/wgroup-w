@@ -2,8 +2,7 @@ import { cache } from "react";
 import type { Prisma } from "@prisma/client";
 
 import { prisma } from "./prisma";
-
-const STAFF = new Set(["admin", "platform_editor"]);
+import { isStaff } from "./access";
 
 /** Organization ids the user is a member of (request-cached). */
 export const getMembershipOrgIds = cache(
@@ -29,7 +28,7 @@ export function audienceWhere(
   role: string | null | undefined,
   orgIds: string[],
 ): Prisma.TitleWhereInput {
-  if (role && STAFF.has(role)) return {};
+  if (isStaff(role)) return {};
   if (orgIds.length === 0) return { visibility: "PUBLIC" };
   return {
     OR: [
@@ -48,7 +47,7 @@ export function canViewTitle(
   role: string | null | undefined,
   orgIds: string[],
 ): boolean {
-  if (role && STAFF.has(role)) return true;
+  if (isStaff(role)) return true;
   if (title.visibility === "PUBLIC") return true;
   const audienceOrgIds = title.orgAudience?.map((a) => a.organizationId) ?? [];
   return audienceOrgIds.some((id) => orgIds.includes(id));
