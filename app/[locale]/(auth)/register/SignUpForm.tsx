@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Link, useRouter } from "@/lib/i18n/navigation";
@@ -20,9 +21,27 @@ export function SignUpForm() {
   const t = useTranslations("register");
   const tc = useTranslations("common");
   const router = useRouter();
+  const params = useSearchParams();
+  // Only accept same-origin relative paths so `?next=` can't be abused as an
+  // open redirect (mirrors the login form's guard).
+  const rawNext = params.get("next") || "/app";
+  const next =
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.includes(":") &&
+    !rawNext.includes("\\")
+      ? rawNext
+      : "/app";
+  // Coming from an organization invite: lock registration to the invited email.
+  const lockedEmail = params.get("email");
+  const loginHref = lockedEmail
+    ? `/login?next=${encodeURIComponent(next)}&email=${encodeURIComponent(
+        lockedEmail,
+      )}`
+    : "/login";
 
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(lockedEmail ?? "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,7 +57,7 @@ export function SignUpForm() {
       name,
       email,
       password,
-      callbackURL: "/app",
+      callbackURL: next,
     });
     setLoading(false);
     if (error) {
@@ -50,7 +69,7 @@ export function SignUpForm() {
 
   async function onGoogle() {
     setGoogleLoading(true);
-    await authClient.signIn.social({ provider: "google", callbackURL: "/app" });
+    await authClient.signIn.social({ provider: "google", callbackURL: next });
   }
 
   const busy = loading || googleLoading;
@@ -72,7 +91,7 @@ export function SignUpForm() {
           variant="dark"
           size="lg"
           className="w-full justify-center"
-          onClick={() => router.push("/login")}
+          onClick={() => router.push(loginHref)}
         >
           {t("backToLogin")}
         </Button>
@@ -126,7 +145,15 @@ export function SignUpForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={busy}
+            readOnly={!!lockedEmail}
+            aria-readonly={!!lockedEmail}
+            className={lockedEmail ? "cursor-not-allowed bg-muted" : undefined}
           />
+          {lockedEmail ? (
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {t("invitedEmailNote")}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -202,7 +229,7 @@ export function SignUpForm() {
       <p className="text-center text-sm text-muted-foreground">
         {t("haveAccount")}{" "}
         <Link
-          href="/login"
+          href={loginHref}
           className="text-foreground underline-offset-[6px] hover:underline"
         >
           {t("login")}

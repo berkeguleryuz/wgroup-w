@@ -18,6 +18,7 @@ export default async function EditorLayout({ children }: { children: ReactNode }
           <NavItem href="/app/editor">{t("dashboard")}</NavItem>
           <NavItem href="/app/editor/categories">{t("categories")}</NavItem>
           <NavItem href="/app/editor/titles">{t("titles")}</NavItem>
+          <NavItem href="/app/editor/instructors">{t("instructors")}</NavItem>
         </ul>
       </nav>
       <section>{children}</section>

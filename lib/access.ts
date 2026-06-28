@@ -4,9 +4,23 @@ import { headers } from "next/headers";
 
 import { auth, type UserRole } from "./auth";
 import { prisma } from "./prisma";
+import { isCompanyAccessValid } from "./company";
 import { routing, localizedPath, type Locale } from "./i18n/routing";
 
 const STAFF_ROLES: UserRole[] = ["admin", "platform_editor"];
+
+/** True for platform staff (admin / platform_editor). Single source of truth. */
+export function isStaff(role: string | null | undefined): boolean {
+  return !!role && (STAFF_ROLES as string[]).includes(role);
+}
+
+/** Typed role accessor — avoids the repeated `as { role }` cast at call sites. */
+export function userRole(
+  session: { user?: { role?: string | null } } | null | undefined,
+): UserRole | null {
+  const r = session?.user?.role ?? null;
+  return (r as UserRole | null) ?? null;
+}
 
 export type AccessSession = Awaited<ReturnType<typeof auth.api.getSession>>;
 
@@ -54,20 +68,22 @@ export const getEffectiveAccess = cache(async function getEffectiveAccess(
     return { hasAccess: true as const, reason: "staff" as const };
   }
 
-  const [individual, activeMembership] = await Promise.all([
+  const [individual, memberships] = await Promise.all([
     prisma.individualSubscription.findUnique({ where: { userId } }),
-    prisma.member.findFirst({
+    // All memberships — a user can belong to several orgs; access is granted if
+    // ANY of them has a valid corporate subscription.
+    prisma.member.findMany({
       where: { userId },
       include: {
         organization: {
           include: { companyProfile: true },
         },
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
     }),
   ]);
 
-  if (individual && individual.status === "active") {
+  if (individual && (individual.status === "active" || individual.status === "trialing")) {
     return {
       hasAccess: true as const,
       reason: "individual" as const,
@@ -75,14 +91,16 @@ export const getEffectiveAccess = cache(async function getEffectiveAccess(
     };
   }
 
-  const company = activeMembership?.organization.companyProfile;
-  if (company && company.subscriptionStatus === "active") {
-    return {
-      hasAccess: true as const,
-      reason: "corporate" as const,
-      membership: activeMembership,
-      company,
-    };
+  for (const membership of memberships) {
+    const company = membership.organization.companyProfile;
+    if (company && isCompanyAccessValid(company)) {
+      return {
+        hasAccess: true as const,
+        reason: "corporate" as const,
+        membership,
+        company,
+      };
+    }
   }
 
   return { hasAccess: false as const, reason: "none" as const };

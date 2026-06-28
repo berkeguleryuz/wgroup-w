@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
+/* Enable the `dark:` variant driven by a `.dark` class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 :root {
+  color-scheme: light;
   --background: #fbf7f6;
   --foreground: #100d08;
   --primary: #edddb9;
@@ -10,6 +14,35 @@
   --muted: #f1ebe7;
   --muted-foreground: #5b534a;
   --border: #e6dccc;
+}
+
+/* Dark theme — the inverse of the light palette. Background/foreground swap;
+   muted/border use warm-toned dark equivalents (literal hex inversion would
+   read cold and off-brand). The bej --primary accent is intentionally preserved
+   across both themes.
+
+   IMPORTANT: --surface-dark / --surface-dark-foreground are NOT overridden here.
+   They are a fixed-contrast "always-dark" surface used by the hero, cards, CTAs
+   and video controls — which layer hardcoded dark gradients/images that don't
+   flip. Inverting them turned those surfaces cream while the overlays stayed
+   dark, making hero/title/video text unreadable in dark mode. They stay
+   constant in both themes; use a theme-aware token (e.g. bg-background/bg-muted)
+   for surfaces that should follow the theme. */
+.dark {
+  color-scheme: dark;
+  /* Warm, layered dark — not a flat pure-black. The page sits slightly above
+     pure black; --surface-dark is kept a touch deeper so cinematic panels
+     (hero, video, dark sections) recede and read with real depth; --muted is
+     clearly elevated for cards. The bej --primary accent is preserved. */
+  --background: #17120a;
+  --foreground: #f4efe6;
+  --primary: #edddb9;
+  --primary-foreground: #100d08;
+  --surface-dark: #0e0b07;
+  --surface-dark-foreground: #f4efe6;
+  --muted: #221b11;
+  --muted-foreground: #a89d8b;
+  --border: #2d2617;
 }
 
 @theme inline {
@@ -37,6 +70,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 h1 {
@@ -59,9 +93,156 @@ h6 {
 .font-accent {
   font-family: var(--font-display-accent), var(--font-sans), sans-serif;
   letter-spacing: 0.01em;
+  /* Patrick Hand SC is a small-caps face: it draws lowercase letters as caps,
+     but its small-cap "i" has no dot — so Turkish "Liderlik" lost its dots.
+     Uppercasing first (honoring <html lang="tr"> → "LİDERLİK") makes it render
+     the real dotted İ glyph instead. */
+  text-transform: uppercase;
 }
 
 .font-display {
   font-family: var(--font-display-hero), var(--font-sans), serif;
   font-optical-sizing: auto;
+}
+
+/* Tailwind v4's Preflight no longer sets a pointer cursor on buttons.
+   Restore it for interactive elements (explicit cursor-* utilities still win). */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+label[for],
+summary,
+select:not(:disabled) {
+  cursor: pointer;
+}
+
+/* Global reduced-motion reset. Components scatter decorative @keyframes through
+   inline <style> blocks (hero glyphs, feature-grid art, shortcut icons, ...);
+   this single rule neutralizes all of them — plus any transitions — for users
+   who ask for less motion, without each component needing its own guard. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Marketing feature-grid icon micro-animations. Subtle, looping, and disabled
+   for users who prefer reduced motion (icons then render in their rest state). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bf-bob {
+    0%,
+    100% {
+      transform: translateY(0.5px);
+    }
+    50% {
+      transform: translateY(-1.6px);
+    }
+  }
+  @keyframes bf-pulse {
+    0%,
+    100% {
+      opacity: 0.3;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes bf-grow {
+    0%,
+    100% {
+      transform: scaleY(0.5);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+  @keyframes bf-sweep {
+    0% {
+      stroke-dashoffset: var(--bf-len, 40);
+    }
+    40% {
+      stroke-dashoffset: 0;
+    }
+    72% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: var(--bf-len, 40);
+    }
+  }
+
+  .bf-bob {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bf-bob 2.8s ease-in-out infinite;
+  }
+  .bf-pulse {
+    animation: bf-pulse 2.6s ease-in-out infinite;
+  }
+  .bf-grow {
+    transform-box: fill-box;
+    transform-origin: bottom;
+    animation: bf-grow 2.4s ease-in-out infinite;
+  }
+  .bf-sweep {
+    stroke-dasharray: var(--bf-len, 40);
+    animation: bf-sweep 3.2s ease-in-out infinite;
+  }
+}
+
+/* Theme-toggle icon (sun ↔ moon morph). Two tones: `currentColor` for the
+   core/rays and a soft `--bf-toggle-accent` halo behind the disc. The crescent
+   is carved by a masked cut-out circle that slides over the core; rays retract,
+   spin, and fade. Transitions run both ways and are auto-neutralized by the
+   reduced-motion reset above (icon then snaps between rest states). */
+.bf-toggle-icon {
+  --bf-toggle-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --bf-toggle-accent: color-mix(in srgb, currentColor 18%, transparent);
+  overflow: visible;
+}
+.bf-toggle-core {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.5s var(--bf-toggle-ease);
+}
+.bf-toggle-halo {
+  fill: var(--bf-toggle-accent);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.5s var(--bf-toggle-ease),
+    opacity 0.4s ease;
+}
+.bf-toggle-cutout {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.55s var(--bf-toggle-ease);
+}
+.bf-toggle-rays {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    transform 0.55s var(--bf-toggle-ease),
+    opacity 0.4s ease;
+}
+
+/* Dark = moon: slide the cut-out over the core, shrink + spin away the rays. */
+.bf-toggle-icon[data-dark="true"] .bf-toggle-cutout {
+  transform: translate(-8px, 5px);
+}
+.bf-toggle-icon[data-dark="true"] .bf-toggle-rays {
+  opacity: 0;
+  transform: scale(0.35) rotate(-45deg);
+}
+.bf-toggle-icon[data-dark="true"] .bf-toggle-core {
+  transform: scale(1.08);
+}
+.bf-toggle-icon[data-dark="true"] .bf-toggle-halo {
+  opacity: 0.7;
+  transform: scale(1.12);
 }

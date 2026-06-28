@@ -2,15 +2,21 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
+import {
+  SeatIcon,
+  InviteIcon,
+  ReportIcon,
+  InvoiceIcon,
+} from "@/components/marketing/FeatureIcons";
 
 export function CorporateCTA() {
   const t = useTranslations("corporateCTA");
 
   const features = [
-    { title: t("feature1Title"), body: t("feature1Body") },
-    { title: t("feature2Title"), body: t("feature2Body") },
-    { title: t("feature3Title"), body: t("feature3Body") },
-    { title: t("feature4Title"), body: t("feature4Body") },
+    { title: t("feature1Title"), body: t("feature1Body"), Icon: SeatIcon },
+    { title: t("feature2Title"), body: t("feature2Body"), Icon: InviteIcon },
+    { title: t("feature3Title"), body: t("feature3Body"), Icon: ReportIcon },
+    { title: t("feature4Title"), body: t("feature4Body"), Icon: InvoiceIcon },
   ];
 
   return (
@@ -59,14 +65,12 @@ export function CorporateCTA() {
         </div>
 
         <div className="mt-20 grid gap-px overflow-hidden rounded-11 border border-border bg-border md:grid-cols-4">
-          {features.map((f, i) => (
+          {features.map((f) => (
             <div
               key={f.title}
               className="flex flex-col bg-muted/60 p-7 transition-colors hover:bg-muted md:p-8"
             >
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                {String(i + 1).padStart(2, "0")}
-              </span>
+              <f.Icon />
               <h3 className="mt-8 font-display text-xl leading-snug md:text-2xl">
                 {f.title}
               </h3>

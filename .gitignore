@@ -46,3 +46,14 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# ingest / HLS video pipeline (generated, not committed)
+public/hls/
+content/hls-manifest.json
+public/subtitles/
+
+# Local-only demo account reference (private, do not commit)
+DEMO-ACCOUNTS.md
+
+# Local test media (large, not for repo)
+public/test-media/

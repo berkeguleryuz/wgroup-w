@@ -12,7 +12,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "login" });
-  return { title: `${t("heading")} · Businessflix` };
+  return { title: `${t("heading")} · Busyflix` };
 }
 
 export default async function LoginPage({

@@ -22,10 +22,27 @@ export function SignInForm() {
   const tc = useTranslations("common");
   const router = useRouter();
   const params = useSearchParams();
-  const next = params.get("next") || "/app";
+  // Only accept same-origin relative paths — never an absolute/protocol-relative
+  // URL — so `?next=` can't be used as an open-redirect to phish post-login.
+  const rawNext = params.get("next") || "/app";
+  const next =
+    rawNext.startsWith("/") &&
+    !rawNext.startsWith("//") &&
+    !rawNext.includes(":") &&
+    !rawNext.includes("\\")
+      ? rawNext
+      : "/app";
   const resetSuccess = params.get("reset") === "1";
+  // When arriving from an organization invite, the email is fixed to the
+  // invited address — pre-fill and lock it so they can't sign in with another.
+  const lockedEmail = params.get("email");
+  const signUpHref = lockedEmail
+    ? `/register?next=${encodeURIComponent(next)}&email=${encodeURIComponent(
+        lockedEmail,
+      )}`
+    : "/register";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(lockedEmail ?? "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -36,23 +53,35 @@ export function SignInForm() {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const { error } = await authClient.signIn.email({
-      email,
-      password,
-      callbackURL: next,
-    });
-    setLoading(false);
-    if (error) {
-      setError(error.message || t("error"));
-      return;
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: next,
+      });
+      if (error) {
+        setError(error.message || t("error"));
+        return;
+      }
+      router.push(next);
+      router.refresh();
+    } catch {
+      // Network failure (server down, offline, etc.) — surface it instead of
+      // throwing an unhandled rejection.
+      setError(t("networkError"));
+    } finally {
+      setLoading(false);
     }
-    router.push(next);
-    router.refresh();
   }
 
   async function onGoogle() {
     setGoogleLoading(true);
-    await authClient.signIn.social({ provider: "google", callbackURL: next });
+    try {
+      await authClient.signIn.social({ provider: "google", callbackURL: next });
+    } catch {
+      setError(t("networkError"));
+      setGoogleLoading(false);
+    }
   }
 
   const busy = loading || googleLoading;
@@ -97,7 +126,15 @@ export function SignInForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={busy}
+            readOnly={!!lockedEmail}
+            aria-readonly={!!lockedEmail}
+            className={lockedEmail ? "cursor-not-allowed bg-muted" : undefined}
           />
+          {lockedEmail ? (
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {t("invitedEmailNote")}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -158,7 +195,7 @@ export function SignInForm() {
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
         <Link
-          href="/register"
+          href={signUpHref}
           className="text-foreground underline-offset-[6px] hover:underline"
         >
           {t("signUp")}

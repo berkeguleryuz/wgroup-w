@@ -7,6 +7,9 @@ export async function requireOrgOwner() {
   const userId = session.user.id;
   const ownerMembership = await prisma.member.findFirst({
     where: { userId, role: "owner" },
+    // Deterministic pick for multi-org owners so the layout header, page
+    // bodies, and mutations all resolve to the same organization.
+    orderBy: { createdAt: "asc" },
     include: { organization: { include: { companyProfile: true } } },
   });
   if (!ownerMembership) redirect("/app");

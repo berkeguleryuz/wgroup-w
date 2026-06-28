@@ -1,6 +1,7 @@
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n/routing";
+import { Link } from "@/lib/i18n/navigation";
 import { requireOrgOwner } from "@/lib/corporate";
 import { inviteSingle, inviteBulk } from "./actions";
 import { Button } from "@/components/ui/Button";
@@ -29,9 +30,18 @@ export default async function CorporateInvitePage({
       </header>
 
       {sp?.sent ? (
-        <p className="rounded-11 border border-primary bg-primary/40 px-4 py-3 text-sm">
-          {t("sentBanner", { count: sp.sent })}
-        </p>
+        <div className="rounded-11 border border-primary bg-primary/40 px-4 py-3 text-sm">
+          <p>{t("sentBanner", { count: sp.sent })}</p>
+          <p className="mt-1 text-muted-foreground">
+            {t("inviteLinkHint")}{" "}
+            <Link
+              href="/app/organization/members"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              {t("members")}
+            </Link>
+          </p>
+        </div>
       ) : null}
       {sp?.err ? (
         <p className="rounded-11 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

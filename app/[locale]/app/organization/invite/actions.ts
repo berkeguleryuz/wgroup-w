@@ -27,7 +27,13 @@ async function assertSeatCapacity(orgId: string, incoming: number) {
   const [members, pending] = await Promise.all([
     prisma.member.count({ where: { organizationId: orgId } }),
     prisma.invitation.count({
-      where: { organizationId: orgId, status: "pending" },
+      // Only invitations that are still live consume a seat; expired ones are
+      // reclaimed (and swept by the expire-corporate cron).
+      where: {
+        organizationId: orgId,
+        status: "pending",
+        expiresAt: { gt: new Date() },
+      },
     }),
   ]);
   const used = members + pending;
@@ -94,7 +100,9 @@ export async function inviteBulk(formData: FormData) {
         },
       });
       ok++;
-    } catch {}
+    } catch (e) {
+      console.error(`[invite] failed for ${email}:`, (e as Error).message);
+    }
   }
   redirect(`${base}?sent=${ok}`);
 }

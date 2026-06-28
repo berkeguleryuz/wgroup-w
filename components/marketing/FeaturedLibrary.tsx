@@ -12,7 +12,8 @@ async function loadFeatured() {
 
   try {
     const titles = await prisma.title.findMany({
-      where: { published: true },
+      // Public marketing never surfaces company-only titles.
+      where: { published: true, visibility: "PUBLIC" },
       orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
       take: 6,
       include: {
@@ -69,32 +70,45 @@ export async function FeaturedLibrary() {
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {titles.map((title, i) => {
               const total = title.episodes.reduce((s, e) => s + e.durationSec, 0);
-              const isDark = i % 3 !== 1;
               return (
                 <article
                   key={title.id}
-                  className="group rounded-11 border border-border/60 overflow-hidden"
-                  style={{
-                    background: gradients[i % gradients.length],
-                    color: isDark
-                      ? "var(--surface-dark-foreground)"
-                      : "var(--foreground)",
-                  }}
+                  className="group relative aspect-[4/5] overflow-hidden rounded-11 border border-border/60 text-surface-dark-foreground"
                 >
-                  <div className="aspect-[4/5] p-6 flex flex-col justify-between">
+                  {title.heroImageUrl ? (
+                    <img
+                      src={title.heroImageUrl}
+                      alt={title.title}
+                      loading="lazy"
+                      decoding="async"
+                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div
+                      aria-hidden
+                      className="absolute inset-0"
+                      style={{ background: gradients[i % gradients.length] }}
+                    />
+                  )}
+                  <div
+                    aria-hidden
+                    className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/15"
+                  />
+                  <div className="relative flex h-full flex-col justify-between p-6">
                     <div>
-                      <p className="font-accent text-sm opacity-80">
+                      <p className="font-accent text-sm opacity-90">
                         {title.type === "SERIES" ? t("series") : t("film")} ·{" "}
-                        {title.category.title}
+                        {/* Turkish category name — keep the dotted İ under uppercase. */}
+                        <span lang="tr">{title.category.title}</span>
                       </p>
                       <h3 className="mt-3 font-display text-3xl leading-tight">
                         {title.title}
                       </h3>
-                      <p className="mt-3 text-sm opacity-80 line-clamp-3">
+                      <p className="mt-3 text-sm opacity-85 line-clamp-3">
                         {title.synopsis}
                       </p>
                     </div>
-                    <div className="flex items-center justify-between text-xs opacity-80">
+                    <div className="flex items-center justify-between text-xs opacity-85">
                       <span>
                         {title.type === "SERIES"
                           ? t("episodesShort", { count: title.episodes.length })

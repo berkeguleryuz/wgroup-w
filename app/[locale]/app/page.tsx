@@ -3,11 +3,25 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
+import {
+  getMembershipOrgIds,
+  audienceWhere,
+  canViewTitle,
+} from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { Section } from "@prisma/client";
+import { AppHero } from "@/components/app/AppHero";
 import { Carousel } from "@/components/app/Carousel";
 import { TitleCard } from "@/components/app/TitleCard";
+import { ContinueWatchingCard } from "@/components/app/ContinueWatchingCard";
 import { Button } from "@/components/ui/Button";
+import { formatDuration } from "@/lib/utils";
+
+const titleInclude = {
+  category: true,
+  episodes: { select: { durationSec: true } },
+  orgAudience: { select: { organizationId: true } },
+} as const;
 
 export default async function AppHomePage({
   params,
@@ -19,131 +33,214 @@ export default async function AppHomePage({
 
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
+  const orgIds = await getMembershipOrgIds(user.id);
+  const audience = audienceWhere(user.role, orgIds);
 
-  const [t, tNav, access, continueWatching, newReleases, series, movies, talent] =
-    await Promise.all([
-      getTranslations("appHome"),
-      getTranslations("nav"),
-      getEffectiveAccess(user.id, user.role),
-      prisma.progress.findMany({
-        where: { userId: user.id, completedAt: null },
-        orderBy: { updatedAt: "desc" },
-        take: 8,
-        include: {
-          episode: {
-            include: {
-              title: {
-                include: {
-                  category: true,
-                  episodes: { select: { durationSec: true } },
-                },
-              },
-            },
+  const [
+    t,
+    tNav,
+    tLib,
+    access,
+    featured,
+    continueRaw,
+    newReleases,
+    series,
+    movies,
+    talent,
+  ] = await Promise.all([
+    getTranslations("appHome"),
+    getTranslations("nav"),
+    getTranslations("featuredLibrary"),
+    getEffectiveAccess(user.id, user.role),
+    prisma.title.findFirst({
+      where: { published: true, AND: [audience] },
+      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
+      include: { category: true },
+    }),
+    prisma.progress.findMany({
+      where: {
+        userId: user.id,
+        completedAt: null,
+        // Never resurface titles the viewer can no longer see (unpublished or
+        // company-only they've left).
+        episode: { title: { published: true, AND: [audience] } },
+      },
+      orderBy: { updatedAt: "desc" },
+      take: 50,
+      include: {
+        episode: {
+          include: {
+            title: { include: titleInclude },
           },
         },
-      }),
-      prisma.title.findMany({
-        where: { published: true },
-        orderBy: { publishedAt: "desc" },
-        take: 10,
-        include: { category: true, episodes: { select: { durationSec: true } } },
-      }),
-      prisma.title.findMany({
-        where: { published: true, category: { section: Section.SERIES } },
-        orderBy: { publishedAt: "desc" },
-        take: 10,
-        include: { category: true, episodes: { select: { durationSec: true } } },
-      }),
-      prisma.title.findMany({
-        where: { published: true, category: { section: Section.MOVIE } },
-        orderBy: { publishedAt: "desc" },
-        take: 10,
-        include: { category: true, episodes: { select: { durationSec: true } } },
-      }),
-      prisma.title.findMany({
-        where: { published: true, category: { section: Section.TALENT } },
-        orderBy: { publishedAt: "desc" },
-        take: 10,
-        include: { category: true, episodes: { select: { durationSec: true } } },
-      }),
-    ]);
+      },
+    }),
+    prisma.title.findMany({
+      where: { published: true, AND: [audience] },
+      orderBy: { publishedAt: "desc" },
+      take: 12,
+      include: titleInclude,
+    }),
+    prisma.title.findMany({
+      where: {
+        published: true,
+        category: { section: Section.SERIES },
+        AND: [audience],
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 12,
+      include: titleInclude,
+    }),
+    prisma.title.findMany({
+      where: {
+        published: true,
+        category: { section: Section.MOVIE },
+        AND: [audience],
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 12,
+      include: titleInclude,
+    }),
+    prisma.title.findMany({
+      where: {
+        published: true,
+        category: { section: Section.TALENT },
+        AND: [audience],
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 12,
+      include: titleInclude,
+    }),
+  ]);
+
+  // One card per series: keep only the most recently watched in-progress
+  // episode for each title (rows are already ordered by updatedAt desc).
+  const seenTitles = new Set<string>();
+  const continueWatching = continueRaw
+    // Defense-in-depth on top of the query filter above.
+    .filter((p) => canViewTitle(p.episode.title, user.role, orgIds))
+    .filter((p) => {
+      const titleId = p.episode.title.id;
+      if (seenTitles.has(titleId)) return false;
+      seenTitles.add(titleId);
+      return true;
+    })
+    .slice(0, 8);
 
   return (
-    <div className="space-y-12">
-      <header className="space-y-2">
-        <span className="font-accent text-lg text-muted-foreground">
-          {t("greeting", { name: user.name || user.email.split("@")[0] })}
-        </span>
-        <h1 className="text-4xl md:text-6xl">{t("heading")}</h1>
-      </header>
+    <div>
+      <AppHero
+        title={
+          featured
+            ? {
+                slug: featured.slug,
+                title: featured.title,
+                synopsis: featured.synopsis,
+                type: featured.type,
+                heroImageUrl: featured.heroImageUrl,
+                trailerUrl: featured.trailerUrl,
+                categoryTitle: featured.category.title,
+              }
+            : null
+        }
+        playLabel={t("play")}
+        moreLabel={t("moreInfo")}
+        seriesLabel={tLib("series")}
+        filmLabel={tLib("film")}
+        fallbackHeading={t("heroFallbackTitle")}
+        fallbackBody={t("heroFallbackBody")}
+      />
 
-      {!access.hasAccess ? (
-        <div className="rounded-11 border border-primary bg-primary/40 p-6 md:p-8">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div>
-              <h2 className="font-display text-2xl">
-                {t("subscriptionWarningTitle")}
-              </h2>
-              <p className="mt-2 text-sm text-foreground/80">
-                {t("subscriptionWarningBody")}
-              </p>
+      <div className="relative z-10 -mt-28 space-y-12 md:-mt-32">
+        {!access.hasAccess ? (
+          <div className="rounded-11 border border-primary bg-primary/40 p-6 md:p-8">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div>
+                <h2 className="font-display text-2xl">
+                  {t("subscriptionWarningTitle")}
+                </h2>
+                <p className="mt-2 text-sm text-foreground/80">
+                  {t("subscriptionWarningBody")}
+                </p>
+              </div>
+              <Link href="/app/account/subscription">
+                <Button variant="dark" size="lg">
+                  {t("startSubscription")}
+                </Button>
+              </Link>
             </div>
-            <Link href="/app/account/subscription">
-              <Button variant="dark" size="lg">
-                {t("startSubscription")}
-              </Button>
-            </Link>
           </div>
-        </div>
-      ) : null}
+        ) : null}
 
-      {continueWatching.length > 0 ? (
-        <Carousel title={t("continueWatching")}>
-          {continueWatching.map((p, i) => (
-            <div key={p.episodeId} className="w-72 shrink-0">
-              <TitleCard title={p.episode.title} variant="wide" index={i} />
-              <p className="mt-2 text-xs text-muted-foreground">
-                {t("minutesWatched", {
-                  name: p.episode.name,
-                  minutes: Math.round(p.positionSec / 60),
-                })}
-              </p>
-            </div>
-          ))}
-        </Carousel>
-      ) : null}
+        {continueWatching.length > 0 ? (
+          <Carousel title={t("continueWatching")}>
+            {continueWatching.map((p, i) => {
+              const dur = p.episode.durationSec;
+              const remaining = dur > 0 ? Math.max(0, dur - p.positionSec) : 0;
+              const percent = dur > 0 ? (p.positionSec / dur) * 100 : 0;
+              return (
+                <ContinueWatchingCard
+                  key={p.episodeId}
+                  title={p.episode.title}
+                  titleId={p.episode.title.id}
+                  href={`/app/watch/${p.episode.title.slug}/${p.episodeId}`}
+                  index={i}
+                  percent={percent}
+                  caption={
+                    dur > 0
+                      ? t("timeLeft", {
+                          name: p.episode.name,
+                          time: formatDuration(remaining),
+                        })
+                      : p.episode.name
+                  }
+                  removeLabel={t("removeFromList")}
+                />
+              );
+            })}
+          </Carousel>
+        ) : null}
 
-      <Carousel title={t("newReleases")} subtitle={t("newReleasesSub")}>
-        {newReleases.map((item, i) => (
-          <div key={item.id} className="w-56 shrink-0">
-            <TitleCard title={item} index={i} />
-          </div>
-        ))}
-      </Carousel>
+        {newReleases.length > 0 ? (
+          <Carousel title={t("newReleases")} subtitle={t("newReleasesSub")}>
+            {newReleases.map((item, i) => (
+              <div key={item.id} className="w-56 shrink-0">
+                <TitleCard title={item} index={i} />
+              </div>
+            ))}
+          </Carousel>
+        ) : null}
 
-      <Carousel title={tNav("series")}>
-        {series.map((item, i) => (
-          <div key={item.id} className="w-56 shrink-0">
-            <TitleCard title={item} index={i} />
-          </div>
-        ))}
-      </Carousel>
+        {series.length > 0 ? (
+          <Carousel title={tNav("series")}>
+            {series.map((item, i) => (
+              <div key={item.id} className="w-56 shrink-0">
+                <TitleCard title={item} index={i} />
+              </div>
+            ))}
+          </Carousel>
+        ) : null}
 
-      <Carousel title={tNav("films")}>
-        {movies.map((item, i) => (
-          <div key={item.id} className="w-56 shrink-0">
-            <TitleCard title={item} index={i} />
-          </div>
-        ))}
-      </Carousel>
+        {movies.length > 0 ? (
+          <Carousel title={tNav("films")}>
+            {movies.map((item, i) => (
+              <div key={item.id} className="w-56 shrink-0">
+                <TitleCard title={item} index={i} />
+              </div>
+            ))}
+          </Carousel>
+        ) : null}
 
-      <Carousel title={tNav("talentManagement")}>
-        {talent.map((item, i) => (
-          <div key={item.id} className="w-56 shrink-0">
-            <TitleCard title={item} index={i} />
-          </div>
-        ))}
-      </Carousel>
+        {talent.length > 0 ? (
+          <Carousel title={tNav("talentManagement")}>
+            {talent.map((item, i) => (
+              <div key={item.id} className="w-56 shrink-0">
+                <TitleCard title={item} index={i} />
+              </div>
+            ))}
+          </Carousel>
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { admin, organization } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
@@ -22,7 +23,7 @@ export const USER_ROLES = [
 export type UserRole = (typeof USER_ROLES)[number];
 
 export const auth = betterAuth({
-  appName: "Businessflix",
+  appName: "Busyflix",
   baseURL: APP_URL,
   secret: process.env.BETTER_AUTH_SECRET,
 
@@ -30,7 +31,8 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: true,
+    requireEmailVerification:
+      process.env.AUTH_SKIP_EMAIL_VERIFICATION !== "true",
     autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
       void sendPasswordResetEmail(user.email, url);
@@ -70,6 +72,40 @@ export const auth = betterAuth({
     }),
     organization({
       allowUserToCreateOrganization: false,
+      // The real seat cap is CompanyProfile.seatCount, enforced in our invite
+      // action and the beforeAcceptInvitation hook below. Keep the framework
+      // limit effectively unlimited so it never blocks a large paid plan.
+      membershipLimit: 100000,
+      organizationHooks: {
+        // Give B2B invitations a 7-day window (default is 48h).
+        beforeCreateInvitation: async ({ invitation }) => {
+          return {
+            data: {
+              ...invitation,
+              expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+            },
+          };
+        },
+        // Hard seat cap at accept-time: a company can never exceed its paid
+        // seatCount, regardless of how many invitations are outstanding.
+        beforeAcceptInvitation: async ({ organization: org }) => {
+          const profile = await prisma.companyProfile.findUnique({
+            where: { organizationId: org.id },
+            select: { seatCount: true },
+          });
+          if (profile) {
+            const members = await prisma.member.count({
+              where: { organizationId: org.id },
+            });
+            if (members >= profile.seatCount) {
+              throw new APIError("BAD_REQUEST", {
+                message:
+                  "Bu şirketin koltuk limiti dolu. Lütfen yöneticinizle iletişime geçin.",
+              });
+            }
+          }
+        },
+      },
       async sendInvitationEmail(data) {
         const inviteUrl = `${APP_URL}/invite/${data.id}`;
         await sendOrganizationInviteEmail({

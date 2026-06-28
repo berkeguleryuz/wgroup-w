@@ -11,14 +11,6 @@ export function PricingTeaser() {
     <section className="relative overflow-hidden rounded-11 border-b border-black/40 bg-surface-dark text-surface-dark-foreground">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.25]"
-        style={{
-          backgroundImage:
-            "radial-gradient(60% 50% at 85% 15%, #edddb9 0%, transparent 60%), radial-gradient(50% 45% at 10% 90%, #5b4630 0%, transparent 55%)",
-        }}
-      />
-      <div
-        aria-hidden
         className="pointer-events-none absolute inset-0 opacity-[0.06]"
         style={{
           backgroundImage:

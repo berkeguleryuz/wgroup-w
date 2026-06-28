@@ -16,9 +16,14 @@ const AUTH_GATED_SEGMENTS = [
   "discover",
 ];
 
+const LOCALES = routing.locales as readonly string[];
+
 function isAuthGated(pathname: string) {
-  const first = pathname.split("/")[1];
-  return AUTH_GATED_SEGMENTS.includes(first);
+  const segs = pathname.split("/").filter(Boolean);
+  // Strip a leading locale segment (e.g. /tr/app/... → app) so the gate matches
+  // localized URLs, not just the unprefixed default-locale ones.
+  const first = segs[0] && LOCALES.includes(segs[0]) ? segs[1] : segs[0];
+  return !!first && AUTH_GATED_SEGMENTS.includes(first);
 }
 
 export default function proxy(request: NextRequest) {

@@ -1,6 +1,7 @@
-import { getTranslations, setRequestLocale } from "next-intl/server";
+import { redirect } from "next/navigation";
+import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 
-import type { Locale } from "@/lib/i18n/routing";
+import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { sendCorporateLeadNotification } from "@/lib/email";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +14,7 @@ export async function generateMetadata({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: "businessPage" });
-  return { title: `${t("kicker")} · Businessflix` };
+  return { title: `${t("kicker")} · Busyflix` };
 }
 
 async function submitLead(formData: FormData) {
@@ -25,20 +26,43 @@ async function submitLead(formData: FormData) {
   const seatTargetRaw = String(formData.get("seatTarget") || "").trim();
   const message = String(formData.get("message") || "").trim() || null;
 
-  if (!companyName || !contactName || !email) throw new Error("Missing fields");
+  const locale = await getLocale();
+  const fail = () => redirect(`${localizedPath(locale, "/business")}?err=1`);
+
+  // Honeypot: real users never fill this hidden field; bots do. Pretend success.
+  if (String(formData.get("website") || "").trim()) {
+    redirect(`${localizedPath(locale, "/business")}?ok=1`);
+  }
+
+  const emailOk = /^\S+@\S+\.\S+$/.test(email);
+  if (
+    !companyName ||
+    companyName.length > 200 ||
+    !contactName ||
+    contactName.length > 200 ||
+    !emailOk ||
+    email.length > 200 ||
+    (message && message.length > 2000)
+  ) {
+    fail();
+  }
   const seatTarget = seatTargetRaw ? Number(seatTargetRaw) : null;
 
-  await prisma.corporateLead.create({
-    data: { companyName, contactName, email, phone, seatTarget, message },
-  });
-
-  void sendCorporateLeadNotification({
-    companyName,
-    contactName,
-    email,
-    seatTarget,
-    message,
-  });
+  try {
+    await prisma.corporateLead.create({
+      data: { companyName, contactName, email, phone, seatTarget, message },
+    });
+    void sendCorporateLeadNotification({
+      companyName,
+      contactName,
+      email,
+      seatTarget,
+      message,
+    });
+  } catch {
+    redirect(`${localizedPath(locale, "/business")}?err=1`);
+  }
+  redirect(`${localizedPath(locale, "/business")}?ok=1`);
 }
 
 export default async function BusinessPage({
@@ -46,7 +70,7 @@ export default async function BusinessPage({
   searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
-  searchParams?: Promise<{ ok?: string }>;
+  searchParams?: Promise<{ ok?: string; err?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -78,6 +102,15 @@ export default async function BusinessPage({
           className="rounded-11 border border-border bg-background p-8"
         >
           <h2 className="font-display text-2xl">{t("formTitle")}</h2>
+          {/* Honeypot — hidden from humans, catches bots. */}
+          <input
+            type="text"
+            name="website"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+            className="hidden"
+          />
           <div className="mt-6 grid gap-4">
             <div>
               <Label htmlFor="companyName">{t("formCompany")}</Label>
@@ -121,6 +154,11 @@ export default async function BusinessPage({
           {sp?.ok === "1" ? (
             <p className="mt-4 rounded-11 border border-border bg-primary/60 px-4 py-3 text-sm">
               {t("formSuccess")}
+            </p>
+          ) : null}
+          {sp?.err === "1" ? (
+            <p className="mt-4 rounded-11 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              {t("formError")}
             </p>
           ) : null}
         </form>
