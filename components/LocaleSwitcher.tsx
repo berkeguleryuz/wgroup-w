@@ -6,15 +6,28 @@ import { useLocale, useTranslations } from "next-intl";
 import { routing } from "@/lib/i18n/routing";
 import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { Flag } from "@/components/Flags";
+import { useTheme } from "@/components/providers/ThemeProvider";
 
 export function LocaleSwitcher() {
   const locale = useLocale();
   const t = useTranslations("localeSwitcher");
   const router = useRouter();
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
   const [isPending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+
+  // A locale switch re-renders the root layout, and React re-asserts the <html>
+  // attributes — wiping the `.dark` class the theme init script set imperatively
+  // (the theme would flip to light). Re-apply the current theme once the
+  // navigation transition settles. Scoped here so the shared ThemeProvider never
+  // reads dynamic request data (which would force the whole app to render dynamically).
+  const wasPending = useRef(false);
+  useEffect(() => {
+    if (wasPending.current && !isPending) setTheme(theme);
+    wasPending.current = isPending;
+  }, [isPending, theme, setTheme]);
 
   useEffect(() => {
     if (!open) return;

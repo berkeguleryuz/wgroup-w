@@ -25,7 +25,8 @@ export async function POST(request: Request) {
   const contentType = body?.contentType?.trim() || "video/mp4";
 
   try {
-    const { uploadUrl, key, headers } = await getStorage().createSignedUploadUrl(
+    const storage = getStorage();
+    const { uploadUrl, key, headers } = await storage.createSignedUploadUrl(
       path,
       contentType,
     );
@@ -33,6 +34,9 @@ export async function POST(request: Request) {
       uploadUrl,
       path: key,
       headers,
+      // Direct public URL — used by callers (e.g. trailers) that play the file
+      // as-is rather than resolving the key through a signed URL.
+      publicUrl: storage.getPublicUrl(key),
     });
   } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 500 });

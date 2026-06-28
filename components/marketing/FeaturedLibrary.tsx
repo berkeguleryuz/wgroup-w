@@ -98,7 +98,8 @@ export async function FeaturedLibrary() {
                     <div>
                       <p className="font-accent text-sm opacity-90">
                         {title.type === "SERIES" ? t("series") : t("film")} ·{" "}
-                        {title.category.title}
+                        {/* Turkish category name — keep the dotted İ under uppercase. */}
+                        <span lang="tr">{title.category.title}</span>
                       </p>
                       <h3 className="mt-3 font-display text-3xl leading-tight">
                         {title.title}

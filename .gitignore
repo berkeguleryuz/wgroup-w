@@ -54,3 +54,6 @@ public/subtitles/
 
 # Local-only demo account reference (private, do not commit)
 DEMO-ACCOUNTS.md
+
+# Local test media (large, not for repo)
+public/test-media/

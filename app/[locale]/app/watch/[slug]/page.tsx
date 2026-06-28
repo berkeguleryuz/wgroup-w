@@ -66,7 +66,8 @@ export default async function TitleDetailPage({
               aria-hidden
               className="absolute inset-0"
               style={{
-                background: "linear-gradient(135deg, #100D08 0%, #3a2e1f 100%)",
+                background:
+                  "radial-gradient(140% 120% at 0% 0%, #1c150d 0%, #14100a 45%, #0b0906 100%)",
               }}
             />
           )}
@@ -82,9 +83,10 @@ export default async function TitleDetailPage({
           <div className="relative flex min-h-[60vh] w-full items-end px-4 pb-16 pt-32 text-surface-dark-foreground md:px-6 lg:px-8">
             <div className="max-w-2xl">
               <span className="font-accent text-lg text-primary md:text-xl">
-                {(title.type === "SERIES" ? tFl("series") : tFl("film")) +
-                  " · " +
-                  title.category.title}
+                {title.type === "SERIES" ? tFl("series") : tFl("film")}
+                {" · "}
+                {/* Turkish category name — keep the dotted İ under uppercase. */}
+                <span lang="tr">{title.category.title}</span>
               </span>
               <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-[-0.02em] md:text-6xl">
                 {title.title}

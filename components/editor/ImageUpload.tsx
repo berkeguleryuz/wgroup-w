@@ -21,8 +21,25 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
   const [url, setUrl] = useState(defaultValue ?? "");
   const [error, setError] = useState<string | null>(null);
 
+  // Block the surrounding form from submitting while an upload is in flight —
+  // otherwise a fast click saves an empty URL (the bug where a freshly added
+  // instructor lost its photo). Toggled from the upload handler (the event that
+  // owns this state), not a state-syncing effect.
+  function setFormBusy(busy: boolean) {
+    const form = inputRef.current?.form;
+    if (!form) return;
+    form
+      .querySelectorAll<HTMLButtonElement>(
+        'button[type="submit"], button:not([type])',
+      )
+      .forEach((b) => {
+        b.disabled = busy;
+      });
+  }
+
   async function handleFile(file: File) {
     setUploading(true);
+    setFormBusy(true);
     setError(null);
     setProgress(0);
     try {
@@ -72,6 +89,7 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
       setError((e as Error).message);
     } finally {
       setUploading(false);
+      setFormBusy(false);
     }
   }
 
@@ -100,7 +118,7 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
             required={required}
             onChange={(e) => setUrl(e.target.value)}
             placeholder="https://…"
-            className="w-full rounded-11 border border-border bg-background px-3 py-2 text-xs outline-none focus:border-foreground/40"
+            className="flex h-11 w-full rounded-11 border border-border bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
           />
           {uploading ? (
             <div className="h-2 w-full overflow-hidden rounded-full bg-muted">

@@ -257,7 +257,8 @@
     "signUp": "Üye ol",
     "resetSuccess": "Şifren güncellendi. Yeni şifren ile giriş yap.",
     "error": "Giriş başarısız",
-    "networkError": "Bağlantı hatası. Lütfen tekrar deneyin."
+    "networkError": "Bağlantı hatası. Lütfen tekrar deneyin.",
+    "invitedEmailNote": "Bu e-posta davete bağlı ve değiştirilemez."
   },
   "register": {
     "kicker": "Başlayalım",
@@ -280,7 +281,8 @@
     "checkEmailTitle": "E-postanı kontrol et",
     "checkEmailBody": "{email} adresine bir doğrulama bağlantısı gönderdik. Linke tıkla, otomatik giriş yapılacak.",
     "backToLogin": "Giriş ekranına dön",
-    "error": "Kayıt başarısız"
+    "error": "Kayıt başarısız",
+    "invitedEmailNote": "Bu e-posta davete bağlı ve değiştirilemez."
   },
   "verify": {
     "kicker": "Doğrulama",
@@ -335,7 +337,8 @@
     "processing": "İşleniyor…",
     "emailLabel": "E-posta: {email}",
     "acceptError": "Davet kabul edilemedi",
-    "rejectError": "Davet reddedilemedi"
+    "rejectError": "Davet reddedilemedi",
+    "switchAccount": "Çıkış yap ve doğru hesapla devam et"
   },
   "appHome": {
     "greeting": "Selam, {name}",
@@ -641,7 +644,7 @@
     "delete": "Sil",
     "deleteDepartmentConfirm": "\"{name}\" departmanını silmek istediğine emin misin? Üyeler departmansız kalır.",
     "colDepartment": "Departman",
-    "noDepartment": "— Departmansız —",
+    "noDepartment": "Seçilmedi",
     "save": "Kaydet",
     "colActions": "Aksiyon",
     "roleMember": "Üye",
@@ -704,7 +707,7 @@
     "roleOwner": "Yönetici",
     "roleMember": "Üye",
     "yourDepartment": "Departmanın",
-    "noDepartment": "Departman yok",
+    "noDepartment": "Seçilmedi",
     "teamSize": "Ekip büyüklüğü",
     "status": "Abonelik durumu",
     "statusLabel": {

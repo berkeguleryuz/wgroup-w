@@ -257,7 +257,8 @@
     "signUp": "Sign up",
     "resetSuccess": "Password updated. Log in with the new one.",
     "error": "Login failed",
-    "networkError": "Connection error. Please try again."
+    "networkError": "Connection error. Please try again.",
+    "invitedEmailNote": "This email is tied to your invitation and can't be changed."
   },
   "register": {
     "kicker": "Get started",
@@ -280,7 +281,8 @@
     "checkEmailTitle": "Check your email",
     "checkEmailBody": "We sent a verification link to {email}. Click the link and you'll be signed in automatically.",
     "backToLogin": "Back to login",
-    "error": "Registration failed"
+    "error": "Registration failed",
+    "invitedEmailNote": "This email is tied to your invitation and can't be changed."
   },
   "verify": {
     "kicker": "Verification",
@@ -335,7 +337,8 @@
     "processing": "Processing…",
     "emailLabel": "Email: {email}",
     "acceptError": "We couldn't accept the invitation",
-    "rejectError": "We couldn't decline the invitation"
+    "rejectError": "We couldn't decline the invitation",
+    "switchAccount": "Sign out and continue with the right account"
   },
   "appHome": {
     "greeting": "Hi, {name}",
@@ -641,7 +644,7 @@
     "delete": "Delete",
     "deleteDepartmentConfirm": "Delete department \"{name}\"? Members will be left unassigned.",
     "colDepartment": "Department",
-    "noDepartment": "— No department —",
+    "noDepartment": "Not selected",
     "save": "Save",
     "colActions": "Actions",
     "roleMember": "Member",
@@ -704,7 +707,7 @@
     "roleOwner": "Admin",
     "roleMember": "Member",
     "yourDepartment": "Your department",
-    "noDepartment": "No department",
+    "noDepartment": "Not selected",
     "teamSize": "Team size",
     "status": "Subscription status",
     "statusLabel": {

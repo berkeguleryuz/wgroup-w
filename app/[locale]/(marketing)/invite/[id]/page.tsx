@@ -6,6 +6,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { getSession } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import { AcceptInviteButton } from "./AcceptInviteButton";
+import { SwitchAccountButton } from "./SwitchAccountButton";
 
 export default async function InvitePage({
   params,
@@ -17,14 +18,6 @@ export default async function InvitePage({
   const t = await getTranslations("invite");
   const session = await getSession();
 
-  if (!session) {
-    redirect(
-      `${localizedPath(locale, "/login")}?next=${encodeURIComponent(
-        `/invite/${id}`,
-      )}`,
-    );
-  }
-
   const invitation = await prisma.invitation.findUnique({
     where: { id },
     include: { organization: { select: { name: true } } },
@@ -32,6 +25,32 @@ export default async function InvitePage({
 
   const isExpired = !invitation || invitation.expiresAt < new Date();
   const isPending = invitation?.status === "pending";
+
+  if (!session) {
+    const next = `/invite/${id}`;
+    // For a live invite, route the visitor straight to the right auth screen
+    // with the invited email pre-filled and locked — register if they have no
+    // account yet, login if they already do — so they can never authenticate
+    // with the wrong address and hit the "wrong account" wall below.
+    if (invitation && !isExpired && isPending) {
+      const existing = await prisma.user.findFirst({
+        where: { email: { equals: invitation.email, mode: "insensitive" } },
+        select: { id: true },
+      });
+      const target = existing ? "/login" : "/register";
+      redirect(
+        `${localizedPath(locale, target)}?next=${encodeURIComponent(
+          next,
+        )}&email=${encodeURIComponent(invitation.email)}`,
+      );
+    }
+    // Invalid/expired invite — fall back to login; the proper state renders
+    // once they are authenticated.
+    redirect(
+      `${localizedPath(locale, "/login")}?next=${encodeURIComponent(next)}`,
+    );
+  }
+
   const wrongAccount =
     !!invitation &&
     invitation.email.toLowerCase() !== session.user.email.toLowerCase();
@@ -65,6 +84,7 @@ export default async function InvitePage({
               currentEmail: session.user.email,
             })}
           </p>
+          <SwitchAccountButton invitePath={`/invite/${id}`} />
         </div>
       ) : (
         <div className="space-y-4 rounded-11 border border-border bg-background p-8">

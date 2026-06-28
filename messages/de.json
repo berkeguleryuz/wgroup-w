@@ -257,7 +257,8 @@
     "signUp": "Registrieren",
     "resetSuccess": "Passwort aktualisiert. Mit dem neuen anmelden.",
     "error": "Anmeldung fehlgeschlagen",
-    "networkError": "Verbindungsfehler. Bitte versuche es erneut."
+    "networkError": "Verbindungsfehler. Bitte versuche es erneut.",
+    "invitedEmailNote": "Diese E-Mail ist an deine Einladung gebunden und kann nicht geändert werden."
   },
   "register": {
     "kicker": "Los geht's",
@@ -280,7 +281,8 @@
     "checkEmailTitle": "Check deine E-Mails",
     "checkEmailBody": "Wir haben einen Bestätigungslink an {email} gesendet. Klick ihn an, du wirst automatisch angemeldet.",
     "backToLogin": "Zurück zum Login",
-    "error": "Registrierung fehlgeschlagen"
+    "error": "Registrierung fehlgeschlagen",
+    "invitedEmailNote": "Diese E-Mail ist an deine Einladung gebunden und kann nicht geändert werden."
   },
   "verify": {
     "kicker": "Bestätigung",
@@ -335,7 +337,8 @@
     "processing": "Wird verarbeitet…",
     "emailLabel": "E-Mail: {email}",
     "acceptError": "Einladung konnte nicht angenommen werden",
-    "rejectError": "Einladung konnte nicht abgelehnt werden"
+    "rejectError": "Einladung konnte nicht abgelehnt werden",
+    "switchAccount": "Abmelden und mit dem richtigen Konto fortfahren"
   },
   "appHome": {
     "greeting": "Hallo, {name}",
@@ -641,7 +644,7 @@
     "delete": "Löschen",
     "deleteDepartmentConfirm": "Abteilung \"{name}\" löschen? Mitglieder bleiben ohne Zuordnung.",
     "colDepartment": "Abteilung",
-    "noDepartment": "— Keine Abteilung —",
+    "noDepartment": "Nicht ausgewählt",
     "save": "Speichern",
     "colActions": "Aktionen",
     "roleMember": "Mitglied",
@@ -704,7 +707,7 @@
     "roleOwner": "Administrator",
     "roleMember": "Mitglied",
     "yourDepartment": "Deine Abteilung",
-    "noDepartment": "Keine Abteilung",
+    "noDepartment": "Nicht ausgewählt",
     "teamSize": "Teamgröße",
     "status": "Abostatus",
     "statusLabel": {

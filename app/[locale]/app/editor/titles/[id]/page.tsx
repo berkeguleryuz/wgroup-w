@@ -12,6 +12,7 @@ import { AddEpisodeForm } from "@/components/editor/AddEpisodeForm";
 import { SubtitleUpload } from "@/components/editor/SubtitleUpload";
 import { VideoUpload } from "@/components/editor/VideoUpload";
 import { ImageUpload } from "@/components/editor/ImageUpload";
+import { TrailerUpload } from "@/components/editor/TrailerUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
 import { formatDuration } from "@/lib/utils";
 
@@ -346,9 +347,8 @@ export default async function EditorTitleDetail({
               />
             </div>
             <div>
-              <Label htmlFor="trailerUrl">{t("trailer")}</Label>
-              <Input
-                id="trailerUrl"
+              <Label>{t("trailer")}</Label>
+              <TrailerUpload
                 name="trailerUrl"
                 defaultValue={title.trailerUrl ?? ""}
               />

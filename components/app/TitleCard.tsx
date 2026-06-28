@@ -60,7 +60,8 @@ export function TitleCard({
         <div className="absolute inset-0 flex flex-col justify-between p-5 text-surface-dark-foreground">
           <p className="font-accent text-xs opacity-90">
             {title.type === "SERIES" ? t("series") : t("film")} ·{" "}
-            {title.category.title}
+            {/* Turkish category name — keep the dotted İ under uppercase. */}
+            <span lang="tr">{title.category.title}</span>
           </p>
           <div>
             <h3 className="font-display text-xl leading-tight line-clamp-2">

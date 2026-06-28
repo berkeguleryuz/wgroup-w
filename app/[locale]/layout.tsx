@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
+import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -19,7 +20,8 @@ const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
 const patrickHandSC = Patrick_Hand_SC({
   variable: "--font-patrick-hand-sc",
-  subsets: ["latin"],
+  // latin-ext carries the Turkish glyphs (İ, ı, ş, ğ, ç) used in accent labels.
+  subsets: ["latin", "latin-ext"],
   weight: "400",
 });
 const fraunces = Fraunces({
@@ -79,10 +81,13 @@ export default async function LocaleLayout({
       suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} ${patrickHandSC.variable} ${fraunces.variable} ${cormorant.variable} h-screen overflow-hidden antialiased`}
     >
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
       <body className="h-screen overflow-hidden bg-surface-dark text-foreground">
+        {/* Anti-FOUC theme init. `next/script` with `beforeInteractive` injects
+            this into the server-rendered <head> so it runs before paint and
+            hydration — without the raw <script> tag Next 16 warns about. */}
+        <Script id="theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
         {/* The page frame (inset rounded card) lives in the (marketing)/(auth)
             layouts; /app uses a full-screen shell. This root only sets up the
             providers so each section can choose its own chrome. */}

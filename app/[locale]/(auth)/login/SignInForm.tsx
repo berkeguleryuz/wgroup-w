@@ -33,8 +33,16 @@ export function SignInForm() {
       ? rawNext
       : "/app";
   const resetSuccess = params.get("reset") === "1";
+  // When arriving from an organization invite, the email is fixed to the
+  // invited address — pre-fill and lock it so they can't sign in with another.
+  const lockedEmail = params.get("email");
+  const signUpHref = lockedEmail
+    ? `/register?next=${encodeURIComponent(next)}&email=${encodeURIComponent(
+        lockedEmail,
+      )}`
+    : "/register";
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(lockedEmail ?? "");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -118,7 +126,15 @@ export function SignInForm() {
             onChange={(e) => setEmail(e.target.value)}
             required
             disabled={busy}
+            readOnly={!!lockedEmail}
+            aria-readonly={!!lockedEmail}
+            className={lockedEmail ? "cursor-not-allowed bg-muted" : undefined}
           />
+          {lockedEmail ? (
+            <p className="mt-1.5 text-xs text-muted-foreground">
+              {t("invitedEmailNote")}
+            </p>
+          ) : null}
         </div>
 
         <div>
@@ -179,7 +195,7 @@ export function SignInForm() {
       <p className="text-center text-sm text-muted-foreground">
         {t("noAccount")}{" "}
         <Link
-          href="/register"
+          href={signUpHref}
           className="text-foreground underline-offset-[6px] hover:underline"
         >
           {t("signUp")}

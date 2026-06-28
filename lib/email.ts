@@ -66,11 +66,11 @@ function wrap(title: string, body: string, cta?: { label: string; url: string })
 export async function sendVerificationEmail(to: string, url: string) {
   return send({
     to,
-    subject: "Busyflix — E-posta doğrulama",
+    subject: "Busyflix — Verify your email",
     html: wrap(
-      "E-postanı doğrula",
-      "<p>Hesabını aktif etmek için aşağıdaki butona tıkla.</p>",
-      { label: "E-postayı doğrula", url },
+      "Verify your email",
+      "<p>Click the button below to activate your account.</p>",
+      { label: "Verify email", url },
     ),
   });
 }
@@ -78,11 +78,11 @@ export async function sendVerificationEmail(to: string, url: string) {
 export async function sendPasswordResetEmail(to: string, url: string) {
   return send({
     to,
-    subject: "Busyflix — Şifre sıfırlama",
+    subject: "Busyflix — Reset your password",
     html: wrap(
-      "Şifreni sıfırla",
-      "<p>Şifreni sıfırlamak için aşağıdaki butona tıkla. Bu linki sen talep etmediysen bu e-postayı yok say.</p>",
-      { label: "Şifreyi sıfırla", url },
+      "Reset your password",
+      "<p>Click the button below to reset your password. If you didn't request this, you can safely ignore this email.</p>",
+      { label: "Reset password", url },
     ),
   });
 }
@@ -97,10 +97,10 @@ export async function sendOrganizationInviteEmail(args: {
   const inviter = escapeHtml(args.inviterName);
   return send({
     to: args.to,
-    subject: `${org} seni Busyflix'e davet etti`,
+    subject: `${org} invited you to Busyflix`,
     html: wrap(
-      `${org} ekibine katıl`,
-      `<p><strong>${inviter}</strong> seni <strong>${org}</strong> adına Busyflix'e davet etti.</p>`,
+      `Join ${org} on Busyflix`,
+      `<p><strong>${inviter}</strong> has invited you to Busyflix on behalf of <strong>${org}</strong>.</p>`,
       { label: "Accept invitation", url: args.inviteUrl },
     ),
   });
@@ -121,13 +121,13 @@ export async function sendCorporateLeadNotification(args: {
   const message = escapeHtml(args.message ?? "");
   return send({
     to,
-    subject: `Yeni kurumsal talep: ${company}`,
+    subject: `New corporate inquiry: ${company}`,
     html: wrap(
-      "Yeni kurumsal talep",
+      "New corporate inquiry",
       `<ul style="padding-left:18px;margin:0">
-        <li><strong>Şirket:</strong> ${company}</li>
-        <li><strong>İletişim:</strong> ${contact} &lt;${email}&gt;</li>
-        <li><strong>Koltuk hedefi:</strong> ${args.seatTarget ?? "-"}</li>
+        <li><strong>Company:</strong> ${company}</li>
+        <li><strong>Contact:</strong> ${contact} &lt;${email}&gt;</li>
+        <li><strong>Seat target:</strong> ${args.seatTarget ?? "-"}</li>
       </ul>
       <p style="margin-top:12px">${message}</p>`,
     ),
