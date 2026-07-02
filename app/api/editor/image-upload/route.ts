@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/access";
+import { canSelfServeContent } from "@/lib/corporate";
 import { getStorage, isR2Configured } from "@/lib/storage";
 import {
   createImageUploadSignedUrl,
@@ -17,8 +18,14 @@ const ALLOWED_TYPES = new Set([
 
 export async function POST(request: Request) {
   const session = await getSession();
-  const role = (session?.user as { role?: string | null } | undefined)?.role;
-  if (!session || !role || !STAFF.has(role)) {
+  if (!session) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+  const role = (session.user as { role?: string | null }).role;
+  // Staff, or an org owner whose self-serve content studio is enabled.
+  const allowed =
+    (role && STAFF.has(role)) || (await canSelfServeContent(session.user.id));
+  if (!allowed) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 

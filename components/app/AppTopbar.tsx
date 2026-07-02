@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
@@ -33,6 +33,8 @@ export function AppTopbar({
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState("");
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
 
   const isHome = pathname === "/app";
   const onDiscover = pathname === "/app/discover";
@@ -44,17 +46,26 @@ export function AppTopbar({
   const isPlayer =
     segs[0] === "app" && segs[1] === "watch" && segs.length === 4;
   const heroPage = isHome || isTitleDetail;
-  // Pages whose bar blends with the content at the top and only gains a
-  // background after scrolling.
-  const scrollAware = heroPage || isPlayer;
 
   useEffect(() => {
-    if (!scrollAware) return;
-    const onScroll = () => setScrolled(window.scrollY > 80);
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 80);
+      // Hide while scrolling down past the bar, reveal on any upward scroll.
+      // The 4px dead zone filters out trackpad jitter; near the top the bar
+      // is always visible.
+      if (y < 80) setHidden(false);
+      else if (y > lastY.current + 4) setHidden(true);
+      else if (y < lastY.current - 4) setHidden(false);
+      lastY.current = y;
+    };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
-  }, [scrollAware]);
+  }, []);
+
+  // Never leave the bar hidden after a navigation.
+  useEffect(() => setHidden(false), [pathname]);
 
   const navItems = [
     { href: "/app", label: t("home"), active: isHome },
@@ -74,11 +85,8 @@ export function AppTopbar({
       active: onDiscover && section === "TALENT",
     },
     { href: "/app/discover", label: t("discover"), active: onDiscover && !section },
-    {
-      href: "/app/talent-lab",
-      label: t("talentLab"),
-      active: pathname === "/app/talent-lab",
-    },
+    // Talent Lab is hidden from the nav for now (page stays reachable at
+    // /app/talent-lab); re-add the item when the feature launches.
   ];
 
   // Anyone who belongs to a company gets a quick link to their company space
@@ -114,26 +122,28 @@ export function AppTopbar({
     router.push(`/app/discover?q=${encodeURIComponent(q.trim())}`);
   }
 
-  const dark = heroPage;
   const overlay = heroPage && !scrolled;
   // Player page: transparent at the top so it merges with the page, then the
   // same solid light bar once scrolled.
   const transparentLight = isPlayer && !scrolled;
 
+  // Theme-aware everywhere: the tokens flip with .dark, so the hero overlay
+  // fades from the page background (cream in light, warm-dark in dark) instead
+  // of hardcoded black — the hero top no longer starts pitch black in light.
   const headerBg = overlay
-    ? "bg-gradient-to-b from-black/80 via-black/35 to-transparent"
+    ? "bg-gradient-to-b from-[#feffff]/95 via-[#feffff]/40 to-transparent dark:from-background/90 dark:via-background/40"
     : transparentLight
       ? "bg-transparent"
-      : dark
-        ? "bg-surface-dark shadow-[0_8px_30px_-12px_rgba(0,0,0,0.6)]"
-        : "bg-background border-b border-border/60 shadow-[0_8px_30px_-16px_rgba(16,13,8,0.35)]";
+      : "bg-background border-b border-border/60 shadow-[0_8px_30px_-16px_rgba(16,13,8,0.35)]";
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${headerBg}`}
+      className={`fixed inset-x-0 top-0 z-40 transition-[transform,background-color,border-color,box-shadow] duration-300 ${headerBg} ${
+        hidden && !open ? "-translate-y-full" : "translate-y-0"
+      }`}
     >
       <div className="flex h-16 w-full items-center gap-7 px-4 md:px-6 lg:px-8">
-        <Wordmark href="/app" onDark={dark} className="shrink-0" />
+        <Wordmark href="/app" className="shrink-0" />
 
         <nav className="hidden items-center gap-6 lg:flex">
           {navItems.map((item) => (
@@ -141,13 +151,9 @@ export function AppTopbar({
               key={item.href}
               href={item.href}
               className={`text-sm transition-colors ${
-                dark
-                  ? item.active
-                    ? "font-semibold text-surface-dark-foreground"
-                    : "text-surface-dark-foreground/65 hover:text-surface-dark-foreground"
-                  : item.active
-                    ? "font-semibold text-foreground"
-                    : "text-muted-foreground hover:text-foreground"
+                item.active
+                  ? "font-semibold text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               {item.label}
@@ -165,25 +171,19 @@ export function AppTopbar({
             aria-label={tc("search")}
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            className={`h-9 w-full rounded-11 border px-3 text-sm transition-colors focus:outline-none ${
-              dark
-                ? "border-white/15 bg-white/10 text-surface-dark-foreground placeholder:text-surface-dark-foreground/45 focus:border-white/35"
-                : "border-border bg-background text-foreground placeholder:text-muted-foreground focus:border-foreground/35"
-            }`}
+            className="h-9 w-full rounded-11 border border-border bg-background px-3 text-sm text-foreground transition-colors placeholder:text-muted-foreground focus:border-foreground/35 focus:outline-none"
           />
         </form>
 
         <div className="ml-auto flex items-center gap-3 md:ml-0">
-          <ThemeToggle onDark={dark} />
+          <ThemeToggle />
           <LocaleSwitcher />
 
           <div className="relative">
             <button
               type="button"
               onClick={() => setOpen((v) => !v)}
-              className={`flex items-center gap-2 text-sm transition-opacity hover:opacity-80 ${
-                dark ? "text-surface-dark-foreground" : "text-foreground"
-              }`}
+              className="flex items-center gap-2 text-sm text-foreground transition-opacity hover:opacity-80"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-display text-xs text-primary-foreground">
                 {userName.slice(0, 1).toUpperCase()}

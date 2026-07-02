@@ -8,6 +8,8 @@
     "submit": "Submit",
     "save": "Save",
     "cancel": "Cancel",
+    "confirmTitle": "Are you sure?",
+    "confirmAction": "Yes, continue",
     "back": "Back",
     "next": "Next",
     "yes": "Yes",
@@ -42,7 +44,7 @@
     "myCompany": "My Company"
   },
   "footer": {
-    "tagline": "The Netflix of business education. Premium video series and films on leadership, entrepreneurship and talent development. Subscribe once, watch everything.",
+    "tagline": "A cinematic streaming experience for the business world. Premium productions that tell leadership, entrepreneurship and talent development like great series. One subscription, unlimited access.",
     "explore": "Explore",
     "account": "Account",
     "talkToSales": "Talk to sales"
@@ -238,7 +240,7 @@
     "sideTag": "Busyflix · Streaming",
     "headingLine1": "Keep watching",
     "headingLine2": "where you left off.",
-    "description": "Premium video series on leadership, entrepreneurship and talent development. Subscribe once, watch everything."
+    "description": "Cinematic business storytelling. One subscription, unlimited streaming."
   },
   "login": {
     "kicker": "Welcome back",
@@ -381,7 +383,7 @@
     "subscribe": "Subscribe",
     "videoUnavailable": "Video is being prepared.",
     "otherEpisodes": "Other episodes",
-    "curriculum": "Course content",
+    "curriculum": "Series content",
     "lessonCount": "{count, plural, =0 {no lessons} one {# lesson} other {# lessons}}",
     "completed": "Completed",
     "nextLesson": "Next lesson",
@@ -423,6 +425,8 @@
     "rolePlatformEditor": "Editor",
     "roleAdmin": "Admin",
     "roleInstructor": "Instructor",
+    "roleOrgOwner": "Corporate Admin",
+    "roleOrgMember": "Corporate Member",
     "subscription": "Subscription",
     "manage": "Manage subscription"
   },
@@ -441,12 +445,12 @@
     "startSubscription": "Start subscription",
     "plans": {
       "monthly": "Monthly",
-      "monthlyPrice": "$29/mo",
+      "monthlyPrice": "€19.95 / mo",
       "monthlyB1": "Cancel anytime",
       "monthlyB2": "Full library",
       "yearly": "Yearly",
-      "yearlyPrice": "$249/yr",
-      "yearlyB1": "30% savings",
+      "yearlyPrice": "€199.95 / yr",
+      "yearlyB1": "2 months free",
       "yearlyB2": "Priority support"
     }
   },
@@ -484,7 +488,8 @@
     "publishToggleOn": "Publish",
     "publishToggleOff": "Unpublish",
     "basicInfo": "Basic info",
-    "heroImage": "Hero image URL",
+    "heroImage": "Hero image",
+    "heroImageHint": "Upload a landscape (16:9) image — it is shown horizontally on cards and lists.",
     "trailer": "Trailer URL",
     "saved": "Save",
     "episodes": "Episodes",
@@ -497,7 +502,7 @@
     "videoPath": "Video path (Supabase Storage key)",
     "videoFile": "Video file",
     "uploadSelect": "Select a video file",
-    "uploadHint": "MP4, WebM or MOV. Uploaded to Supabase Storage.",
+    "uploadHint": "MP4, WebM or MOV. The video is uploaded to secure storage and served via CDN.",
     "uploading": "Uploading",
     "uploadRemove": "Remove",
     "preview": "Preview (sec)",
@@ -522,6 +527,9 @@
     "creditRolePlaceholder": "e.g. Lead instructor",
     "editEpisode": "Edit episode",
     "deleteEpisodeConfirm": "Delete episode \"{name}\"? Watch progress and subtitles will also be deleted.",
+    "deleteTitle": "Delete training",
+    "deleteTitleBody": "Permanently removes this training. All episodes, subtitles and viewers' progress records are deleted too; this cannot be undone.",
+    "deleteTitleConfirm": "\"{name}\" will be permanently deleted, including all episodes and watch records.",
     "replaceVideo": "Replace video (optional)",
     "replaceVideoHint": "Leave empty to keep the current video.",
     "imageUploadSelect": "Upload image",
@@ -543,7 +551,8 @@
     "noAssignedCompanies": "No companies assigned — this title is visible to no one.",
     "company": "Company",
     "assignCompany": "Assign company",
-    "subtitleSelect": "Select .vtt file"
+    "subtitleSelect": "Select .vtt file",
+    "imageReplace": "Replace image"
   },
   "admin": {
     "kicker": "Admin",
@@ -600,7 +609,25 @@
     "reactivate": "Reactivate",
     "deactivate": "Deactivate",
     "deactivateConfirm": "Deactivate \"{company}\"? Members will lose access.",
-    "saveCompany": "Save"
+    "selfServeContent": "Company can add its own trainings (content studio)",
+    "saveCompany": "Save",
+    "storageHeading": "Storage",
+    "storageBody": "R2 inventory of panel-uploaded videos and images. Orphaned files (no longer referenced by any record) can be cleaned up here; files in use can't be touched.",
+    "storageNoR2": "R2 is not configured. Add the R2 credentials to .env to use the storage inventory.",
+    "storageTotal": "Total files",
+    "storageInUse": "In use",
+    "storageOrphans": "Orphaned",
+    "storageColKey": "File",
+    "storageColSize": "Size",
+    "storageColDate": "Uploaded",
+    "storageInUseBadge": "In use",
+    "storageOrphanBadge": "Orphan",
+    "storageDelete": "Delete",
+    "storageDeleteConfirm": "\"{key}\" will be permanently deleted from storage.",
+    "storageCleanup": "Clean up orphans",
+    "storageCleanupTitle": "Clean up orphaned files",
+    "storageCleanupConfirm": "{count} orphaned files ({size}) will be permanently deleted from storage. No training or episode is affected.",
+    "storageEmpty": "No panel-uploaded files yet."
   },
   "organization": {
     "kicker": "For Business",
@@ -625,8 +652,27 @@
     "colEmail": "Email",
     "colExpires": "Expires",
     "inviteHeading": "Send invitation",
+    "contentStudio": "Content studio",
+    "contentBody": "Create trainings and series exclusive to your company. Content added here is only visible to your own employees; it never appears in the public catalog.",
+    "contentList": "Your company trainings",
+    "contentEmpty": "No company trainings yet. Create your first one below.",
+    "newContent": "Create new training",
+    "newContentBody": "After creating the training you can add episodes and videos. Publish it when it's ready.",
+    "contentOrgOnly": "Visible to your company only",
+    "contentAssigned": "Content assigned to your company by Busyflix",
+    "contentAssignedBody": "These are prepared and assigned by the Busyflix team; they can't be edited here.",
+    "contentAssignedEmpty": "No content assigned to your company yet.",
+    "contentAssignedBadge": "Busyflix content",
+    "contentAudience": "Audience",
+    "contentAudienceBody": "By default the whole company can see it. Select specific departments to limit visibility to their members.",
+    "contentAllCompany": "Whole company",
+    "contentAllCompanyNow": "Currently visible to the whole company. Select departments to restrict it.",
+    "contentDeleteBody": "Deleting the training also removes all its episodes and your employees' watch progress. This cannot be undone.",
+    "contentDelete": "Delete training",
+    "contentDeleteConfirm": "Are you sure you want to delete \"{name}\"? All episodes and watch records will be removed.",
     "sentBanner": "{count} invitations sent.",
     "single": "Single user",
+    "singleBody": "Invite a teammate by email address. They'll receive an invitation link.",
     "sendInvite": "Send invitation",
     "bulk": "Bulk",
     "bulkBody": "One email per line or separated by commas.",
@@ -671,7 +717,27 @@
     "errEmail": "The invitation email couldn't be sent. Please try again.",
     "copyLink": "Copy link",
     "copied": "Copied",
-    "inviteLinkHint": "To share the invite directly, copy its link from:"
+    "inviteLinkHint": "To share the invite directly, copy its link from:",
+    "billingTitle": "Plan & Billing",
+    "billingBody": "Pick a package for your company. Your subscription activates automatically after payment.",
+    "pkgSmallName": "Corporate 10",
+    "pkgSmallSeats": "Up to 10 employees",
+    "pkgLargeName": "Corporate Unlimited",
+    "pkgLargeSeats": "Unlimited employees",
+    "perYear": "/ year",
+    "choosePlan": "Choose this package",
+    "preparing": "Preparing…",
+    "manageBilling": "Manage billing",
+    "opening": "Opening…",
+    "upgradeCta": "Upgrade to Unlimited",
+    "upgrading": "Upgrading…",
+    "upgradeDone": "Your package was upgraded. The change appears within a few seconds.",
+    "upgradeFailed": "Upgrade failed, please try again.",
+    "currentPlan": "Current package",
+    "seatsUnlimited": "Unlimited",
+    "errNoProfile": "Company profile not found.",
+    "errSeats": "Not enough seats. {remaining} remaining, {requested} requested.",
+    "errSeatsUpgrade": "Not enough seats. {remaining} remaining, {requested} requested. Upgrade your package for more seats."
   },
   "themeToggle": {
     "label": "Theme",
@@ -719,10 +785,19 @@
     "renewsOn": "Subscription ends: {date}",
     "exclusiveTitle": "Company-exclusive content",
     "exclusiveBody": "Training available only to your company's members.",
-    "noExclusive": "No company-exclusive content yet."
+    "noExclusive": "No company-exclusive content yet.",
+    "managePanel": "Company management",
+    "teamSizeValue": "{count, plural, one {# person} other {# people}}",
+    "exclusiveCount": "{count, plural, one {# title} other {# titles}}"
   },
   "seo": {
     "homeTitle": "Busyflix — The Netflix of business education",
     "homeDescription": "Leadership, entrepreneurship and talent development — business education that streams like a series."
+  },
+  "toasts": {
+    "saved": "Saved",
+    "created": "Created",
+    "deleted": "Deleted",
+    "sent": "Sent"
   }
 }

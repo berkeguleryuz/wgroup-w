@@ -42,6 +42,12 @@ export interface StoragePutResult {
   publicUrl: string;
 }
 
+export interface StorageObject {
+  key: string;
+  size: number;
+  lastModified: Date | null;
+}
+
 export interface StorageProvider {
   name: "r2" | "supabase";
   putObject(
@@ -55,6 +61,10 @@ export interface StorageProvider {
     contentType?: string,
   ): Promise<SignedUpload>;
   createSignedReadUrl(key: string, expiresInSec?: number): Promise<string>;
+  /** List objects under a prefix (admin/ops tooling). */
+  listObjects(prefix: string): Promise<StorageObject[]>;
+  /** Permanently delete a single object. */
+  deleteObject(key: string): Promise<void>;
 }
 
 // ---------------------------------------------------------------------------
@@ -148,6 +158,43 @@ const r2Provider: StorageProvider = {
       { expiresIn: expiresInSec },
     );
   },
+  async listObjects(prefix) {
+    const client = await getR2Client();
+    const { ListObjectsV2Command } = await import("@aws-sdk/client-s3");
+    const objects: StorageObject[] = [];
+    let continuationToken: string | undefined;
+    do {
+      const page = await client.send(
+        new ListObjectsV2Command({
+          Bucket: R2_BUCKET,
+          Prefix: stripLeadingSlash(prefix),
+          ContinuationToken: continuationToken,
+        }),
+      );
+      for (const obj of page.Contents ?? []) {
+        if (!obj.Key) continue;
+        objects.push({
+          key: obj.Key,
+          size: obj.Size ?? 0,
+          lastModified: obj.LastModified ?? null,
+        });
+      }
+      continuationToken = page.IsTruncated
+        ? page.NextContinuationToken
+        : undefined;
+    } while (continuationToken);
+    return objects;
+  },
+  async deleteObject(key) {
+    const client = await getR2Client();
+    const { DeleteObjectCommand } = await import("@aws-sdk/client-s3");
+    await client.send(
+      new DeleteObjectCommand({
+        Bucket: R2_BUCKET,
+        Key: stripLeadingSlash(key),
+      }),
+    );
+  },
 };
 
 // Supabase fallback — keeps the editor upload + signed playback working until
@@ -168,6 +215,13 @@ const supabaseProvider: StorageProvider = {
   },
   async createSignedReadUrl(key, expiresInSec = 60 * 60) {
     return createVideoSignedUrl(key, expiresInSec);
+  },
+  async listObjects() {
+    // Storage inventory tooling is R2-only; the Supabase fallback predates it.
+    return [];
+  },
+  async deleteObject() {
+    throw new Error("deleteObject is not supported on the Supabase provider");
   },
 };
 

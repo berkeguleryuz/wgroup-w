@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { headers } from "next/headers";
-import { getLocale } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -20,10 +20,14 @@ function parseEmails(raw: string): string[] {
 }
 
 async function assertSeatCapacity(orgId: string, incoming: number) {
+  const t = await getTranslations("organization");
   const profile = await prisma.companyProfile.findUnique({
     where: { organizationId: orgId },
   });
-  if (!profile) throw new Error("Şirket profili yok");
+  if (!profile) throw new Error(t("errNoProfile"));
+  // corp_large has no seat cap; every other plan (corp_small, manual) is
+  // limited by seatCount. Exceeding it requires a package upgrade.
+  if (profile.plan === "corp_large") return;
   const [members, pending] = await Promise.all([
     prisma.member.count({ where: { organizationId: orgId } }),
     prisma.invitation.count({
@@ -38,8 +42,13 @@ async function assertSeatCapacity(orgId: string, incoming: number) {
   ]);
   const used = members + pending;
   if (used + incoming > profile.seatCount) {
+    // The upgrade hint only makes sense on the small Stripe package; manually
+    // activated companies negotiate seats with sales instead.
     throw new Error(
-      `Koltuk sayısı yetersiz. Kalan ${Math.max(0, profile.seatCount - used)}, talep ${incoming}.`,
+      t(profile.plan === "corp_small" ? "errSeatsUpgrade" : "errSeats", {
+        remaining: Math.max(0, profile.seatCount - used),
+        requested: incoming,
+      }),
     );
   }
 }

@@ -361,7 +361,16 @@ export default async function AdminCorporatePage({
                       defaultValue={c.billingEmail}
                     />
                   </div>
-                  <div className="md:col-span-4">
+                  <div className="flex items-center justify-between gap-3 md:col-span-4">
+                    <label className="flex cursor-pointer items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        name="selfServeContent"
+                        defaultChecked={c.selfServeContent}
+                        className="h-4 w-4 accent-foreground"
+                      />
+                      {t("selfServeContent")}
+                    </label>
                     <Button type="submit" variant="secondary" size="sm">
                       {t("saveCompany")}
                     </Button>

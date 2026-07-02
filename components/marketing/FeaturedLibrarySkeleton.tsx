@@ -17,7 +17,7 @@ export function FeaturedLibrarySkeleton() {
           {Array.from({ length: 6 }).map((_, i) => (
             <div
               key={i}
-              className="aspect-[4/5] rounded-11 border border-border/60 bg-background animate-pulse"
+              className="aspect-video rounded-11 border border-border/60 bg-background animate-pulse"
             />
           ))}
         </div>

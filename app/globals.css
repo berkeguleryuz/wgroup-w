@@ -193,56 +193,96 @@ select:not(:disabled) {
     animation: bf-sweep 3.2s ease-in-out infinite;
   }
 }
-
-/* Theme-toggle icon (sun ↔ moon morph). Two tones: `currentColor` for the
-   core/rays and a soft `--bf-toggle-accent` halo behind the disc. The crescent
-   is carved by a masked cut-out circle that slides over the core; rays retract,
-   spin, and fade. Transitions run both ways and are auto-neutralized by the
-   reduced-motion reset above (icon then snaps between rest states). */
-.bf-toggle-icon {
-  --bf-toggle-ease: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --bf-toggle-accent: color-mix(in srgb, currentColor 18%, transparent);
+/* Theme-toggle "contrast orb" (see ThemeToggleIcon.tsx). A half-filled disc
+   and a satellite dot spin 180° inside a fixed ring when the theme flips; the
+   disc breathes slightly mid-flip. Single `currentColor` tone. Transitions run
+   both ways and are neutralized by the reduced-motion reset above. */
+.bf-orb {
+  --bf-orb-ease: cubic-bezier(0.45, 1.5, 0.4, 1);
   overflow: visible;
 }
-.bf-toggle-core {
+.bf-orb-spin {
+  transform-box: view-box;
+  transform-origin: center;
+  transition: transform 0.65s var(--bf-orb-ease);
+}
+.bf-orb-half {
+  fill: currentColor;
+  transform-box: fill-box;
+  transform-origin: left center;
+  transition: transform 0.65s var(--bf-orb-ease);
+}
+.bf-orb-dot {
   fill: currentColor;
   transform-box: fill-box;
   transform-origin: center;
-  transition: transform 0.5s var(--bf-toggle-ease);
-}
-.bf-toggle-halo {
-  fill: var(--bf-toggle-accent);
-  transform-box: fill-box;
-  transform-origin: center;
   transition:
-    transform 0.5s var(--bf-toggle-ease),
-    opacity 0.4s ease;
+    transform 0.65s var(--bf-orb-ease),
+    opacity 0.3s ease;
 }
-.bf-toggle-cutout {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition: transform 0.55s var(--bf-toggle-ease);
+.bf-orb[data-dark="true"] .bf-orb-spin {
+  transform: rotate(180deg);
 }
-.bf-toggle-rays {
-  transform-box: fill-box;
-  transform-origin: center;
-  transition:
-    transform 0.55s var(--bf-toggle-ease),
-    opacity 0.4s ease;
+.bf-orb[data-dark="true"] .bf-orb-half {
+  transform: scaleX(0.92);
+}
+.bf-orb[data-dark="true"] .bf-orb-dot {
+  transform: scale(0.75);
+  opacity: 0.85;
 }
 
-/* Dark = moon: slide the cut-out over the core, shrink + spin away the rays. */
-.bf-toggle-icon[data-dark="true"] .bf-toggle-cutout {
-  transform: translate(-8px, 5px);
+/* Toast entrance (see components/ui/Toaster.tsx). */
+.bf-toast {
+  animation: bf-toast-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);
 }
-.bf-toggle-icon[data-dark="true"] .bf-toggle-rays {
-  opacity: 0;
-  transform: scale(0.35) rotate(-45deg);
+@keyframes bf-toast-in {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
-.bf-toggle-icon[data-dark="true"] .bf-toggle-core {
-  transform: scale(1.08);
+
+/* Gooey CTA (see GooeyButton.tsx). The link carries the goo filter; the blob
+   rests half-fused into the pill's right edge and oozes outward on hover with
+   a springy overshoot — the filter draws the stretching liquid neck.
+   Transitions are neutralized by the reduced-motion reset. */
+.bf-gooey {
+  filter: url(#bf-goo);
 }
-.bf-toggle-icon[data-dark="true"] .bf-toggle-halo {
-  opacity: 0.7;
-  transform: scale(1.12);
+.bf-gooey-blob {
+  /* Rest: parked fully behind the pill (z-0, same color) — invisible, so the
+     button reads as a plain pill until hovered. */
+  transform: translate(-130%, -50%);
+  transition: transform 0.5s cubic-bezier(0.55, 0, 0.55, 1);
+}
+/* Hover lives on the wrapper: its right padding covers the blob's detached
+   resting spot, so the pointer can travel pill → gap → drop (and click the
+   drop) without the hover breaking and the drop retreating. */
+.bf-gooey-wrap:hover .bf-gooey-blob,
+.bf-gooey:focus-visible .bf-gooey-blob {
+  /* Hover plays in two beats: (1) the drop oozes out but stays fused to the
+     pill through a liquid neck, holds there, then (2) pinches off and settles
+     as a separate circle. `forwards` keeps the detached pose; releasing the
+     hover lets the transition above pull it back behind the pill. */
+  animation: bf-goo-out 1.1s cubic-bezier(0.45, 0, 0.3, 1) forwards;
+}
+@keyframes bf-goo-out {
+  0% {
+    transform: translate(-130%, -50%);
+  }
+  40%,
+  62% {
+    /* Beat 1: attached droplet — the blob's left edge just kisses the pill's
+       right edge, so the goo filter draws a thin visible neck between them. */
+    transform: translate(0%, -50%);
+  }
+  100% {
+    /* Beat 2: pinched off — the small gap clears the goo blur radius, so the
+       drop reads as a separate circle sitting close to the pill. */
+    transform: translate(18%, -50%);
+  }
 }

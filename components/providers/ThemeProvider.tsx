@@ -5,6 +5,7 @@ import {
   useCallback,
   useContext,
   useEffect,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -27,19 +28,48 @@ function applyTheme(theme: Theme) {
 }
 
 function getInitialTheme(): Theme {
-  // The blocking script in the document head has already resolved and applied
-  // the correct theme before paint; mirror its decision so React state matches
-  // the DOM and there is no hydration mismatch.
-  if (typeof document !== "undefined") {
-    return document.documentElement.classList.contains("dark")
-      ? "dark"
-      : "light";
+  // Resolve from localStorage → OS preference, exactly like the head script.
+  // Do NOT read the DOM class here: if the provider remounts right after a
+  // root-layout re-render (locale switch), React may already have wiped the
+  // `.dark` class — reading it would lock the wrong theme into state.
+  if (typeof window === "undefined") return "light";
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+  } catch {
+    // localStorage unavailable — fall through to the OS preference.
   }
-  return "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getInitialTheme);
+  const themeRef = useRef(theme);
+  useEffect(() => {
+    themeRef.current = theme;
+  }, [theme]);
+
+  // The `.dark` class is applied imperatively, so any React re-render of the
+  // <html> element (e.g. a locale switch re-rendering the root layout with a
+  // new `lang`) re-asserts className and wipes it. Watch the class attribute
+  // and re-apply the current theme whenever the DOM drifts from our state —
+  // applyTheme converges, so the observer settles after one correction.
+  useEffect(() => {
+    const root = document.documentElement;
+    // Converge the DOM immediately (covers a remount that happened after
+    // React wiped the class), then keep watching for future wipes.
+    applyTheme(themeRef.current);
+    const observer = new MutationObserver(() => {
+      const domDark = root.classList.contains("dark");
+      if (domDark !== (themeRef.current === "dark")) {
+        applyTheme(themeRef.current);
+      }
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ["class"] });
+    return () => observer.disconnect();
+  }, []);
 
   const setTheme = useCallback((next: Theme) => {
     setThemeState(next);

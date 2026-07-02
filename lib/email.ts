@@ -51,16 +51,51 @@ async function send({ to, subject, html }: SendArgs): Promise<boolean> {
   }
 }
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
 function wrap(title: string, body: string, cta?: { label: string; url: string }) {
   const buttonHtml = cta
-    ? `<p style="margin:24px 0"><a href="${cta.url}" style="display:inline-block;padding:12px 20px;border-radius:11px;background:#100D08;color:#fbf7f6;text-decoration:none;font-weight:600">${cta.label}</a></p>`
+    ? `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:28px 0 8px">
+        <tr>
+          <td style="border-radius:11px;background:#100D08">
+            <a href="${cta.url}" style="display:inline-block;padding:13px 26px;border-radius:11px;font-family:-apple-system,'Segoe UI',sans-serif;font-size:15px;font-weight:600;color:#fbf7f6;text-decoration:none">${cta.label}</a>
+          </td>
+        </tr>
+      </table>`
     : "";
-  return `<div style="font-family:system-ui,-apple-system,Segoe UI,sans-serif;max-width:560px;margin:0 auto;padding:32px;background:#fbf7f6;color:#100D08;border-radius:11px">
-    <h1 style="font-size:22px;margin:0 0 16px;font-weight:600">${title}</h1>
-    <div style="font-size:15px;line-height:1.55">${body}</div>
-    ${buttonHtml}
-    <p style="margin-top:32px;color:#5b534a;font-size:13px">Busyflix</p>
-  </div>`;
+  return `<!doctype html>
+<html>
+  <body style="margin:0;padding:0;background:#f1ebe7">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f1ebe7;padding:32px 16px">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%">
+            <tr>
+              <td style="border-radius:11px 11px 0 0;background:#0c0907;padding:30px 40px 26px" align="center">
+                <img src="${APP_URL}/logo-email.png" width="59" height="80" alt="Busyflix" style="display:block;border:0;margin:0 auto 12px" />
+                <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;letter-spacing:0.5px;color:#fbf7f6">busyflix</span>
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#fbf7f6;padding:36px 40px 32px;border:1px solid #e6dccc;border-top:0;border-radius:0 0 11px 11px">
+                <h1 style="margin:0 0 16px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:600;line-height:1.25;color:#100D08">${title}</h1>
+                <div style="font-family:-apple-system,'Segoe UI',sans-serif;font-size:15px;line-height:1.6;color:#100D08">${body}</div>
+                ${buttonHtml}
+                <hr style="margin:28px 0 0;border:0;border-top:1px solid #e6dccc" />
+                <p style="margin:16px 0 0;font-family:-apple-system,'Segoe UI',sans-serif;font-size:12px;line-height:1.6;color:#5b534a">Busyflix — Cinema-grade productions for the business world.</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="center" style="padding:18px 8px 0">
+                <p style="margin:0;font-family:-apple-system,'Segoe UI',sans-serif;font-size:11px;color:#5b534a">&copy; ${new Date().getFullYear()} Busyflix &middot; Wgroup GmbH</p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`;
 }
 
 export async function sendVerificationEmail(to: string, url: string) {

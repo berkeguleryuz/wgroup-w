@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { requireSession } from "@/lib/access";
+import { prisma } from "@/lib/prisma";
 import { SettingsSidebar } from "@/components/app/SettingsSidebar";
 
 const ROLE_KEYS: Record<string, string> = {
@@ -21,7 +22,18 @@ export default async function AccountLayout({
     getTranslations("account"),
   ]);
   const user = session.user as typeof session.user & { role?: string | null };
-  const roleKey = ROLE_KEYS[user.role ?? "individual"] ?? "roleIndividual";
+
+  let roleKey = ROLE_KEYS[user.role ?? "individual"] ?? "roleIndividual";
+  if ((user.role ?? "individual") === "individual") {
+    const membership = await prisma.member.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: "asc" },
+      select: { role: true },
+    });
+    if (membership) {
+      roleKey = membership.role === "owner" ? "roleOrgOwner" : "roleOrgMember";
+    }
+  }
 
   return (
     <div className="flex gap-6">

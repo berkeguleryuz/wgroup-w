@@ -21,6 +21,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
           <NavItem href="/app/admin/subscribers">
             {t("subscribersHeading")}
           </NavItem>
+          <NavItem href="/app/admin/storage">{t("storageHeading")}</NavItem>
         </ul>
       </nav>
       <section>{children}</section>

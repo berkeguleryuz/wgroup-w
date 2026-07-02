@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 
-import { stripe } from "@/lib/stripe";
+import { stripe, corpPlanFromPriceId, CORP_SMALL_MAX_SEATS } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -37,16 +37,19 @@ export async function POST(request: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const s = event.data.object as Stripe.Checkout.Session;
+        const organizationId = s.metadata?.organizationId ?? null;
         const userId = s.client_reference_id || (s.metadata?.userId ?? null);
         const subscriptionId =
           typeof s.subscription === "string" ? s.subscription : s.subscription?.id;
-        if (userId && subscriptionId) {
+        if (subscriptionId && (organizationId || userId)) {
           const sub = await stripe.subscriptions.retrieve(subscriptionId);
-          await upsertFromSubscription(userId, sub, eventAt);
+          if (organizationId) await upsertCorporate(organizationId, sub, eventAt);
+          else await upsertFromSubscription(userId!, sub, eventAt);
         } else {
           console.warn(`[stripe] checkout.session.completed unresolved`, {
             eventId: event.id,
             userId,
+            organizationId,
             subscriptionId,
           });
         }
@@ -55,6 +58,13 @@ export async function POST(request: Request) {
       case "customer.subscription.updated":
       case "customer.subscription.created": {
         const sub = event.data.object as Stripe.Subscription;
+        const organizationId =
+          (sub.metadata?.organizationId as string | undefined) ??
+          (await orgIdFromCustomer(sub.customer));
+        if (organizationId) {
+          await upsertCorporate(organizationId, sub, eventAt);
+          break;
+        }
         const userId =
           (sub.metadata?.userId as string | undefined) ??
           (await userIdFromCustomer(sub.customer));
@@ -76,6 +86,17 @@ export async function POST(request: Request) {
           },
           data: { status: "canceled", cancelAtPeriodEnd: false, lastEventAt: eventAt },
         });
+        await prisma.companyProfile.updateMany({
+          where: {
+            stripeSubscriptionId: sub.id,
+            OR: [{ lastEventAt: null }, { lastEventAt: { lte: eventAt } }],
+          },
+          data: {
+            subscriptionStatus: "expired",
+            cancelAtPeriodEnd: false,
+            lastEventAt: eventAt,
+          },
+        });
         break;
       }
       default:
@@ -92,6 +113,64 @@ export async function POST(request: Request) {
     .create({ data: { id: event.id, type: event.type } })
     .catch(() => {});
   return NextResponse.json({ ok: true });
+}
+
+async function orgIdFromCustomer(customer: Stripe.Subscription["customer"]) {
+  const customerId = typeof customer === "string" ? customer : customer.id;
+  const existing = await prisma.companyProfile.findUnique({
+    where: { stripeCustomerId: customerId },
+    select: { organizationId: true },
+  });
+  return existing?.organizationId ?? null;
+}
+
+/** Map a Stripe subscription status onto CompanyProfile.subscriptionStatus. */
+function corporateStatus(status: Stripe.Subscription.Status) {
+  if (status === "active" || status === "trialing") return "active";
+  if (status === "past_due") return "grace";
+  return "expired";
+}
+
+async function upsertCorporate(
+  organizationId: string,
+  sub: Stripe.Subscription,
+  eventAt: Date,
+) {
+  const current = await prisma.companyProfile.findUnique({
+    where: { organizationId },
+    select: { lastEventAt: true },
+  });
+  if (!current) {
+    console.warn(`[stripe] corporate event for unknown org ${organizationId}`);
+    return;
+  }
+  // Same out-of-order guard as the individual path (>= — see comment there).
+  if (current.lastEventAt && current.lastEventAt >= eventAt) return;
+
+  const priceId = sub.items.data[0]?.price.id ?? "";
+  const plan = corpPlanFromPriceId(priceId);
+  const periodEndUnix = sub.items.data[0]?.current_period_end;
+  const customerId = typeof sub.customer === "string" ? sub.customer : sub.customer.id;
+
+  await prisma.companyProfile.update({
+    where: { organizationId },
+    data: {
+      stripeCustomerId: customerId,
+      stripeSubscriptionId: sub.id,
+      ...(plan ? { plan } : {}),
+      // The package dictates the seat limit: corp_small caps the org at 10;
+      // corp_large is unlimited (the seat check keys off plan, seatCount is
+      // display-only there).
+      ...(plan === "corp_small" ? { seatCount: CORP_SMALL_MAX_SEATS } : {}),
+      subscriptionStatus: corporateStatus(sub.status),
+      subscriptionStartedAt: new Date(sub.start_date * 1000),
+      ...(periodEndUnix
+        ? { subscriptionEndsAt: new Date(periodEndUnix * 1000) }
+        : {}),
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      lastEventAt: eventAt,
+    },
+  });
 }
 
 async function userIdFromCustomer(customer: Stripe.Subscription["customer"]) {

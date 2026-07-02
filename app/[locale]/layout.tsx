@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Script from "next/script";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { setRequestLocale } from "next-intl/server";
@@ -14,7 +13,8 @@ import {
 
 import "../globals.css";
 import { routing, type Locale } from "@/lib/i18n/routing";
-import { ThemeProvider, themeInitScript } from "@/components/providers/ThemeProvider";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
+import { ThemeInitScript } from "@/components/providers/ThemeInitScript";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -82,12 +82,12 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} ${patrickHandSC.variable} ${fraunces.variable} ${cormorant.variable} h-screen overflow-hidden antialiased`}
     >
       <body className="h-screen overflow-hidden bg-surface-dark text-foreground">
-        {/* Anti-FOUC theme init. `next/script` with `beforeInteractive` injects
-            this into the server-rendered <head> so it runs before paint and
-            hydration — without the raw <script> tag Next 16 warns about. */}
-        <Script id="theme-init" strategy="beforeInteractive">
-          {themeInitScript}
-        </Script>
+        {/* First child of <body> on purpose: it still executes before any body
+            content paints (anti-FOUC), and unlike <head> — where Next appends
+            a fresh copy of head children on every locale switch, remounting
+            the script and logging the React dev warning — body children are
+            reconciled normally, so the constant element never remounts. */}
+        <ThemeInitScript />
         {/* The page frame (inset rounded card) lives in the (marketing)/(auth)
             layouts; /app uses a full-screen shell. This root only sets up the
             providers so each section can choose its own chrome. */}
