@@ -23,7 +23,7 @@ export function AddEpisodeForm({ action, titleId, nextEpisodeNumber }: Props) {
       <h3 className="font-semibold">{t("newEpisode")}</h3>
       <input type="hidden" name="titleId" value={titleId} />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2">
         <div>
           <Label htmlFor="seasonNumber">{t("season")}</Label>
           <Input
@@ -44,16 +44,6 @@ export function AddEpisodeForm({ action, titleId, nextEpisodeNumber }: Props) {
             min={1}
           />
         </div>
-        <div>
-          <Label htmlFor="durationSec">{t("duration")}</Label>
-          <Input
-            id="durationSec"
-            name="durationSec"
-            type="number"
-            min={0}
-            defaultValue={0}
-          />
-        </div>
       </div>
 
       <div>
@@ -68,7 +58,8 @@ export function AddEpisodeForm({ action, titleId, nextEpisodeNumber }: Props) {
 
       <div>
         <Label>{t("videoFile")}</Label>
-        <VideoUpload name="videoPath" required />
+        {/* Duration is read from the file's metadata — no manual entry. */}
+        <VideoUpload name="videoPath" durationName="durationSec" required />
       </div>
 
       <div className="max-w-xs">

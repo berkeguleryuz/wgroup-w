@@ -1,33 +1,28 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { routing } from "@/lib/i18n/routing";
-import { usePathname, useRouter } from "@/lib/i18n/navigation";
 import { Flag } from "@/components/Flags";
-import { useTheme } from "@/components/providers/ThemeProvider";
+
+// Full document reload on purpose: a soft locale switch re-renders the root
+// layout in place, which remounts the inline theme-init <script> and triggers
+// React's dev warning ("Encountered a script tag while rendering"). With
+// localePrefix "never" the locale lives in the NEXT_LOCALE cookie, so set it
+// directly and reload — the theme script re-runs natively and the correct
+// theme comes from localStorage.
+function applyLocaleAndReload(next: string) {
+  document.cookie = `NEXT_LOCALE=${next};path=/;max-age=31536000;samesite=lax`;
+  window.location.reload();
+}
 
 export function LocaleSwitcher() {
   const locale = useLocale();
   const t = useTranslations("localeSwitcher");
-  const router = useRouter();
-  const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const [open, setOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
-
-  // A locale switch re-renders the root layout, and React re-asserts the <html>
-  // attributes — wiping the `.dark` class the theme init script set imperatively
-  // (the theme would flip to light). Re-apply the current theme once the
-  // navigation transition settles. Scoped here so the shared ThemeProvider never
-  // reads dynamic request data (which would force the whole app to render dynamically).
-  const wasPending = useRef(false);
-  useEffect(() => {
-    if (wasPending.current && !isPending) setTheme(theme);
-    wasPending.current = isPending;
-  }, [isPending, theme, setTheme]);
 
   useEffect(() => {
     if (!open) return;
@@ -51,9 +46,8 @@ export function LocaleSwitcher() {
       return;
     }
     setOpen(false);
-    startTransition(() => {
-      router.replace(pathname, { locale: next });
-    });
+    setIsPending(true);
+    applyLocaleAndReload(next);
   };
 
   return (

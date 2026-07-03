@@ -6,7 +6,7 @@ export default function AppLoading() {
         {Array.from({ length: 8 }).map((_, i) => (
           <div
             key={i}
-            className="aspect-[2/3] animate-pulse rounded-11 bg-muted"
+            className="aspect-video animate-pulse rounded-11 bg-muted"
           />
         ))}
       </div>

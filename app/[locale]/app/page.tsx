@@ -4,11 +4,12 @@ import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
 import {
-  getMembershipOrgIds,
+  getViewerAudience,
   audienceWhere,
   canViewTitle,
 } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
+import { episodePath } from "@/lib/episode-path";
 import { Section } from "@prisma/client";
 import { AppHero } from "@/components/app/AppHero";
 import { Carousel } from "@/components/app/Carousel";
@@ -21,6 +22,7 @@ const titleInclude = {
   category: true,
   episodes: { select: { durationSec: true } },
   orgAudience: { select: { organizationId: true } },
+  departmentAudience: { select: { departmentId: true } },
 } as const;
 
 export default async function AppHomePage({
@@ -33,8 +35,8 @@ export default async function AppHomePage({
 
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
-  const orgIds = await getMembershipOrgIds(user.id);
-  const audience = audienceWhere(user.role, orgIds);
+  const viewer = await getViewerAudience(user.id);
+  const audience = audienceWhere(user.role, viewer);
 
   const [
     t,
@@ -118,7 +120,7 @@ export default async function AppHomePage({
   const seenTitles = new Set<string>();
   const continueWatching = continueRaw
     // Defense-in-depth on top of the query filter above.
-    .filter((p) => canViewTitle(p.episode.title, user.role, orgIds))
+    .filter((p) => canViewTitle(p.episode.title, user.role, viewer))
     .filter((p) => {
       const titleId = p.episode.title.id;
       if (seenTitles.has(titleId)) return false;
@@ -144,7 +146,6 @@ export default async function AppHomePage({
             : null
         }
         playLabel={t("play")}
-        moreLabel={t("moreInfo")}
         seriesLabel={tLib("series")}
         filmLabel={tLib("film")}
         fallbackHeading={t("heroFallbackTitle")}
@@ -183,7 +184,7 @@ export default async function AppHomePage({
                   key={p.episodeId}
                   title={p.episode.title}
                   titleId={p.episode.title.id}
-                  href={`/app/watch/${p.episode.title.slug}/${p.episodeId}`}
+                  href={episodePath(p.episode.title.slug, p.episode)}
                   index={i}
                   percent={percent}
                   caption={
@@ -204,7 +205,7 @@ export default async function AppHomePage({
         {newReleases.length > 0 ? (
           <Carousel title={t("newReleases")} subtitle={t("newReleasesSub")}>
             {newReleases.map((item, i) => (
-              <div key={item.id} className="w-56 shrink-0">
+              <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
                 <TitleCard title={item} index={i} />
               </div>
             ))}
@@ -214,7 +215,7 @@ export default async function AppHomePage({
         {series.length > 0 ? (
           <Carousel title={tNav("series")}>
             {series.map((item, i) => (
-              <div key={item.id} className="w-56 shrink-0">
+              <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
                 <TitleCard title={item} index={i} />
               </div>
             ))}
@@ -224,7 +225,7 @@ export default async function AppHomePage({
         {movies.length > 0 ? (
           <Carousel title={tNav("films")}>
             {movies.map((item, i) => (
-              <div key={item.id} className="w-56 shrink-0">
+              <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
                 <TitleCard title={item} index={i} />
               </div>
             ))}
@@ -234,7 +235,7 @@ export default async function AppHomePage({
         {talent.length > 0 ? (
           <Carousel title={tNav("talentManagement")}>
             {talent.map((item, i) => (
-              <div key={item.id} className="w-56 shrink-0">
+              <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
                 <TitleCard title={item} index={i} />
               </div>
             ))}

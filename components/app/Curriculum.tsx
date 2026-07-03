@@ -9,6 +9,8 @@ import { useTitleProgress, type ProgressMap } from "@/lib/hooks/use-progress";
 
 type Lesson = {
   id: string;
+  /** Pretty URL segment (e.g. "s1-b2") — precomputed server-side. */
+  seg: string;
   episodeNumber: number;
   name: string;
   durationSec: number;
@@ -78,7 +80,7 @@ export function Curriculum({
                   active={active}
                 />
                 <Link
-                  href={`/app/watch/${slug}/${l.id}`}
+                  href={`/app/watch/${slug}/${l.seg}`}
                   className="flex min-w-0 flex-1 items-center"
                 >
                   <div className="min-w-0 flex-1">

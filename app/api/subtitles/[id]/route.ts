@@ -1,5 +1,5 @@
 import { getSession, getEffectiveAccess } from "@/lib/access";
-import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
+import { getViewerAudience, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { resolveVideoUrl } from "@/lib/storage";
 
@@ -20,7 +20,10 @@ export async function GET(
       episode: {
         include: {
           title: {
-            include: { orgAudience: { select: { organizationId: true } } },
+            include: {
+              orgAudience: { select: { organizationId: true } },
+              departmentAudience: { select: { departmentId: true } },
+            },
           },
         },
       },
@@ -35,8 +38,8 @@ export async function GET(
   const isStaff = role === "admin" || role === "platform_editor";
   if (!isStaff) {
     if (!title.published) return new Response("not found", { status: 404 });
-    const orgIds = await getMembershipOrgIds(session.user.id);
-    if (!canViewTitle(title, role, orgIds)) {
+    const viewer = await getViewerAudience(session.user.id);
+    if (!canViewTitle(title, role, viewer)) {
       return new Response("not found", { status: 404 });
     }
     // Full transcript = full content; preview-only (non-subscriber) users don't

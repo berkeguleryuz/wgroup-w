@@ -13,7 +13,7 @@ export default async function NotFound() {
         {t("notFoundBody")}
       </p>
       <Link href="/">
-        <Button variant="dark">{t("backHome")}</Button>
+        <Button variant="shine">{t("backHome")}</Button>
       </Link>
     </div>
   );

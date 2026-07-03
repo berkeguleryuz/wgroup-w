@@ -88,7 +88,7 @@ export function SignUpForm() {
         </div>
         <Button
           type="button"
-          variant="dark"
+          variant="shine"
           size="lg"
           className="w-full justify-center"
           onClick={() => router.push(loginHref)}
@@ -195,7 +195,7 @@ export function SignUpForm() {
 
         <Button
           type="submit"
-          variant="dark"
+          variant="shine"
           size="lg"
           className="w-full justify-center gap-2"
           disabled={busy}

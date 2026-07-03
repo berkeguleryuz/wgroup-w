@@ -19,7 +19,7 @@ export function Carousel({
           ) : null}
         </div>
       </div>
-      <div className="-mx-2 overflow-x-auto pb-2">
+      <div className="bf-no-scrollbar -mx-2 overflow-x-auto pb-2">
         <div className="flex gap-4 px-2 min-w-max">{children}</div>
       </div>
     </section>

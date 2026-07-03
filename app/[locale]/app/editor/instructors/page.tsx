@@ -85,7 +85,7 @@ export default async function EditorInstructorsPage({
             </div>
             <div>
               <Label>{t("instructorPhoto")}</Label>
-              <ImageUpload name="photoUrl" />
+              <ImageUpload name="photoUrl" shape="avatar" />
             </div>
           </div>
           <div>
@@ -167,6 +167,7 @@ export default async function EditorInstructorsPage({
                         <ImageUpload
                           name="photoUrl"
                           defaultValue={i.photoUrl ?? ""}
+                          shape="avatar"
                         />
                       </div>
                     </div>

@@ -5,7 +5,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { Section, TitleType } from "@prisma/client";
 import { requireSession } from "@/lib/access";
-import { getMembershipOrgIds, audienceWhere } from "@/lib/content-visibility";
+import { getViewerAudience, audienceWhere } from "@/lib/content-visibility";
 import { TitleCard } from "@/components/app/TitleCard";
 
 type SearchParams = {
@@ -42,8 +42,8 @@ export default async function BrowsePage({
 
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
-  const orgIds = await getMembershipOrgIds(user.id);
-  const audience = audienceWhere(user.role, orgIds);
+  const viewer = await getViewerAudience(user.id);
+  const audience = audienceWhere(user.role, viewer);
 
   const [t, tNav, topCategories, subCategories, titles] = await Promise.all([
     getTranslations("discover"),
@@ -140,7 +140,7 @@ export default async function BrowsePage({
           {t("empty")}
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {titles.map((title, i) => (
             <TitleCard key={title.id} title={title} index={i} />
           ))}
@@ -164,10 +164,10 @@ function FilterPill({
   return (
     <Link
       href={href}
-      className={`rounded-11 border px-3 py-1.5 text-sm transition-colors ${
+      className={`rounded-11 px-3 py-1.5 text-sm transition-colors ${
         active
-          ? "bg-surface-dark text-surface-dark-foreground border-surface-dark"
-          : "bg-background text-foreground border-border hover:bg-muted"
+          ? "border border-transparent bg-primary font-medium text-primary-foreground"
+          : "border border-border bg-background text-foreground hover:bg-muted"
       } ${small ? "text-xs py-1" : ""}`}
     >
       {children}

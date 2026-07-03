@@ -24,3 +24,12 @@ export function slugify(input: string): string {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 }
+
+/**
+ * True for the control-flow error Next's redirect() throws — rethrow it from
+ * catch blocks so error-toast wrapping never swallows a real redirect.
+ */
+export function isNextRedirect(e: unknown): boolean {
+  const digest = (e as { digest?: unknown } | null)?.digest;
+  return typeof digest === "string" && digest.startsWith("NEXT_REDIRECT");
+}

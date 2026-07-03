@@ -49,34 +49,46 @@ export default async function CorporateInvitePage({
         </p>
       ) : null}
 
-      <section className="grid gap-6 md:grid-cols-2">
+      <section className="grid items-stretch gap-6 md:grid-cols-2">
         <form
           action={inviteSingle}
-          className="space-y-4 rounded-11 border border-border/60 bg-background p-6"
+          className="flex flex-col rounded-11 border border-border/60 bg-background p-6"
         >
           <h2 className="font-display text-2xl">{t("single")}</h2>
-          <div>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("singleBody")}
+          </p>
+          <div className="mt-5">
             <Label htmlFor="email">{t("colEmail")}</Label>
-            <Input id="email" type="email" name="email" required />
+            <Input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="name@company.com"
+              required
+            />
           </div>
-          <Button type="submit" variant="dark">
-            {t("sendInvite")}
-          </Button>
+          <div className="mt-auto pt-5">
+            <Button type="submit" variant="dark" className="w-full">
+              {t("sendInvite")}
+            </Button>
+          </div>
         </form>
 
         <form
           action={inviteBulk}
-          className="space-y-4 rounded-11 border border-border/60 bg-background p-6"
+          className="flex flex-col rounded-11 border border-border/60 bg-background p-6"
         >
           <h2 className="font-display text-2xl">{t("bulk")}</h2>
-          <p className="text-sm text-muted-foreground">{t("bulkBody")}</p>
+          <p className="mt-2 text-sm text-muted-foreground">{t("bulkBody")}</p>
           <Textarea
             name="emails"
-            rows={8}
+            rows={5}
+            className="mt-5 flex-1"
             placeholder="name@company.com&#10;colleague@company.com"
             required
           />
-          <Button type="submit" variant="dark">
+          <Button type="submit" variant="dark" className="mt-5 w-full">
             {t("sendAll")}
           </Button>
         </form>

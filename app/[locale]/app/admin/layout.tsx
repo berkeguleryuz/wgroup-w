@@ -1,12 +1,23 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { requireRole } from "@/lib/access";
+import { PanelNav, type PanelNavItem } from "@/components/app/PanelNav";
 
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   await requireRole(["admin"]);
   const t = await getTranslations("admin");
+
+  const items: PanelNavItem[] = [
+    { href: "/app/admin", label: t("dashboard"), exact: true },
+    { href: "/app/admin/users", label: t("users") },
+    { href: "/app/admin/companies", label: t("companies") },
+    { href: "/app/admin/subscribers", label: t("subscribersHeading") },
+    { href: "/app/admin/storage", label: t("storageHeading") },
+    // Instructor management lives in the editor area; admins have access to
+    // it, so surface a direct shortcut here.
+    { href: "/app/editor/instructors", label: t("instructors") },
+  ];
 
   return (
     <div className="grid gap-8 md:grid-cols-[220px_1fr]">
@@ -14,26 +25,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
         <p className="mb-3 px-2 text-xs uppercase tracking-wide text-muted-foreground">
           {t("kicker")}
         </p>
-        <ul className="space-y-1">
-          <NavItem href="/app/admin">{t("dashboard")}</NavItem>
-          <NavItem href="/app/admin/users">{t("users")}</NavItem>
-          <NavItem href="/app/admin/companies">{t("companies")}</NavItem>
-          <NavItem href="/app/admin/subscribers">
-            {t("subscribersHeading")}
-          </NavItem>
-        </ul>
+        <PanelNav items={items} />
       </nav>
-      <section>{children}</section>
+      <section className="min-w-0">{children}</section>
     </div>
-  );
-}
-
-function NavItem({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <li>
-      <Link href={href} className="block rounded-11 px-3 py-2 text-sm hover:bg-muted">
-        {children}
-      </Link>
-    </li>
   );
 }

@@ -5,33 +5,36 @@ import { Link } from "@/lib/i18n/navigation";
 export function CategoryShowcase() {
   const t = useTranslations("categories");
 
+  // Card surfaces invert with the theme: the dark cards turn gold in dark
+  // mode and the gold card turns dark, so all three keep contrast against
+  // the page background.
+  const darkCard =
+    "[background:linear-gradient(135deg,#100D08,#3a2e1f)] text-surface-dark-foreground dark:[background:linear-gradient(135deg,#edddb9,#c9a86a)] dark:text-[#100D08]";
+  const goldCard =
+    "[background:linear-gradient(135deg,#edddb9,#c9a86a)] text-[#100D08] dark:[background:linear-gradient(135deg,#100D08,#3a2e1f)] dark:text-surface-dark-foreground";
+
   const categories = [
     {
       title: t("seriesTitle"),
       tag: t("seriesTag"),
       body: t("seriesBody"),
       count: t("seriesCount"),
-      from: "#100D08",
-      to: "#3a2e1f",
-      dark: true,
+      surface: darkCard,
     },
     {
       title: t("filmsTitle"),
       tag: t("filmsTag"),
       body: t("filmsBody"),
       count: t("filmsCount"),
-      from: "#edddb9",
-      to: "#c9a86a",
-      dark: false,
+      surface: goldCard,
     },
     {
       title: t("talentTitle"),
       tag: t("talentTag"),
       body: t("talentBody"),
       count: t("talentCount"),
-      from: "#2b2016",
-      to: "#5b4630",
-      dark: true,
+      surface:
+        "[background:linear-gradient(135deg,#2b2016,#5b4630)] text-surface-dark-foreground dark:[background:linear-gradient(135deg,#e6d3a8,#b8945a)] dark:text-[#100D08]",
     },
   ];
 
@@ -53,13 +56,7 @@ export function CategoryShowcase() {
           {categories.map((c) => (
             <div
               key={c.title}
-              className="rounded-11 border border-border/60 overflow-hidden"
-              style={{
-                background: `linear-gradient(135deg, ${c.from}, ${c.to})`,
-                color: c.dark
-                  ? "var(--surface-dark-foreground)"
-                  : "var(--foreground)",
-              }}
+              className={`rounded-11 border border-border/60 overflow-hidden ${c.surface}`}
             >
               <div className="aspect-[4/5] p-8 flex flex-col justify-between">
                 <div>

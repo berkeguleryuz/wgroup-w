@@ -94,8 +94,10 @@ model Organization {
   invitations Invitation[]
   departments Department[]
 
-  companyProfile CompanyProfile?
-  titleAudience  TitleOrganization[]
+  companyProfile     CompanyProfile?
+  titleAudience      TitleOrganization[]
+  createdTitles      Title[]
+  createdInstructors Instructor[]
 
   @@map("organization")
 }
@@ -125,7 +127,8 @@ model Department {
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   name           String
 
-  members Member[]
+  members       Member[]
+  titleAudience TitleDepartment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -202,10 +205,16 @@ model Title {
   scheduledFor DateTime?
   // Audience gate: PUBLIC (all subscribers) or ORG_ONLY (only assigned orgs).
   visibility   TitleVisibility @default(PUBLIC)
+  // Set when a company created this title via its self-serve content studio.
+  // Such titles are always ORG_ONLY and only editable by that org's owner
+  // (platform staff can still manage them from the editor panel).
+  createdByOrgId String?
+  createdByOrg   Organization? @relation(fields: [createdByOrgId], references: [id], onDelete: SetNull)
 
-  episodes    Episode[]
-  credits     TitleInstructor[]
-  orgAudience TitleOrganization[]
+  episodes           Episode[]
+  credits            TitleInstructor[]
+  orgAudience        TitleOrganization[]
+  departmentAudience TitleDepartment[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -214,6 +223,7 @@ model Title {
   @@index([published, publishedAt(sort: Desc), createdAt(sort: Desc)])
   @@index([published, scheduledFor])
   @@index([published, visibility])
+  @@index([createdByOrgId])
 }
 
 // Which organizations an ORG_ONLY title is exposed to. No rows = visible to
@@ -228,6 +238,21 @@ model TitleOrganization {
 
   @@id([titleId, organizationId])
   @@index([organizationId])
+}
+
+// Optional department targeting for an ORG_ONLY title. No rows = the whole
+// company sees it; with rows only members of those departments (and the org
+// owner) see it.
+model TitleDepartment {
+  titleId      String
+  departmentId String
+  title        Title      @relation(fields: [titleId], references: [id], onDelete: Cascade)
+  department   Department @relation(fields: [departmentId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@id([titleId, departmentId])
+  @@index([departmentId])
 }
 
 model Episode {
@@ -275,8 +300,14 @@ model Instructor {
   photoUrl String?
   userId   String? @unique
   user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Set when a company created this instructor in its content studio; such
+  // instructors are only assignable to that org's own titles.
+  createdByOrgId String?
+  createdByOrg   Organization? @relation(fields: [createdByOrgId], references: [id], onDelete: Cascade)
 
   credits TitleInstructor[]
+
+  @@index([createdByOrgId])
 }
 
 model TitleInstructor {
@@ -337,9 +368,20 @@ model CompanyProfile {
   seatCount             Int          @default(0)
   // "pending" | "active" | "grace" | "expired"
   subscriptionStatus    String       @default("pending")
+  // Self-serve content studio: when true (default) the org owner can create
+  // ORG_ONLY trainings for their own company from the corporate panel.
+  selfServeContent      Boolean      @default(true)
   subscriptionStartedAt DateTime?
   subscriptionEndsAt    DateTime?
   notes                 String?
+
+  // Stripe self-checkout (null for manually activated companies).
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  // "corp_small" (max 10 seats) | "corp_large" (unlimited)
+  plan                 String?
+  cancelAtPeriodEnd    Boolean   @default(false)
+  lastEventAt          DateTime?
 
   // Originating sales lead this company was activated from (if any).
   leadId String?        @unique

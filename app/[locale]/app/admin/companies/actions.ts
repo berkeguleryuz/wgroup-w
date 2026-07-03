@@ -1,11 +1,24 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import { getLocale } from "next-intl/server";
 import { headers } from "next/headers";
+
+import { localizedPath } from "@/lib/i18n/routing";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
+import { isNextRedirect } from "@/lib/utils";
+
+/** Refresh the companies page and flash a one-shot toast (`?toast=<key>`). */
+async function backToCompanies(toast: string, emsg?: string) {
+  revalidatePath("/app/admin/companies");
+  const locale = await getLocale();
+  const q = emsg ? `&emsg=${encodeURIComponent(emsg)}` : "";
+  redirect(localizedPath(locale, `/app/admin/companies?toast=${toast}${q}`));
+}
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
@@ -16,11 +29,12 @@ export async function markLeadContacted(formData: FormData) {
     where: { id },
     data: { status: "contacted" },
   });
-  revalidatePath("/app/admin/companies");
+  await backToCompanies("saved");
 }
 
 export async function activateCompany(formData: FormData) {
   await requireRole(["admin"]);
+  try {
 
   const companyName = String(formData.get("companyName") || "").trim();
   const slug = String(formData.get("slug") || "").trim().toLowerCase();
@@ -165,7 +179,13 @@ export async function activateCompany(formData: FormData) {
       .catch(() => {});
   }
 
-  revalidatePath("/app/admin/companies");
+  } catch (e) {
+    if (isNextRedirect(e)) throw e;
+    // Business errors (slug taken, owner provisioning failed, …) surface as
+    // an error toast instead of the generic error page.
+    await backToCompanies("error", (e as Error).message);
+  }
+  await backToCompanies("created");
 }
 
 export async function updateCompany(formData: FormData) {
@@ -175,6 +195,7 @@ export async function updateCompany(formData: FormData) {
   const seatCount = Number(formData.get("seatCount") || 0);
   const subscriptionStatus = String(formData.get("subscriptionStatus") || "").trim();
   const endsAtRaw = String(formData.get("endsAt") || "").trim();
+  const selfServeContent = formData.get("selfServeContent") === "on";
 
   if (!billingEmail || seatCount < 0) throw new Error("Eksik alan");
   const allowed = new Set(["pending", "active", "grace", "expired"]);
@@ -187,9 +208,10 @@ export async function updateCompany(formData: FormData) {
       seatCount,
       subscriptionStatus,
       subscriptionEndsAt: endsAtRaw ? new Date(endsAtRaw) : null,
+      selfServeContent,
     },
   });
-  revalidatePath("/app/admin/companies");
+  await backToCompanies("saved");
 }
 
 export async function deactivateCompany(formData: FormData) {
@@ -199,7 +221,7 @@ export async function deactivateCompany(formData: FormData) {
     where: { organizationId },
     data: { subscriptionStatus: "expired" },
   });
-  revalidatePath("/app/admin/companies");
+  await backToCompanies("saved");
 }
 
 export async function reactivateCompany(formData: FormData) {
@@ -209,5 +231,5 @@ export async function reactivateCompany(formData: FormData) {
     where: { organizationId },
     data: { subscriptionStatus: "active" },
   });
-  revalidatePath("/app/admin/companies");
+  await backToCompanies("saved");
 }

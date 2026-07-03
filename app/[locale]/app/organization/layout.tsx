@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { requireOrgOwner } from "@/lib/corporate";
+import { OrgSidebar, type OrgSidebarItem } from "@/components/app/OrgSidebar";
 
 export default async function CorporateAdminLayout({
   children,
@@ -14,34 +14,44 @@ export default async function CorporateAdminLayout({
     requireOrgOwner(),
   ]);
 
-  return (
-    <div className="grid gap-8 md:grid-cols-[240px_1fr]">
-      <nav className="rounded-11 border border-border/60 bg-background p-4 h-fit">
-        <p className="mb-1 px-2 text-xs uppercase tracking-wide text-muted-foreground">
-          {t("kicker")}
-        </p>
-        <p className="px-2 mb-3 text-sm font-semibold">
-          {ownerMembership.organization.name}
-        </p>
-        <ul className="space-y-1">
-          <NavItem href="/app/organization">{t("dashboard")}</NavItem>
-          <NavItem href="/app/organization/members">{t("members")}</NavItem>
-          <NavItem href="/app/organization/departments">{t("departments")}</NavItem>
-          <NavItem href="/app/organization/reports">{t("reports")}</NavItem>
-          <NavItem href="/app/organization/invite">{t("inviteHeading")}</NavItem>
-        </ul>
-      </nav>
-      <section>{children}</section>
-    </div>
-  );
-}
+  const items: OrgSidebarItem[] = [
+    { href: "/app/organization", label: t("dashboard"), icon: "dashboard" },
+    { href: "/app/organization/members", label: t("members"), icon: "members" },
+    ...(ownerMembership.organization.companyProfile?.selfServeContent
+      ? [
+          {
+            href: "/app/organization/content",
+            label: t("contentStudio"),
+            icon: "content",
+          } as OrgSidebarItem,
+        ]
+      : []),
+    {
+      href: "/app/organization/departments",
+      label: t("departments"),
+      icon: "departments",
+    },
+    { href: "/app/organization/reports", label: t("reports"), icon: "reports" },
+    {
+      href: "/app/organization/billing",
+      label: t("billingTitle"),
+      icon: "billing",
+    },
+    {
+      href: "/app/organization/invite",
+      label: t("inviteHeading"),
+      icon: "invite",
+    },
+  ];
 
-function NavItem({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <li>
-      <Link href={href} className="block rounded-11 px-3 py-2 text-sm hover:bg-muted">
-        {children}
-      </Link>
-    </li>
+    <div className="grid gap-8 md:grid-cols-[256px_1fr]">
+      <OrgSidebar
+        kicker={t("kicker")}
+        orgName={ownerMembership.organization.name}
+        items={items}
+      />
+      <section className="min-w-0">{children}</section>
+    </div>
   );
 }

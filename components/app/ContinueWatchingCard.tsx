@@ -53,11 +53,10 @@ export function ContinueWatchingCard({
   };
 
   return (
-    <div className="w-72 shrink-0">
+    <div className="w-64 sm:w-72 xl:w-80 shrink-0">
       <div className="relative">
         <TitleCard
           title={title}
-          variant="wide"
           index={index}
           href={href}
           progressPercent={percent}

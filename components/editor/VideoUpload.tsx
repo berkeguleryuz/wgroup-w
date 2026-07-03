@@ -6,15 +6,49 @@ import { useTranslations } from "next-intl";
 type Props = {
   name: string;
   required?: boolean;
+  /** When set, a hidden input with this name carries the video's duration in
+      seconds, read from the file's metadata — no manual entry needed. */
+  durationName?: string;
 };
 
-export function VideoUpload({ name, required }: Props) {
+/** Read the duration (seconds) from a video file's metadata in the browser. */
+function readVideoDuration(file: File): Promise<number | null> {
+  return new Promise((resolve) => {
+    const url = URL.createObjectURL(file);
+    const video = document.createElement("video");
+    video.preload = "metadata";
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(url);
+      resolve(
+        Number.isFinite(video.duration) && video.duration > 0
+          ? Math.round(video.duration)
+          : null,
+      );
+    };
+    video.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(null);
+    };
+    video.src = url;
+  });
+}
+
+function formatDuration(totalSec: number) {
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  const mm = h > 0 ? String(m).padStart(2, "0") : String(m);
+  return `${h > 0 ? `${h}:` : ""}${mm}:${String(s).padStart(2, "0")}`;
+}
+
+export function VideoUpload({ name, required, durationName }: Props) {
   const t = useTranslations("editor");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
   const [path, setPath] = useState("");
   const [fileName, setFileName] = useState("");
+  const [durationSec, setDurationSec] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(file: File) {
@@ -23,6 +57,10 @@ export function VideoUpload({ name, required }: Props) {
     setProgress(0);
     setPath("");
     setFileName(file.name);
+    setDurationSec(null);
+    if (durationName) {
+      void readVideoDuration(file).then(setDurationSec);
+    }
     try {
       const res = await fetch("/api/editor/video-upload", {
         method: "POST",
@@ -79,6 +117,9 @@ export function VideoUpload({ name, required }: Props) {
   return (
     <div>
       <input type="hidden" name={name} value={path} required={required} />
+      {durationName && durationSec !== null ? (
+        <input type="hidden" name={durationName} value={durationSec} />
+      ) : null}
 
       <div
         className={`rounded-11 border border-dashed p-5 transition-colors ${
@@ -88,7 +129,14 @@ export function VideoUpload({ name, required }: Props) {
         {path ? (
           <div className="flex items-center justify-between gap-4">
             <div className="min-w-0">
-              <p className="truncate text-sm font-medium">{fileName}</p>
+              <p className="truncate text-sm font-medium">
+                {fileName}
+                {durationSec !== null ? (
+                  <span className="ml-2 font-mono text-xs text-muted-foreground">
+                    {formatDuration(durationSec)}
+                  </span>
+                ) : null}
+              </p>
               <p className="mt-0.5 truncate font-mono text-xs text-muted-foreground">
                 {path}
               </p>
@@ -98,6 +146,7 @@ export function VideoUpload({ name, required }: Props) {
               onClick={() => {
                 setPath("");
                 setFileName("");
+                setDurationSec(null);
                 if (inputRef.current) inputRef.current.value = "";
               }}
               className="shrink-0 text-xs text-red-600 underline-offset-4 hover:underline"

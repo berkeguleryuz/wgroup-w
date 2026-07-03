@@ -1,11 +1,16 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import type { Locale } from "@/lib/i18n/routing";
+import { localizedPath, type Locale } from "@/lib/i18n/routing";
+import {
+  episodePath,
+  episodeSegment,
+  parseEpisodeSegment,
+} from "@/lib/episode-path";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
-import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
+import { getViewerAudience, canViewTitle } from "@/lib/content-visibility";
 import { resolveVideoUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/Button";
 import { Curriculum } from "@/components/app/Curriculum";
@@ -16,37 +21,55 @@ export default async function PlayerPage({
 }: {
   params: Promise<{ locale: Locale; slug: string; episode: string }>;
 }) {
-  const { locale, slug, episode: episodeId } = await params;
+  const { locale, slug, episode: episodeParam } = await params;
   setRequestLocale(locale);
   const session = await requireSession();
   const user = session.user as typeof session.user & { role?: string | null };
 
+  // Pretty URLs (/s1-b2) resolve by season+episode number; legacy id URLs
+  // still resolve, then get redirected to the pretty form below.
+  const numbers = parseEpisodeSegment(episodeParam);
+  const episodeInclude = {
+    subtitles: { orderBy: { label: "asc" as const } },
+    title: {
+      include: {
+        episodes: {
+          orderBy: [
+            { seasonNumber: "asc" as const },
+            { episodeNumber: "asc" as const },
+          ],
+        },
+        orgAudience: { select: { organizationId: true } },
+        departmentAudience: { select: { departmentId: true } },
+      },
+    },
+  };
+
   const [t, access, ep] = await Promise.all([
     getTranslations("player"),
     getEffectiveAccess(user.id, user.role),
-    prisma.episode.findUnique({
-      where: { id: episodeId },
-      include: {
-        subtitles: { orderBy: { label: "asc" } },
-        title: {
-          include: {
-            episodes: {
-              orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
-            },
-            orgAudience: { select: { organizationId: true } },
-          },
-        },
-      },
-    }),
+    numbers
+      ? prisma.episode.findFirst({
+          where: { ...numbers, title: { slug } },
+          include: episodeInclude,
+        })
+      : prisma.episode.findUnique({
+          where: { id: episodeParam },
+          include: episodeInclude,
+        }),
   ]);
   if (!ep || ep.title.slug !== slug) notFound();
+
+  // Legacy id URL → canonical pretty URL (keeps old links working without
+  // exposing the database id in the address bar).
+  if (!numbers) redirect(localizedPath(locale, episodePath(slug, ep)));
 
   const isStaff = user.role === "admin" || user.role === "platform_editor";
   // Draft / scheduled titles are watchable only by staff (mirrors the detail page).
   if (!ep.title.published && !isStaff) notFound();
 
-  const orgIds = await getMembershipOrgIds(user.id);
-  if (!canViewTitle(ep.title, user.role, orgIds)) notFound();
+  const viewer = await getViewerAudience(user.id);
+  if (!canViewTitle(ep.title, user.role, viewer)) notFound();
 
   const [progress, allProgress, videoUrl] = await Promise.all([
     prisma.progress.findUnique({
@@ -82,6 +105,7 @@ export default async function PlayerPage({
 
   const lessons = ep.title.episodes.map((e) => ({
     id: e.id,
+    seg: episodeSegment(e),
     episodeNumber: e.episodeNumber,
     name: e.name,
     durationSec: e.durationSec,
@@ -130,7 +154,7 @@ export default async function PlayerPage({
             capSeconds={capSeconds}
             startAt={access.hasAccess ? (progress?.positionSec ?? 0) : 0}
             hasAccess={access.hasAccess}
-            nextHref={next ? `/app/watch/${slug}/${next.id}` : null}
+            nextHref={next ? episodePath(slug, next) : null}
             nextName={next?.name ?? null}
             initialProgress={initialProgress}
           />
@@ -169,7 +193,7 @@ export default async function PlayerPage({
         <div className="flex items-center justify-between gap-3 border-t border-border/60 pt-5">
           {prev ? (
             <Link
-              href={`/app/watch/${slug}/${prev.id}`}
+              href={episodePath(slug, prev)}
               className="inline-flex items-center gap-2 rounded-11 border border-border bg-background px-4 py-2.5 text-sm transition-colors hover:bg-muted"
             >
               ← {t("prevLesson")}
@@ -179,7 +203,7 @@ export default async function PlayerPage({
           )}
           {next ? (
             <Link
-              href={`/app/watch/${slug}/${next.id}`}
+              href={episodePath(slug, next)}
               className="inline-flex items-center gap-2 rounded-11 bg-surface-dark px-5 py-2.5 text-sm font-semibold text-surface-dark-foreground transition-colors hover:bg-surface-dark/90"
             >
               {t("nextLesson")} →

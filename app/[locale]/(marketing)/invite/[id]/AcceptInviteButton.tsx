@@ -47,7 +47,7 @@ export function AcceptInviteButton({ invitationId }: { invitationId: string }) {
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
       <Button
         type="button"
-        variant="dark"
+        variant="shine"
         size="lg"
         className="w-full"
         onClick={onAccept}

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getSession } from "@/lib/access";
-import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
+import { getViewerAudience, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 
 // Per-title progress map for the watch page (consumed by TanStack Query).
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
           published: true,
           visibility: true,
           orgAudience: { select: { organizationId: true } },
+          departmentAudience: { select: { departmentId: true } },
         },
       },
     },
@@ -70,8 +71,8 @@ export async function POST(request: Request) {
     if (!episode.title.published) {
       return NextResponse.json({ ok: false }, { status: 404 });
     }
-    const orgIds = await getMembershipOrgIds(userId);
-    if (!canViewTitle(episode.title, role, orgIds)) {
+    const viewer = await getViewerAudience(userId);
+    if (!canViewTitle(episode.title, role, viewer)) {
       return NextResponse.json({ ok: false }, { status: 404 });
     }
   }

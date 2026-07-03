@@ -6,6 +6,7 @@ import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
+import { cleanupStorageRefs } from "@/lib/storage-cleanup";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { AddEpisodeForm } from "@/components/editor/AddEpisodeForm";
@@ -25,10 +26,11 @@ const LANG_LABELS: Record<string, string> = {
   ar: "العربية",
 };
 
-async function backToTitle(titleId: string) {
+async function backToTitle(titleId: string, toast = "saved") {
   updateTag("featured-titles");
   const locale = await getLocale();
-  redirect(localizedPath(locale, `/app/editor/titles/${titleId}`));
+  // `?toast=<key>` is picked up client-side by the Toaster and shown once.
+  redirect(localizedPath(locale, `/app/editor/titles/${titleId}?toast=${toast}`));
 }
 
 async function updateTitle(formData: FormData) {
@@ -40,10 +42,19 @@ async function updateTitle(formData: FormData) {
   const heroImageUrl = String(formData.get("heroImageUrl") || "").trim() || null;
   const trailerUrl = String(formData.get("trailerUrl") || "").trim() || null;
 
+  const before = await prisma.title.findUnique({
+    where: { id },
+    select: { heroImageUrl: true, trailerUrl: true },
+  });
   await prisma.title.update({
     where: { id },
     data: { title, synopsis, heroImageUrl, trailerUrl },
   });
+  // Drop replaced media from storage once nothing references it.
+  await cleanupStorageRefs([
+    before?.heroImageUrl !== heroImageUrl ? before?.heroImageUrl : null,
+    before?.trailerUrl !== trailerUrl ? before?.trailerUrl : null,
+  ]);
   await backToTitle(id);
 }
 
@@ -88,6 +99,31 @@ async function cancelSchedule(formData: FormData) {
   await backToTitle(id);
 }
 
+async function deleteTitle(formData: FormData) {
+  "use server";
+  // Deleting a whole training is admin-only; editors manage content but
+  // cannot remove it (episodes + watch progress go with it).
+  await requireRole(["admin"]);
+  const id = String(formData.get("id"));
+  const doomed = await prisma.title.findUnique({
+    where: { id },
+    include: {
+      episodes: { select: { videoPath: true, subtitles: { select: { vttPath: true } } } },
+    },
+  });
+  await prisma.title.delete({ where: { id } });
+  if (doomed) {
+    await cleanupStorageRefs([
+      doomed.heroImageUrl,
+      doomed.trailerUrl,
+      ...doomed.episodes.flatMap((e) => [e.videoPath, ...e.subtitles.map((s) => s.vttPath)]),
+    ]);
+  }
+  updateTag("featured-titles");
+  const locale = await getLocale();
+  redirect(localizedPath(locale, "/app/editor/titles?toast=deleted"));
+}
+
 async function addEpisode(formData: FormData) {
   "use server";
   await requireRole(["platform_editor", "admin"]);
@@ -126,13 +162,18 @@ async function updateEpisode(formData: FormData) {
   const synopsis = String(formData.get("synopsis") || "").trim() || null;
   const seasonNumber = Number(formData.get("seasonNumber") || 1);
   const episodeNumber = Number(formData.get("episodeNumber") || 1);
-  const durationSec = Number(formData.get("durationSec") || 0);
+  // Only present when a replacement video was selected (measured client-side
+  // from the file's metadata); absent = keep the stored duration.
+  const durationRaw = String(formData.get("durationSec") ?? "").trim();
   const previewSec = Number(formData.get("previewSec") || 0);
   // Empty = keep the current video; the upload field is optional on edit.
   const videoPath = String(formData.get("videoPath") || "").trim();
 
   if (!name) throw new Error("Missing fields");
 
+  const before = videoPath
+    ? await prisma.episode.findUnique({ where: { id }, select: { videoPath: true } })
+    : null;
   await prisma.episode.update({
     where: { id },
     data: {
@@ -140,11 +181,15 @@ async function updateEpisode(formData: FormData) {
       synopsis,
       seasonNumber,
       episodeNumber,
-      durationSec,
       previewSec,
+      ...(durationRaw ? { durationSec: Number(durationRaw) } : {}),
       ...(videoPath ? { videoPath } : {}),
     },
   });
+  // Drop the replaced video from storage once nothing references it.
+  if (before && before.videoPath !== videoPath) {
+    await cleanupStorageRefs([before.videoPath]);
+  }
   await backToTitle(titleId);
 }
 
@@ -153,8 +198,18 @@ async function deleteEpisode(formData: FormData) {
   await requireRole(["platform_editor", "admin"]);
   const id = String(formData.get("id"));
   const titleId = String(formData.get("titleId"));
+  const doomed = await prisma.episode.findUnique({
+    where: { id },
+    include: { subtitles: { select: { vttPath: true } } },
+  });
   await prisma.episode.delete({ where: { id } });
-  await backToTitle(titleId);
+  if (doomed) {
+    await cleanupStorageRefs([
+      doomed.videoPath,
+      ...doomed.subtitles.map((s) => s.vttPath),
+    ]);
+  }
+  await backToTitle(titleId, "deleted");
 }
 
 async function setVisibility(formData: FormData) {
@@ -229,11 +284,18 @@ async function addSubtitle(formData: FormData) {
   if (!episodeId || !lang || !vttPath) throw new Error("Missing fields");
 
   const label = LANG_LABELS[lang] ?? lang.toUpperCase();
+  const before = await prisma.subtitle.findUnique({
+    where: { episodeId_lang: { episodeId, lang } },
+    select: { vttPath: true },
+  });
   await prisma.subtitle.upsert({
     where: { episodeId_lang: { episodeId, lang } },
     create: { episodeId, lang, label, vttPath },
     update: { vttPath, label },
   });
+  if (before && before.vttPath !== vttPath) {
+    await cleanupStorageRefs([before.vttPath]);
+  }
   await backToTitle(titleId);
 }
 
@@ -242,8 +304,13 @@ async function deleteSubtitle(formData: FormData) {
   await requireRole(["platform_editor", "admin"]);
   const id = String(formData.get("id"));
   const titleId = String(formData.get("titleId"));
+  const doomed = await prisma.subtitle.findUnique({
+    where: { id },
+    select: { vttPath: true },
+  });
   await prisma.subtitle.delete({ where: { id } });
-  await backToTitle(titleId);
+  await cleanupStorageRefs([doomed?.vttPath]);
+  await backToTitle(titleId, "deleted");
 }
 
 export default async function EditorTitleDetail({
@@ -253,7 +320,9 @@ export default async function EditorTitleDetail({
 }) {
   const { locale, id } = await params;
   setRequestLocale(locale);
-  await requireRole(["platform_editor", "admin"]);
+  const session = await requireRole(["platform_editor", "admin"]);
+  const isAdmin =
+    (session.user as { role?: string | null }).role === "admin";
   const [t, title, instructors, organizations] = await Promise.all([
     getTranslations("editor"),
     prisma.title.findUnique({
@@ -283,7 +352,13 @@ export default async function EditorTitleDetail({
   const nextEpisodeNumber =
     (title.episodes[title.episodes.length - 1]?.episodeNumber ?? 0) + 1;
   const creditedIds = new Set(title.credits.map((c) => c.instructorId));
-  const assignable = instructors.filter((i) => !creditedIds.has(i.id));
+  // Company-scoped instructors are only assignable to that company's own
+  // titles — keep them out of the pool for platform content.
+  const assignable = instructors.filter(
+    (i) =>
+      !creditedIds.has(i.id) &&
+      (i.createdByOrgId === null || i.createdByOrgId === title.createdByOrgId),
+  );
 
   return (
     <div className="space-y-10">
@@ -345,6 +420,9 @@ export default async function EditorTitleDetail({
                 name="heroImageUrl"
                 defaultValue={title.heroImageUrl ?? ""}
               />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {t("heroImageHint")}
+              </p>
             </div>
             <div>
               <Label>{t("trailer")}</Label>
@@ -640,7 +718,7 @@ export default async function EditorTitleDetail({
                   >
                     <input type="hidden" name="id" value={ep.id} />
                     <input type="hidden" name="titleId" value={title.id} />
-                    <div className="grid gap-3 md:grid-cols-4">
+                    <div className="grid gap-3 md:grid-cols-3">
                       <div>
                         <Label htmlFor={`season-${ep.id}`}>{t("season")}</Label>
                         <Input
@@ -661,16 +739,6 @@ export default async function EditorTitleDetail({
                           type="number"
                           min={1}
                           defaultValue={ep.episodeNumber}
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor={`dur-${ep.id}`}>{t("duration")}</Label>
-                        <Input
-                          id={`dur-${ep.id}`}
-                          name="durationSec"
-                          type="number"
-                          min={0}
-                          defaultValue={ep.durationSec}
                         />
                       </div>
                       <div>
@@ -708,7 +776,8 @@ export default async function EditorTitleDetail({
                     </div>
                     <div>
                       <Label>{t("replaceVideo")}</Label>
-                      <VideoUpload name="videoPath" />
+                      {/* New file also refreshes durationSec from metadata. */}
+                      <VideoUpload name="videoPath" durationName="durationSec" />
                       <p className="mt-1 text-xs text-muted-foreground">
                         {t("replaceVideoHint")}
                       </p>
@@ -784,6 +853,30 @@ export default async function EditorTitleDetail({
           nextEpisodeNumber={nextEpisodeNumber}
         />
       </section>
+
+      {isAdmin ? (
+        <section className="rounded-11 border border-border/60 bg-background p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="min-w-0">
+              <h2 className="font-display text-2xl">{t("deleteTitle")}</h2>
+              <p className="mt-2 max-w-xl text-sm text-muted-foreground">
+                {t("deleteTitleBody")}
+              </p>
+            </div>
+            <form action={deleteTitle} className="shrink-0">
+              <input type="hidden" name="id" value={title.id} />
+              <ConfirmButton
+                confirmTitle={t("deleteTitle")}
+                confirmText={t("deleteTitleConfirm", { name: title.title })}
+                confirmLabel={t("deleteTitle")}
+                className="rounded-11 border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-colors hover:bg-red-50 dark:border-red-900/50 dark:hover:bg-red-950/30"
+              >
+                {t("deleteTitle")}
+              </ConfirmButton>
+            </form>
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

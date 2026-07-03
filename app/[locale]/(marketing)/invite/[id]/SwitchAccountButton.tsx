@@ -28,7 +28,7 @@ export function SwitchAccountButton({ invitePath }: { invitePath: string }) {
   return (
     <Button
       type="button"
-      variant="dark"
+      variant="shine"
       size="md"
       className="mt-5 w-full"
       onClick={onSwitch}

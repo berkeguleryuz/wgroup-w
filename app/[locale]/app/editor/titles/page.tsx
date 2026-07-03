@@ -18,7 +18,11 @@ export default async function EditorTitlesPage({
     prisma.title.findMany({
       orderBy: { updatedAt: "desc" },
       take: 200,
-      include: { category: true, episodes: { select: { id: true } } },
+      include: {
+        category: true,
+        episodes: { select: { id: true } },
+        credits: { include: { instructor: { select: { name: true } } } },
+      },
     }),
   ]);
   const dateLocale =
@@ -45,6 +49,7 @@ export default async function EditorTitlesPage({
               <th className="px-5 py-3">{t("titleLabel")}</th>
               <th className="px-5 py-3">{t("categoryLabel")}</th>
               <th className="px-5 py-3">{t("typeLabel")}</th>
+              <th className="px-5 py-3">{t("instructor")}</th>
               <th className="px-5 py-3">{t("episodes")}</th>
               <th className="px-5 py-3">{ta("status")}</th>
               <th className="px-5 py-3">{t("updatedLabel")}</th>
@@ -65,6 +70,11 @@ export default async function EditorTitlesPage({
                   {item.type === "SERIES"
                     ? t("formTypeSeries")
                     : t("formTypeMovie")}
+                </td>
+                <td className="px-5 py-3 text-muted-foreground">
+                  {item.credits.length > 0
+                    ? item.credits.map((c) => c.instructor.name).join(", ")
+                    : "-"}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground">
                   {item.episodes.length}
@@ -94,7 +104,7 @@ export default async function EditorTitlesPage({
             {titles.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-5 py-10 text-center text-muted-foreground"
                 >
                   {t("empty")}

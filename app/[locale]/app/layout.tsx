@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { AppTopbar } from "@/components/app/AppTopbar";
 import { AppFooter } from "@/components/app/AppFooter";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { Toaster } from "@/components/ui/Toaster";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const session = await requireSession();
@@ -30,10 +31,14 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <div className="fixed inset-0 overflow-hidden bg-background">
       <div className="h-full w-full overflow-y-auto overflow-x-hidden">
         <QueryProvider>
-          <div className="flex min-h-full flex-col bg-background">
+          {/* Light theme: the page opens near-white (#feffff) and drifts very
+              softly into the cream background over the first screen. Dark
+              theme keeps the flat token background. */}
+          <div className="flex min-h-full flex-col bg-background bg-[linear-gradient(to_bottom,#feffff_0,var(--background)_100vh)] bg-no-repeat dark:bg-none">
             <AppTopbar
               userName={user.name || user.email}
               userEmail={user.email}
+              userImage={user.image}
               role={user.role}
               orgOwner={!!ownerMembership}
               corporateMember={!!corporateMembership}
@@ -43,6 +48,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             </main>
             <AppFooter />
           </div>
+          <Toaster />
         </QueryProvider>
       </div>
     </div>

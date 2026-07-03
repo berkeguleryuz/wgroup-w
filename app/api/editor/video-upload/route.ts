@@ -1,14 +1,22 @@
 import { NextResponse } from "next/server";
 
 import { getSession } from "@/lib/access";
+import { getSelfServeOrgId } from "@/lib/corporate";
 import { getStorage } from "@/lib/storage";
 
 const STAFF = new Set(["admin", "platform_editor"]);
 
 export async function POST(request: Request) {
   const session = await getSession();
-  const role = (session?.user as { role?: string | null } | undefined)?.role;
-  if (!session || !role || !STAFF.has(role)) {
+  if (!session) {
+    return NextResponse.json({ error: "forbidden" }, { status: 403 });
+  }
+  const role = (session.user as { role?: string | null }).role;
+  const isStaff = !!role && STAFF.has(role);
+  // Staff, or an org owner whose self-serve content studio is enabled. Org
+  // uploads get an org-scoped prefix so per-company usage is measurable.
+  const selfServeOrgId = isStaff ? null : await getSelfServeOrgId(session.user.id);
+  if (!isStaff && !selfServeOrgId) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
@@ -21,7 +29,8 @@ export async function POST(request: Request) {
   }
 
   const safe = filename.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
-  const path = `uploads/${Date.now()}-${safe}`;
+  const orgPrefix = selfServeOrgId ? `org/${selfServeOrgId}/` : "";
+  const path = `uploads/${orgPrefix}${Date.now()}-${safe}`;
   const contentType = body?.contentType?.trim() || "video/mp4";
 
   try {

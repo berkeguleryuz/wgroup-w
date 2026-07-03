@@ -27,9 +27,7 @@ export async function AuthShell({
           }}
         />
 
-        <span className="relative font-mono text-[11px] uppercase tracking-[0.22em] opacity-60">
-          {t("sideTag")}
-        </span>
+        <div aria-hidden />
 
         <div className="relative max-w-lg">
           <h2 className="font-display text-4xl leading-[1.05] tracking-[-0.01em] md:text-5xl lg:text-6xl">

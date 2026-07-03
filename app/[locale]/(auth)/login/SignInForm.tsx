@@ -182,7 +182,7 @@ export function SignInForm() {
 
         <Button
           type="submit"
-          variant="dark"
+          variant="shine"
           size="lg"
           className="w-full justify-center gap-2"
           disabled={busy}

@@ -73,7 +73,7 @@ export async function FeaturedLibrary() {
               return (
                 <article
                   key={title.id}
-                  className="group relative aspect-[4/5] overflow-hidden rounded-11 border border-border/60 text-surface-dark-foreground"
+                  className="group relative aspect-video overflow-hidden rounded-11 border border-border/60 text-surface-dark-foreground"
                 >
                   {title.heroImageUrl ? (
                     <img
@@ -101,10 +101,10 @@ export async function FeaturedLibrary() {
                         {/* Turkish category name — keep the dotted İ under uppercase. */}
                         <span lang="tr">{title.category.title}</span>
                       </p>
-                      <h3 className="mt-3 font-display text-3xl leading-tight">
+                      <h3 className="mt-2 font-display text-2xl leading-tight line-clamp-2">
                         {title.title}
                       </h3>
-                      <p className="mt-3 text-sm opacity-85 line-clamp-3">
+                      <p className="mt-2 text-sm opacity-85 line-clamp-2">
                         {title.synopsis}
                       </p>
                     </div>

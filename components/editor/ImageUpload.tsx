@@ -7,13 +7,25 @@ type Props = {
   name: string;
   defaultValue?: string;
   required?: boolean;
+  /** Preview shape: "wide" (16:9, hero images) or "avatar" (compact circle,
+      person photos — sized to line up with a standard h-11 input). */
+  shape?: "wide" | "avatar";
+  /** Signed-upload endpoint; defaults to the staff/studio editor route. */
+  endpoint?: string;
 };
 
 /**
  * Uploads an image to storage (R2 or public Supabase bucket) and exposes the
- * resulting public URL via a hidden input. A URL can also be pasted manually.
+ * resulting public URL via a visually hidden input — the raw URL is never
+ * shown or hand-editable (the preview thumbnail is the source of truth).
  */
-export function ImageUpload({ name, defaultValue, required }: Props) {
+export function ImageUpload({
+  name,
+  defaultValue,
+  required,
+  shape = "wide",
+  endpoint = "/api/editor/image-upload",
+}: Props) {
   const t = useTranslations("editor");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -43,7 +55,7 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
     setError(null);
     setProgress(0);
     try {
-      const res = await fetch("/api/editor/image-upload", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -96,7 +108,13 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
   return (
     <div>
       <div className="flex items-start gap-3">
-        <div className="relative h-20 w-32 shrink-0 overflow-hidden rounded-11 border border-border bg-muted">
+        <div
+          className={`relative shrink-0 overflow-hidden border border-border bg-muted ${
+            shape === "avatar"
+              ? "h-11 w-11 rounded-full"
+              : "aspect-video w-36 rounded-11"
+          }`}
+        >
           {url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -111,45 +129,62 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
           )}
         </div>
         <div className="min-w-0 flex-1 space-y-2">
+          {/* Visually hidden (not display:none) so `required` validation still
+              works — the URL itself stays out of sight and out of reach. */}
           <input
             type="text"
             name={name}
             value={url}
             required={required}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://…"
-            className="flex h-11 w-full rounded-11 border border-border bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+            readOnly
+            tabIndex={-1}
+            aria-hidden
+            className="sr-only"
           />
           {uploading ? (
-            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
-              <div
-                className="h-full rounded-full bg-foreground transition-[width] duration-200"
-                style={{ width: `${progress}%` }}
-              />
+            <div
+              className={`flex h-full flex-col justify-center rounded-11 border border-dashed border-border bg-muted/40 px-4 ${
+                shape === "avatar" ? "min-h-11 py-1.5" : "min-h-[3.5rem]"
+              }`}
+            >
+              <p className="text-xs text-muted-foreground">
+                {t("uploading")} — {progress}%
+              </p>
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className="h-full rounded-full bg-foreground transition-[width] duration-200"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
             </div>
           ) : (
-            <div className="flex items-center gap-3 text-xs">
-              <button
-                type="button"
-                onClick={() => inputRef.current?.click()}
-                className="font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
-              >
-                {t("imageUploadSelect")}
-              </button>
-              {url ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setUrl("");
-                    if (inputRef.current) inputRef.current.value = "";
-                  }}
-                  className="text-red-600 underline-offset-2 hover:underline"
-                >
-                  {t("uploadRemove")}
-                </button>
-              ) : null}
-            </div>
+            <button
+              type="button"
+              onClick={() => inputRef.current?.click()}
+              className={`flex w-full items-center justify-center gap-2 rounded-11 border border-dashed px-4 text-sm font-medium transition-colors ${
+                shape === "avatar" ? "h-11" : "min-h-[3.5rem]"
+              } ${
+                url
+                  ? "border-primary bg-primary/10 text-muted-foreground hover:text-foreground"
+                  : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <UploadIcon />
+              {url ? t("imageReplace") : t("imageUploadSelect")}
+            </button>
           )}
+          {!uploading && url ? (
+            <button
+              type="button"
+              onClick={() => {
+                setUrl("");
+                if (inputRef.current) inputRef.current.value = "";
+              }}
+              className="text-xs text-red-600 underline-offset-2 hover:underline"
+            >
+              {t("uploadRemove")}
+            </button>
+          ) : null}
           {error ? <p className="text-xs text-red-600">{error}</p> : null}
         </div>
       </div>
@@ -164,5 +199,24 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
         }}
       />
     </div>
+  );
+}
+
+function UploadIcon() {
+  return (
+    <svg
+      viewBox="0 0 20 20"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.7"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M10 13V3" />
+      <path d="M6 7l4-4 4 4" />
+      <path d="M3.5 13v3a1.5 1.5 0 0 0 1.5 1.5h10a1.5 1.5 0 0 0 1.5-1.5v-3" />
+    </svg>
   );
 }

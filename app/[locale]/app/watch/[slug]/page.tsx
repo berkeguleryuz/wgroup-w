@@ -4,8 +4,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { episodePath } from "@/lib/episode-path";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
-import { getMembershipOrgIds, canViewTitle } from "@/lib/content-visibility";
+import { getViewerAudience, canViewTitle } from "@/lib/content-visibility";
 import { Button } from "@/components/ui/Button";
 import { formatDuration } from "@/lib/utils";
 
@@ -30,14 +31,15 @@ export default async function TitleDetailPage({
         episodes: { orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }] },
         credits: { include: { instructor: true } },
         orgAudience: { select: { organizationId: true } },
+        departmentAudience: { select: { departmentId: true } },
       },
     }),
   ]);
 
   if (!title || !title.published) notFound();
 
-  const orgIds = await getMembershipOrgIds(user.id);
-  if (!canViewTitle(title, user.role, orgIds)) notFound();
+  const viewer = await getViewerAudience(user.id);
+  if (!canViewTitle(title, user.role, viewer)) notFound();
 
   const completedSet = new Set(
     (
@@ -113,7 +115,7 @@ export default async function TitleDetailPage({
               </div>
               {firstEpisode ? (
                 <div className="mt-7 flex flex-wrap items-center gap-3">
-                  <Link href={`/app/watch/${title.slug}/${firstEpisode.id}`}>
+                  <Link href={episodePath(title.slug, firstEpisode)}>
                     <Button size="lg" variant="primary">
                       {access.hasAccess ? t("startWatching") : t("startPreview")}
                     </Button>
@@ -139,7 +141,7 @@ export default async function TitleDetailPage({
           {title.episodes.map((ep) => (
             <Link
               key={ep.id}
-              href={`/app/watch/${title.slug}/${ep.id}`}
+              href={episodePath(title.slug, ep)}
               className="flex items-center justify-between gap-4 px-5 py-4 hover:bg-muted"
             >
               <div className="flex items-start gap-4">
