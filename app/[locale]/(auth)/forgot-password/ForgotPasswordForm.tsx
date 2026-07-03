@@ -84,7 +84,7 @@ export function ForgotPasswordForm() {
 
         <Button
           type="submit"
-          variant="dark"
+          variant="shine"
           size="lg"
           className="w-full justify-center gap-2"
           disabled={loading}

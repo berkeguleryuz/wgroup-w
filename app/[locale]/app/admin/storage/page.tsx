@@ -2,7 +2,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n/routing";
 import { requireRole } from "@/lib/access";
-import { isR2Configured } from "@/lib/storage";
+import { getStorage, isR2Configured } from "@/lib/storage";
 import { getStorageInventory } from "./inventory";
 import { deleteStorageObject, deleteAllOrphans } from "./actions";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
@@ -123,7 +123,16 @@ export default async function AdminStoragePage({
                   inventory.map((obj) => (
                     <tr key={obj.key}>
                       <td className="max-w-[320px] truncate px-4 py-3 font-mono text-xs">
-                        {obj.key}
+                        {/* Opens the object straight from R2 so an orphan can
+                            be eyeballed before deleting it. */}
+                        <a
+                          href={getStorage().getPublicUrl(obj.key)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="underline-offset-4 hover:text-foreground hover:underline"
+                        >
+                          {obj.key}
+                        </a>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {formatBytes(obj.size)}

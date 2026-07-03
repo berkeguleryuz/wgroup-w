@@ -43,16 +43,11 @@ export default async function PricingPage({
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-16 md:py-24">
-      <div className="flex items-end justify-between gap-6 border-b border-foreground/15 pb-6">
-        <div>
-          <span className="font-accent text-xl text-muted-foreground">
-            {t("kicker")}
-          </span>
-          <h1 className="mt-2 text-4xl md:text-6xl">{t("heading")}</h1>
-        </div>
-        <span className="hidden whitespace-nowrap font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground md:block">
-          01 / {t("kicker")}
+      <div className="border-b border-foreground/15 pb-6">
+        <span className="font-accent text-xl text-muted-foreground">
+          {t("kicker")}
         </span>
+        <h1 className="mt-2 text-4xl md:text-6xl">{t("heading")}</h1>
       </div>
       <p className="mt-6 max-w-2xl text-muted-foreground">{t("description")}</p>
 
@@ -160,8 +155,7 @@ function PlanCard({
           {cadenceLabel}
         </span>
         {highlight && badge ? (
-          <span className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-11 border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary-foreground">
-            <SparkIcon />
+          <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-11 border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary-foreground">
             {badge}
           </span>
         ) : null}
@@ -212,7 +206,7 @@ function PlanCard({
         <Link href={href} className="block">
           <Button
             className="w-full"
-            variant={dark ? "primary" : "dark"}
+            variant={dark ? "primary" : "shine"}
             size="lg"
           >
             {cta}
@@ -236,19 +230,6 @@ function CheckIcon() {
       aria-hidden
     >
       <path d="M4 10.5 L8.5 15 L16 6" />
-    </svg>
-  );
-}
-
-function SparkIcon() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-3 w-3"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M10 2 L11.8 7.2 L17 9 L11.8 10.8 L10 16 L8.2 10.8 L3 9 L8.2 7.2 Z" />
     </svg>
   );
 }

@@ -147,7 +147,7 @@ export default async function BusinessPage({
               <Textarea id="message" name="message" rows={4} />
             </div>
 
-            <Button type="submit" variant="dark" size="lg">
+            <Button type="submit" variant="shine" size="lg">
               {t("formSubmit")}
             </Button>
           </div>

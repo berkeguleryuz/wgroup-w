@@ -17,7 +17,7 @@ export function SubscribeButton({
   const [loading, setLoading] = useState(false);
   return (
     <Button
-      variant={highlight ? "dark" : "dark"}
+      variant="shine"
       className="w-full"
       disabled={loading}
       onClick={async () => {

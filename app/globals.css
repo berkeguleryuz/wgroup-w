@@ -241,6 +241,70 @@ select:not(:disabled) {
   display: none; /* Chrome / Safari */
 }
 
+/* Fade-effect sliders stack ALL slides on top of each other; the invisible
+   (opacity 0) neighbours still sit above the active slide and swallow clicks
+   — e.g. the hero CTA becoming unclickable. Only the active slide may receive
+   pointer events. */
+.swiper-fade .swiper-slide:not(.swiper-slide-active) {
+  pointer-events: none !important;
+}
+
+/* Universal hover sheen (applied to every Button): a skewed light strip
+   sweeps across on hover as an overlay — the button's own colors stay
+   untouched. Buttons using the `shine` variant run their richer gradient
+   sweep instead, so the overlay is disabled there. */
+.bf-hover-shine {
+  position: relative;
+  overflow: hidden;
+}
+.bf-hover-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -80%;
+  width: 55%;
+  transform: skewX(-20deg);
+  background: linear-gradient(
+    100deg,
+    transparent,
+    rgba(255, 255, 255, 0.45),
+    transparent
+  );
+  opacity: 0;
+  pointer-events: none;
+}
+.bf-hover-shine:hover::after {
+  animation: bf-hover-shine-sweep 1.1s ease infinite;
+}
+.bf-shine.bf-hover-shine::after {
+  display: none;
+}
+@keyframes bf-hover-shine-sweep {
+  from {
+    left: -80%;
+    opacity: 1;
+  }
+  to {
+    left: 130%;
+    opacity: 1;
+  }
+}
+
+/* Shine CTA (see the `shine` variant in components/ui/Button.tsx): flat dark
+   at rest; hovering sweeps the highlight across the 400%-wide gradient. */
+.bf-shine:hover {
+  animation: bf-shine 1.4s linear infinite;
+}
+@keyframes bf-shine {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: -400% 0;
+  }
+}
+
 /* Toast entrance (see components/ui/Toaster.tsx). */
 .bf-toast {
   animation: bf-toast-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);

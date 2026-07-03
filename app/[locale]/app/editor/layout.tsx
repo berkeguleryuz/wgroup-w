@@ -1,12 +1,19 @@
 import type { ReactNode } from "react";
 import { getTranslations } from "next-intl/server";
 
-import { Link } from "@/lib/i18n/navigation";
 import { requireRole } from "@/lib/access";
+import { PanelNav, type PanelNavItem } from "@/components/app/PanelNav";
 
 export default async function EditorLayout({ children }: { children: ReactNode }) {
   await requireRole(["platform_editor", "admin"]);
   const t = await getTranslations("editor");
+
+  const items: PanelNavItem[] = [
+    { href: "/app/editor", label: t("dashboard"), exact: true },
+    { href: "/app/editor/categories", label: t("categories") },
+    { href: "/app/editor/titles", label: t("titles") },
+    { href: "/app/editor/instructors", label: t("instructors") },
+  ];
 
   return (
     <div className="grid gap-8 md:grid-cols-[220px_1fr]">
@@ -14,24 +21,9 @@ export default async function EditorLayout({ children }: { children: ReactNode }
         <p className="mb-3 px-2 text-xs uppercase tracking-wide text-muted-foreground">
           {t("kicker")}
         </p>
-        <ul className="space-y-1">
-          <NavItem href="/app/editor">{t("dashboard")}</NavItem>
-          <NavItem href="/app/editor/categories">{t("categories")}</NavItem>
-          <NavItem href="/app/editor/titles">{t("titles")}</NavItem>
-          <NavItem href="/app/editor/instructors">{t("instructors")}</NavItem>
-        </ul>
+        <PanelNav items={items} />
       </nav>
-      <section>{children}</section>
+      <section className="min-w-0">{children}</section>
     </div>
-  );
-}
-
-function NavItem({ href, children }: { href: string; children: ReactNode }) {
-  return (
-    <li>
-      <Link href={href} className="block rounded-11 px-3 py-2 text-sm hover:bg-muted">
-        {children}
-      </Link>
-    </li>
   );
 }

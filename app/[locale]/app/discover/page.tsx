@@ -164,10 +164,10 @@ function FilterPill({
   return (
     <Link
       href={href}
-      className={`rounded-11 border px-3 py-1.5 text-sm transition-colors ${
+      className={`rounded-11 px-3 py-1.5 text-sm transition-colors ${
         active
-          ? "bg-surface-dark text-surface-dark-foreground border-surface-dark"
-          : "bg-background text-foreground border-border hover:bg-muted"
+          ? "border border-transparent bg-primary font-medium text-primary-foreground"
+          : "border border-border bg-background text-foreground hover:bg-muted"
       } ${small ? "text-xs py-1" : ""}`}
     >
       {children}

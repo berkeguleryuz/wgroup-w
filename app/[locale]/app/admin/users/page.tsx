@@ -3,9 +3,17 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
-import { USER_ROLES } from "@/lib/auth";
+import { USER_ROLES, type UserRole } from "@/lib/auth";
 import { updateUserRole } from "./actions";
 import { Button } from "@/components/ui/Button";
+
+// DB role slugs → admin.* translation keys for human-readable option labels.
+const ROLE_LABEL_KEYS: Record<UserRole, string> = {
+  individual: "roleIndividual",
+  platform_editor: "rolePlatformEditor",
+  admin: "roleAdmin",
+  instructor: "roleInstructor",
+};
 
 export default async function AdminUsersPage({
   params,
@@ -68,7 +76,7 @@ export default async function AdminUsersPage({
                     >
                       {USER_ROLES.map((r) => (
                         <option key={r} value={r}>
-                          {r}
+                          {t(ROLE_LABEL_KEYS[r])}
                         </option>
                       ))}
                     </select>
