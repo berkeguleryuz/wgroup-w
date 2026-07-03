@@ -13,6 +13,8 @@ import {
   updateOrgEpisode,
   deleteOrgEpisode,
   setOrgTitleDepartments,
+  addOrgCredit,
+  removeOrgCredit,
 } from "../actions";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
@@ -31,7 +33,7 @@ export default async function OrgContentDetail({
   setRequestLocale(locale);
   const { membership } = await requireOrgContentStudio();
 
-  const [t, te, title, departments] = await Promise.all([
+  const [t, te, title, departments, orgInstructors] = await Promise.all([
     getTranslations("organization"),
     getTranslations("editor"),
     prisma.title.findUnique({
@@ -42,6 +44,7 @@ export default async function OrgContentDetail({
           orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
         },
         departmentAudience: { select: { departmentId: true } },
+        credits: { include: { instructor: true } },
       },
     }),
     prisma.department.findMany({
@@ -49,8 +52,18 @@ export default async function OrgContentDetail({
       orderBy: { name: "asc" },
       select: { id: true, name: true },
     }),
+    prisma.instructor.findMany({
+      where: { createdByOrgId: membership.organizationId },
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
   ]);
   if (!title || title.createdByOrgId !== membership.organizationId) notFound();
+
+  const creditedIds = new Set(title.credits.map((c) => c.instructorId));
+  const assignableInstructors = orgInstructors.filter(
+    (i) => !creditedIds.has(i.id),
+  );
 
   const targetedDepartmentIds = new Set(
     title.departmentAudience.map((d) => d.departmentId),
@@ -157,6 +170,96 @@ export default async function OrgContentDetail({
           </form>
         </section>
       ) : null}
+
+      <section className="rounded-11 border border-border/60 bg-background p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="font-display text-2xl">{te("instructors")}</h2>
+          <Link
+            href="/app/organization/content/instructors"
+            className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+          >
+            {te("manageInstructors")} →
+          </Link>
+        </div>
+        {orgInstructors.length === 0 ? (
+          <p className="mt-4 text-sm text-muted-foreground">
+            {te("noInstructorsYet")}
+          </p>
+        ) : (
+          <>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {title.credits.length === 0 ? (
+                <p className="text-sm text-muted-foreground">
+                  {te("noCredits")}
+                </p>
+              ) : (
+                title.credits.map((c) => (
+                  <span
+                    key={c.instructorId}
+                    className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-sm"
+                  >
+                    {c.instructor.name}
+                    {c.role ? (
+                      <span className="text-xs text-muted-foreground">
+                        · {c.role}
+                      </span>
+                    ) : null}
+                    <form action={removeOrgCredit} className="inline-flex">
+                      <input type="hidden" name="titleId" value={title.id} />
+                      <input
+                        type="hidden"
+                        name="instructorId"
+                        value={c.instructorId}
+                      />
+                      <button
+                        type="submit"
+                        title={te("delete")}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        ×
+                      </button>
+                    </form>
+                  </span>
+                ))
+              )}
+            </div>
+            {assignableInstructors.length > 0 ? (
+              <form
+                action={addOrgCredit}
+                className="mt-4 flex flex-wrap items-end gap-3"
+              >
+                <input type="hidden" name="titleId" value={title.id} />
+                <div>
+                  <Label htmlFor="instructorId">{te("instructor")}</Label>
+                  <select
+                    id="instructorId"
+                    name="instructorId"
+                    required
+                    className="block rounded-11 border border-border bg-background px-3 py-2 text-sm"
+                  >
+                    {assignableInstructors.map((i) => (
+                      <option key={i.id} value={i.id}>
+                        {i.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <Label htmlFor="creditRole">{te("creditRole")}</Label>
+                  <Input
+                    id="creditRole"
+                    name="role"
+                    placeholder={te("creditRolePlaceholder")}
+                  />
+                </div>
+                <Button type="submit" variant="secondary">
+                  {te("addInstructor")}
+                </Button>
+              </form>
+            ) : null}
+          </>
+        )}
+      </section>
 
       <section className="rounded-11 border border-border/60 bg-background p-6">
         <h2 className="font-display text-2xl">{te("episodes")}</h2>

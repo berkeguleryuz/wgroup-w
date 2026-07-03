@@ -90,7 +90,7 @@ export default async function MyCompanyPage({
         {isOwner ? (
           <Link
             href="/app/organization"
-            className="inline-flex h-11 items-center gap-2 rounded-11 border border-surface-dark bg-surface-dark px-5 text-sm font-medium text-surface-dark-foreground transition-colors hover:bg-surface-dark/90 dark:border-primary/40 dark:bg-primary/15 dark:text-primary dark:hover:bg-primary/25"
+            className="inline-flex h-11 items-center gap-2 rounded-11 border border-surface-dark bg-surface-dark px-5 text-sm font-medium text-surface-dark-foreground transition-colors hover:bg-surface-dark/90 dark:border-border dark:bg-muted dark:text-foreground dark:hover:bg-muted/70"
           >
             <PanelIcon />
             {t("managePanel")}
@@ -101,12 +101,27 @@ export default async function MyCompanyPage({
       {/* Company band: identity + subscription on the left, membership stats
           on the right — one rich dark surface instead of four flat boxes. */}
       {/* In dark mode --surface-dark nearly matches the page background, so
-          the band gets a translucent lift + stronger border to stay visible. */}
-      <section className="rounded-11 border border-white/10 bg-surface-dark p-6 text-surface-dark-foreground md:p-8 dark:border-white/15 dark:bg-white/[0.05]">
+          the band lifts onto the standard elevated card tone (--muted) with
+          the shared --border token — same border color/weight as every other
+          card in the app. */}
+      <section className="rounded-11 border border-white/10 bg-surface-dark p-6 text-surface-dark-foreground md:p-8 dark:border-border dark:bg-muted/50">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
-            <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary font-display text-2xl text-primary-foreground">
-              {org.name.slice(0, 1).toUpperCase()}
+            <span
+              className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-2xl ${
+                org.logo ? "" : "bg-primary text-primary-foreground"
+              }`}
+            >
+              {org.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={org.logo}
+                  alt={org.name}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                org.name.slice(0, 1).toUpperCase()
+              )}
             </span>
             <div className="min-w-0">
               <p className="truncate text-lg font-semibold">{org.name}</p>

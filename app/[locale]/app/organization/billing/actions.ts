@@ -120,9 +120,21 @@ export async function upgradeCorporatePlan(): Promise<{ ok: boolean; error?: str
   const item = sub.items.data[0];
   if (!item) return { ok: false, error: "subscription has no items" };
 
+  // always_invoice: the prorated difference is invoiced AND charged to the
+  // company's saved card immediately — not deferred to the next billing cycle.
   await stripe.subscriptions.update(sub.id, {
     items: [{ id: item.id, price: STRIPE_PRICE_CORP_LARGE }],
-    proration_behavior: "create_prorations",
+    proration_behavior: "always_invoice",
+    payment_behavior: "error_if_incomplete",
+  });
+
+  // Optimistic local flip so the panel reflects the upgrade immediately (and
+  // in dev, where the webhook can't reach localhost). The webhook remains the
+  // source of truth: we don't touch lastEventAt, so a later
+  // customer.subscription.updated event still applies its full sync cleanly.
+  await prisma.companyProfile.update({
+    where: { organizationId: membership.organizationId },
+    data: { plan: "corp_large" },
   });
 
   return { ok: true };

@@ -12,6 +12,7 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
+import { getOrgStorageUsage, formatBytes } from "@/lib/storage-usage";
 
 function slugify(s: string) {
   return s
@@ -60,6 +61,16 @@ export default async function AdminCorporatePage({
   ]);
   const dateLocale =
     (await getLocale()) === "tr" ? "tr-TR" : locale === "de" ? "de-DE" : "en-US";
+
+  // Content-studio storage footprint per company (from org-scoped R2 prefixes).
+  const storageUsages = new Map(
+    await Promise.all(
+      companies.map(
+        async (c) =>
+          [c.organizationId, await getOrgStorageUsage(c.organizationId)] as const,
+      ),
+    ),
+  );
 
   const prefillLead = sp?.lead
     ? leads.find((l) => l.id === sp.lead) ?? null
@@ -266,7 +277,9 @@ export default async function AdminCorporatePage({
                     <p className="font-medium">{c.organization.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {c.organization._count.members} / {c.seatCount}{" "}
-                      {t("seatsUsed")} · {c.subscriptionStatus}
+                      {t("seatsUsed")} · {c.subscriptionStatus} ·{" "}
+                      {formatBytes(storageUsages.get(c.organizationId) ?? 0)}{" "}
+                      {t("storageUsed")}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

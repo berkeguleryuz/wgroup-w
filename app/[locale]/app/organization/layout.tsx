@@ -33,6 +33,11 @@ export default async function CorporateAdminLayout({
     },
     { href: "/app/organization/reports", label: t("reports"), icon: "reports" },
     {
+      href: "/app/organization/billing",
+      label: t("billingTitle"),
+      icon: "billing",
+    },
+    {
       href: "/app/organization/invite",
       label: t("inviteHeading"),
       icon: "invite",

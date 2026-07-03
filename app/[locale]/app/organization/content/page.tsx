@@ -64,14 +64,22 @@ export default async function OrgContentPage({
 
   return (
     <div className="space-y-10">
-      <header>
-        <span className="font-accent text-lg text-muted-foreground">
-          {t("kicker")}
-        </span>
-        <h1 className="mt-1 text-3xl md:text-5xl">{t("contentStudio")}</h1>
-        <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
-          {t("contentBody")}
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <span className="font-accent text-lg text-muted-foreground">
+            {t("kicker")}
+          </span>
+          <h1 className="mt-1 text-3xl md:text-5xl">{t("contentStudio")}</h1>
+          <p className="mt-3 max-w-2xl text-sm text-muted-foreground">
+            {t("contentBody")}
+          </p>
+        </div>
+        <Link
+          href="/app/organization/content/instructors"
+          className="inline-flex h-11 items-center rounded-11 border border-border bg-background px-5 text-sm font-medium transition-colors hover:bg-muted"
+        >
+          {te("instructors")} →
+        </Link>
       </header>
 
       <section>

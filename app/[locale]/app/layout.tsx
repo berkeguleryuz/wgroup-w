@@ -38,6 +38,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
             <AppTopbar
               userName={user.name || user.email}
               userEmail={user.email}
+              userImage={user.image}
               role={user.role}
               orgOwner={!!ownerMembership}
               corporateMember={!!corporateMembership}

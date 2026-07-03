@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
+import { ConfirmButton } from "@/components/editor/ConfirmButton";
 import {
   startCorporateCheckout,
   openCorporateBillingPortal,
@@ -60,21 +61,29 @@ export function CorporateUpgradeButton() {
   const t = useTranslations("organization");
   const router = useRouter();
   const [state, setState] = useState<"idle" | "busy" | "done" | "error">("idle");
+
+  const run = async () => {
+    setState("busy");
+    const res = await upgradeCorporatePlan().catch(() => ({ ok: false }));
+    setState(res.ok ? "done" : "error");
+    if (res.ok) router.refresh();
+  };
+
   return (
     <div className="space-y-2">
-      <Button
-        variant="dark"
+      {/* Upgrading charges the company's saved card immediately — never a
+          single accidental click: a confirmation dialog stands in between. */}
+      <ConfirmButton
+        tone="primary"
+        confirmTitle={t("upgradeCta")}
+        confirmText={t("upgradeConfirmBody")}
+        confirmLabel={t("upgradeConfirmCta")}
+        onConfirm={() => void run()}
         disabled={state === "busy" || state === "done"}
-        onClick={async () => {
-          setState("busy");
-          const res = await upgradeCorporatePlan().catch(() => ({ ok: false }));
-          setState(res.ok ? "done" : "error");
-          // Webhook flips the plan asynchronously; refresh shortly after.
-          if (res.ok) setTimeout(() => router.refresh(), 3000);
-        }}
+        className="inline-flex h-11 items-center justify-center gap-2 rounded-11 border border-surface-dark bg-surface-dark px-5 text-sm font-medium text-surface-dark-foreground transition-colors hover:bg-surface-dark/90 disabled:pointer-events-none disabled:opacity-50 dark:border-foreground dark:bg-foreground dark:text-background dark:hover:bg-foreground/90"
       >
         {state === "busy" ? t("upgrading") : t("upgradeCta")}
-      </Button>
+      </ConfirmButton>
       {state === "done" ? (
         <p className="text-sm text-muted-foreground">{t("upgradeDone")}</p>
       ) : null}

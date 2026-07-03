@@ -428,7 +428,8 @@
     "roleOrgOwner": "Firmen-Admin",
     "roleOrgMember": "Firmenmitglied",
     "subscription": "Abo",
-    "manage": "Abo verwalten"
+    "manage": "Abo verwalten",
+    "avatar": "Profilfoto"
   },
   "subscription": {
     "kicker": "Mitgliedschaft",
@@ -627,7 +628,9 @@
     "storageCleanup": "Verwaiste bereinigen",
     "storageCleanupTitle": "Verwaiste Dateien bereinigen",
     "storageCleanupConfirm": "{count} verwaiste Dateien ({size}) werden dauerhaft gelöscht. Keine Trainings oder Episoden sind betroffen.",
-    "storageEmpty": "Noch keine über das Panel hochgeladenen Dateien."
+    "storageEmpty": "Noch keine über das Panel hochgeladenen Dateien.",
+    "storageUsed": "Speicher",
+    "instructors": "Trainer"
   },
   "organization": {
     "kicker": "Unternehmen",
@@ -731,13 +734,20 @@
     "opening": "Wird geöffnet…",
     "upgradeCta": "Auf Unlimited upgraden",
     "upgrading": "Upgrade läuft…",
-    "upgradeDone": "Ihr Paket wurde hochgestuft. Die Änderung erscheint in wenigen Sekunden.",
+    "upgradeDone": "Dein Paket wurde hochgestuft und die Differenz von der hinterlegten Karte abgebucht.",
     "upgradeFailed": "Upgrade fehlgeschlagen, bitte erneut versuchen.",
     "currentPlan": "Aktuelles Paket",
     "seatsUnlimited": "Unbegrenzt",
     "errNoProfile": "Firmenprofil nicht gefunden.",
     "errSeats": "Nicht genügend Plätze. {remaining} verbleibend, {requested} angefragt.",
-    "errSeatsUpgrade": "Nicht genügend Plätze. {remaining} verbleibend, {requested} angefragt. Upgraden Sie Ihr Paket für mehr Plätze."
+    "errSeatsUpgrade": "Nicht genügend Plätze. {remaining} verbleibend, {requested} angefragt. Upgraden Sie Ihr Paket für mehr Plätze.",
+    "statStorage": "Speicher",
+    "contentInstructorsBody": "Der Trainer-Pool deines Unternehmens. Diese Trainer können nur deinen eigenen Trainings zugeordnet werden und sind nur für deine Mitarbeitenden sichtbar.",
+    "upgradeConfirmBody": "Dein Paket wird auf Corporate Unlimited hochgestuft. Die anteilige Differenz für den Rest des Zeitraums wird sofort von der hinterlegten Karte deines Unternehmens abgebucht. Möchtest du fortfahren?",
+    "upgradeConfirmCta": "Ja, upgraden und abbuchen",
+    "companyLogo": "Firmenlogo",
+    "companyLogoBody": "Das Logo ersetzt den Firmen-Anfangsbuchstaben auf der Seite Mein Unternehmen und im Panel.",
+    "saveCompanyLogo": "Logo speichern"
   },
   "themeToggle": {
     "label": "Erscheinungsbild",
@@ -798,6 +808,7 @@
     "saved": "Gespeichert",
     "created": "Erstellt",
     "deleted": "Gelöscht",
-    "sent": "Gesendet"
+    "sent": "Gesendet",
+    "error": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
   }
 }

@@ -231,6 +231,16 @@ select:not(:disabled) {
   opacity: 0.85;
 }
 
+/* Horizontal content rows scroll without showing a scrollbar track (the
+   Netflix-style carousels on /app) — swiping/scrolling still works. */
+.bf-no-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge */
+}
+.bf-no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
+}
+
 /* Toast entrance (see components/ui/Toaster.tsx). */
 .bf-toast {
   animation: bf-toast-in 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.2);

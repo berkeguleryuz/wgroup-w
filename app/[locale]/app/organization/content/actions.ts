@@ -8,7 +8,8 @@ import { TitleType } from "@prisma/client";
 import { localizedPath } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { requireOrgContentStudio } from "@/lib/corporate";
-import { slugify } from "@/lib/utils";
+import { cleanupStorageRefs } from "@/lib/storage-cleanup";
+import { slugify, isNextRedirect } from "@/lib/utils";
 
 /** Resolve the caller's org and assert it owns the title. */
 async function requireOwnedTitle(titleId: string) {
@@ -44,6 +45,7 @@ async function sanitizeDepartmentIds(orgId: string, raw: string[]) {
 export async function createOrgTitle(formData: FormData) {
   const { membership } = await requireOrgContentStudio();
   const orgId = membership.organizationId;
+  try {
 
   const title = String(formData.get("title") || "").trim();
   const synopsis = String(formData.get("synopsis") || "").trim();
@@ -77,6 +79,10 @@ export async function createOrgTitle(formData: FormData) {
     },
   });
   await backToContent(created.id, "created");
+  } catch (e) {
+    if (isNextRedirect(e)) throw e;
+    await backToContent(undefined, "error");
+  }
 }
 
 export async function setOrgTitleDepartments(formData: FormData) {
@@ -110,10 +116,18 @@ export async function updateOrgTitle(formData: FormData) {
   const heroImageUrl = String(formData.get("heroImageUrl") || "").trim() || null;
   if (!title || !synopsis) throw new Error("Missing fields");
 
+  const before = await prisma.title.findUnique({
+    where: { id },
+    select: { heroImageUrl: true },
+  });
   await prisma.title.update({
     where: { id },
     data: { title, synopsis, heroImageUrl },
   });
+  // Drop the replaced cover from storage once nothing references it.
+  if (before && before.heroImageUrl !== heroImageUrl) {
+    await cleanupStorageRefs([before.heroImageUrl]);
+  }
   await backToContent(id, "saved");
 }
 
@@ -133,13 +147,31 @@ export async function toggleOrgPublish(formData: FormData) {
 export async function deleteOrgTitle(formData: FormData) {
   const id = String(formData.get("id"));
   await requireOwnedTitle(id);
+  const doomed = await prisma.title.findUnique({
+    where: { id },
+    include: {
+      episodes: {
+        select: { videoPath: true, subtitles: { select: { vttPath: true } } },
+      },
+    },
+  });
   await prisma.title.delete({ where: { id } });
+  if (doomed) {
+    await cleanupStorageRefs([
+      doomed.heroImageUrl,
+      ...doomed.episodes.flatMap((e) => [
+        e.videoPath,
+        ...e.subtitles.map((sub) => sub.vttPath),
+      ]),
+    ]);
+  }
   await backToContent(undefined, "deleted");
 }
 
 export async function addOrgEpisode(formData: FormData) {
   const titleId = String(formData.get("titleId"));
   await requireOwnedTitle(titleId);
+  try {
 
   const name = String(formData.get("name") || "").trim();
   const synopsis = String(formData.get("synopsis") || "").trim() || null;
@@ -163,6 +195,10 @@ export async function addOrgEpisode(formData: FormData) {
     },
   });
   await backToContent(titleId, "created");
+  } catch (e) {
+    if (isNextRedirect(e)) throw e;
+    await backToContent(titleId, "error");
+  }
 }
 
 export async function updateOrgEpisode(formData: FormData) {
@@ -197,6 +233,10 @@ export async function updateOrgEpisode(formData: FormData) {
       ...(videoPath ? { videoPath } : {}),
     },
   });
+  // Drop the replaced video from storage once nothing references it.
+  if (videoPath && episode.videoPath !== videoPath) {
+    await cleanupStorageRefs([episode.videoPath]);
+  }
   await backToContent(titleId, "saved");
 }
 
@@ -209,5 +249,88 @@ export async function deleteOrgEpisode(formData: FormData) {
   if (!episode || episode.titleId !== titleId) throw new Error("forbidden");
 
   await prisma.episode.delete({ where: { id } });
+  await cleanupStorageRefs([episode.videoPath]);
   await backToContent(titleId, "deleted");
+}
+
+// ---------------------------------------------------------------------------
+// Org-scoped instructors: companies manage their own instructor pool and can
+// only credit those instructors on their own titles.
+// ---------------------------------------------------------------------------
+
+export async function createOrgInstructor(formData: FormData) {
+  const { membership } = await requireOrgContentStudio();
+  const name = String(formData.get("name") || "").trim();
+  const bio = String(formData.get("bio") || "").trim() || null;
+  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
+  if (!name) throw new Error("Missing fields");
+
+  await prisma.instructor.create({
+    data: { name, bio, photoUrl, createdByOrgId: membership.organizationId },
+  });
+  await backToContent(undefined, "created");
+}
+
+export async function updateOrgInstructor(formData: FormData) {
+  const { membership } = await requireOrgContentStudio();
+  const id = String(formData.get("id"));
+  const name = String(formData.get("name") || "").trim();
+  const bio = String(formData.get("bio") || "").trim() || null;
+  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
+  if (!name) throw new Error("Missing fields");
+
+  const { count } = await prisma.instructor.updateMany({
+    where: { id, createdByOrgId: membership.organizationId },
+    data: { name, bio, photoUrl },
+  });
+  if (count === 0) throw new Error("forbidden");
+  await backToContent(undefined, "saved");
+}
+
+export async function deleteOrgInstructor(formData: FormData) {
+  const { membership } = await requireOrgContentStudio();
+  const id = String(formData.get("id"));
+  const doomed = await prisma.instructor.findUnique({
+    where: { id },
+    select: { createdByOrgId: true, photoUrl: true },
+  });
+  if (!doomed || doomed.createdByOrgId !== membership.organizationId) {
+    throw new Error("forbidden");
+  }
+  await prisma.instructor.delete({ where: { id } });
+  await cleanupStorageRefs([doomed.photoUrl]);
+  await backToContent(undefined, "deleted");
+}
+
+export async function addOrgCredit(formData: FormData) {
+  const titleId = String(formData.get("titleId"));
+  const { orgId } = await requireOwnedTitle(titleId);
+  const instructorId = String(formData.get("instructorId") || "");
+  const role = String(formData.get("role") || "").trim() || null;
+  if (!instructorId) return;
+
+  // Only the company's own instructors may be credited on its titles.
+  const instructor = await prisma.instructor.findUnique({
+    where: { id: instructorId },
+    select: { createdByOrgId: true },
+  });
+  if (!instructor || instructor.createdByOrgId !== orgId) {
+    throw new Error("forbidden");
+  }
+  await prisma.titleInstructor.upsert({
+    where: { titleId_instructorId: { titleId, instructorId } },
+    create: { titleId, instructorId, role },
+    update: { role },
+  });
+  await backToContent(titleId, "saved");
+}
+
+export async function removeOrgCredit(formData: FormData) {
+  const titleId = String(formData.get("titleId"));
+  await requireOwnedTitle(titleId);
+  const instructorId = String(formData.get("instructorId"));
+  await prisma.titleInstructor.delete({
+    where: { titleId_instructorId: { titleId, instructorId } },
+  });
+  await backToContent(titleId, "saved");
 }

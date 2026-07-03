@@ -13,6 +13,7 @@ import { Wordmark } from "@/components/Wordmark";
 type Props = {
   userName: string;
   userEmail: string;
+  userImage?: string | null;
   role: string | null | undefined;
   orgOwner: boolean;
   corporateMember?: boolean;
@@ -21,6 +22,7 @@ type Props = {
 export function AppTopbar({
   userName,
   userEmail,
+  userImage,
   role,
   orgOwner,
   corporateMember,
@@ -64,8 +66,13 @@ export function AppTopbar({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Never leave the bar hidden after a navigation.
-  useEffect(() => setHidden(false), [pathname]);
+  // Never leave the bar hidden after a navigation — adjust during render
+  // (React's sanctioned pattern) instead of a cascading effect.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (lastPathname !== pathname) {
+    setLastPathname(pathname);
+    setHidden(false);
+  }
 
   const navItems = [
     { href: "/app", label: t("home"), active: isHome },
@@ -185,8 +192,21 @@ export function AppTopbar({
               onClick={() => setOpen((v) => !v)}
               className="flex items-center gap-2 text-sm text-foreground transition-opacity hover:opacity-80"
             >
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary font-display text-xs text-primary-foreground">
-                {userName.slice(0, 1).toUpperCase()}
+              <span
+                className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-full font-display text-xs ${
+                  userImage ? "" : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {userImage ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={userImage}
+                    alt={userName}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  userName.slice(0, 1).toUpperCase()
+                )}
               </span>
               <span className="hidden max-w-[120px] truncate md:inline">
                 {userName}

@@ -428,7 +428,8 @@
     "roleOrgOwner": "Kurumsal Admin",
     "roleOrgMember": "Kurumsal Üye",
     "subscription": "Abonelik",
-    "manage": "Aboneliği yönet"
+    "manage": "Aboneliği yönet",
+    "avatar": "Profil fotoğrafı"
   },
   "subscription": {
     "kicker": "Üyelik",
@@ -627,7 +628,9 @@
     "storageCleanup": "Yetimleri temizle",
     "storageCleanupTitle": "Yetim dosyaları temizle",
     "storageCleanupConfirm": "{count} yetim dosya ({size}) depolamadan kalıcı olarak silinecek. Hiçbir eğitim ya da bölüm etkilenmez.",
-    "storageEmpty": "Panelden yüklenmiş dosya yok."
+    "storageEmpty": "Panelden yüklenmiş dosya yok.",
+    "storageUsed": "depolama",
+    "instructors": "Eğitmenler"
   },
   "organization": {
     "kicker": "Kurumsal",
@@ -731,13 +734,20 @@
     "opening": "Açılıyor…",
     "upgradeCta": "Sınırsız pakete yükselt",
     "upgrading": "Yükseltiliyor…",
-    "upgradeDone": "Paketiniz yükseltildi. Değişiklik birkaç saniye içinde görünür.",
+    "upgradeDone": "Paketin yükseltildi ve fark kayıtlı kartından tahsil edildi.",
     "upgradeFailed": "Yükseltme başarısız oldu, lütfen tekrar deneyin.",
     "currentPlan": "Mevcut paket",
     "seatsUnlimited": "Sınırsız",
     "errNoProfile": "Şirket profili bulunamadı.",
     "errSeats": "Koltuk sayısı yetersiz. Kalan {remaining}, talep {requested}.",
-    "errSeatsUpgrade": "Koltuk sayısı yetersiz. Kalan {remaining}, talep {requested}. Daha fazla koltuk için paketinizi yükseltin."
+    "errSeatsUpgrade": "Koltuk sayısı yetersiz. Kalan {remaining}, talep {requested}. Daha fazla koltuk için paketinizi yükseltin.",
+    "statStorage": "Depolama",
+    "contentInstructorsBody": "Şirketinin eğitmen havuzu. Buradaki eğitmenler yalnızca kendi eğitimlerine atanabilir ve sadece çalışanlarına görünür.",
+    "upgradeConfirmBody": "Paketin Kurumsal Sınırsız'a yükseltilecek. Dönemin kalanına oranlanan fark, şirketinin kayıtlı kartından hemen tahsil edilir. Devam etmek istiyor musun?",
+    "upgradeConfirmCta": "Evet, yükselt ve tahsil et",
+    "companyLogo": "Şirket logosu",
+    "companyLogoBody": "Logo; Şirketim sayfasında ve panelde şirket baş harfinin yerine gösterilir.",
+    "saveCompanyLogo": "Logoyu kaydet"
   },
   "themeToggle": {
     "label": "Tema",
@@ -798,6 +808,7 @@
     "saved": "Kaydedildi",
     "created": "Oluşturuldu",
     "deleted": "Silindi",
-    "sent": "Gönderildi"
+    "sent": "Gönderildi",
+    "error": "İşlem başarısız oldu. Lütfen tekrar dene."
   }
 }

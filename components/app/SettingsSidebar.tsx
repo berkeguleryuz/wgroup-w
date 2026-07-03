@@ -8,10 +8,16 @@ import { authClient } from "@/lib/auth-client";
 type Props = {
   userName: string;
   userEmail: string;
+  userImage?: string | null;
   roleLabel: string;
 };
 
-export function SettingsSidebar({ userName, userEmail, roleLabel }: Props) {
+export function SettingsSidebar({
+  userName,
+  userEmail,
+  userImage,
+  roleLabel,
+}: Props) {
   const t = useTranslations("nav");
   const tc = useTranslations("common");
   const router = useRouter();
@@ -79,8 +85,21 @@ export function SettingsSidebar({ userName, userEmail, roleLabel }: Props) {
 
         <div className="mt-auto rounded-11 border border-white/10 bg-white/[0.04] p-3">
           <div className="flex items-center gap-3">
-            <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary font-display text-sm text-primary-foreground">
-              {userName.slice(0, 1).toUpperCase()}
+            <span
+              className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-sm ${
+                userImage ? "" : "bg-primary text-primary-foreground"
+              }`}
+            >
+              {userImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={userImage}
+                  alt={userName}
+                  className="h-full w-full object-cover"
+                />
+              ) : (
+                userName.slice(0, 1).toUpperCase()
+              )}
             </span>
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{userName}</p>

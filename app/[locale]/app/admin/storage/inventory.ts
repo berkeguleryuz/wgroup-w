@@ -14,15 +14,22 @@ export function isManagedKey(key: string): boolean {
 
 /** Every DB string that may point at a storage object. */
 async function getReferenceStrings(): Promise<string[]> {
-  const [episodes, titles, subtitles] = await Promise.all([
-    prisma.episode.findMany({ select: { videoPath: true } }),
-    prisma.title.findMany({ select: { heroImageUrl: true, trailerUrl: true } }),
-    prisma.subtitle.findMany({ select: { vttPath: true } }),
-  ]);
+  const [episodes, titles, subtitles, instructors, users, orgs] =
+    await Promise.all([
+      prisma.episode.findMany({ select: { videoPath: true } }),
+      prisma.title.findMany({ select: { heroImageUrl: true, trailerUrl: true } }),
+      prisma.subtitle.findMany({ select: { vttPath: true } }),
+      prisma.instructor.findMany({ select: { photoUrl: true } }),
+      prisma.user.findMany({ select: { image: true } }),
+      prisma.organization.findMany({ select: { logo: true } }),
+    ]);
   return [
     ...episodes.map((e) => e.videoPath),
     ...titles.flatMap((t) => [t.heroImageUrl, t.trailerUrl]),
     ...subtitles.map((s) => s.vttPath),
+    ...instructors.map((i) => i.photoUrl),
+    ...users.map((u) => u.image),
+    ...orgs.map((o) => o.logo),
   ].filter((s): s is string => !!s);
 }
 

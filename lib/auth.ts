@@ -35,7 +35,7 @@ export const auth = betterAuth({
       process.env.AUTH_SKIP_EMAIL_VERIFICATION !== "true",
     autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
-      void sendPasswordResetEmail(user.email, url);
+      void sendPasswordResetEmail(user.email, url, await requestLocale());
     },
   },
 
@@ -43,7 +43,7 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      void sendVerificationEmail(user.email, url);
+      void sendVerificationEmail(user.email, url, await requestLocale());
     },
   },
 
@@ -113,6 +113,9 @@ export const auth = betterAuth({
           organizationName: data.organization.name,
           inviterName: data.inviter.user.name,
           inviteUrl,
+          // The inviter's UI language — best available signal for the
+          // company's language until the invitee has an own preference.
+          locale: await requestLocale(),
         });
       },
     }),
@@ -121,3 +124,17 @@ export const auth = betterAuth({
 });
 
 export type Session = typeof auth.$Infer.Session;
+
+/**
+ * The requester's UI language (NEXT_LOCALE cookie) for localized e-mails.
+ * Auth callbacks run inside a request scope, so next/headers works; outside
+ * one (jobs, scripts) this quietly falls back to undefined → English.
+ */
+async function requestLocale(): Promise<string | undefined> {
+  try {
+    const { cookies } = await import("next/headers");
+    return (await cookies()).get("NEXT_LOCALE")?.value;
+  } catch {
+    return undefined;
+  }
+}

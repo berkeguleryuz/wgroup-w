@@ -40,6 +40,7 @@ export default async function AccountLayout({
       <SettingsSidebar
         userName={user.name || user.email}
         userEmail={user.email}
+        userImage={user.image}
         roleLabel={t(roleKey)}
       />
       <div className="min-w-0 flex-1">{children}</div>

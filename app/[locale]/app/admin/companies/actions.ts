@@ -10,12 +10,14 @@ import { localizedPath } from "@/lib/i18n/routing";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
+import { isNextRedirect } from "@/lib/utils";
 
 /** Refresh the companies page and flash a one-shot toast (`?toast=<key>`). */
-async function backToCompanies(toast: string) {
+async function backToCompanies(toast: string, emsg?: string) {
   revalidatePath("/app/admin/companies");
   const locale = await getLocale();
-  redirect(localizedPath(locale, `/app/admin/companies?toast=${toast}`));
+  const q = emsg ? `&emsg=${encodeURIComponent(emsg)}` : "";
+  redirect(localizedPath(locale, `/app/admin/companies?toast=${toast}${q}`));
 }
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -32,6 +34,7 @@ export async function markLeadContacted(formData: FormData) {
 
 export async function activateCompany(formData: FormData) {
   await requireRole(["admin"]);
+  try {
 
   const companyName = String(formData.get("companyName") || "").trim();
   const slug = String(formData.get("slug") || "").trim().toLowerCase();
@@ -176,6 +179,12 @@ export async function activateCompany(formData: FormData) {
       .catch(() => {});
   }
 
+  } catch (e) {
+    if (isNextRedirect(e)) throw e;
+    // Business errors (slug taken, owner provisioning failed, …) surface as
+    // an error toast instead of the generic error page.
+    await backToCompanies("error", (e as Error).message);
+  }
   await backToCompanies("created");
 }
 

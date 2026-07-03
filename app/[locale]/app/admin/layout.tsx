@@ -22,6 +22,9 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             {t("subscribersHeading")}
           </NavItem>
           <NavItem href="/app/admin/storage">{t("storageHeading")}</NavItem>
+          {/* Instructor management lives in the editor area; admins have
+              access to it, so surface a direct shortcut here. */}
+          <NavItem href="/app/editor/instructors">{t("instructors")}</NavItem>
         </ul>
       </nav>
       <section>{children}</section>

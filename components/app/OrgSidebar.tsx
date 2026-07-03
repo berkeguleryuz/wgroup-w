@@ -7,7 +7,14 @@ import { Link, usePathname } from "@/lib/i18n/navigation";
 export type OrgSidebarItem = {
   href: string;
   label: string;
-  icon: "dashboard" | "members" | "departments" | "reports" | "invite" | "content";
+  icon:
+    | "dashboard"
+    | "members"
+    | "departments"
+    | "reports"
+    | "invite"
+    | "content"
+    | "billing";
 };
 
 type Props = {
@@ -23,6 +30,7 @@ const ICONS: Record<OrgSidebarItem["icon"], ReactNode> = {
   reports: <ReportsIcon />,
   invite: <InviteIcon />,
   content: <ContentIcon />,
+  billing: <BillingIcon />,
 };
 
 export function OrgSidebar({ kicker, orgName, items }: Props) {
@@ -120,6 +128,15 @@ function ReportsIcon() {
       <path d="M3 17V3" />
       <path d="M3 17h14" />
       <path d="M6.5 13.5v-4M10.5 13.5V6M14.5 13.5V9" />
+    </svg>
+  );
+}
+
+function BillingIcon() {
+  return (
+    <svg {...iconProps}>
+      <rect x="2.5" y="4.5" width="15" height="11" rx="2" />
+      <path d="M2.5 8.5h15M5.5 12.5h3" />
     </svg>
   );
 }

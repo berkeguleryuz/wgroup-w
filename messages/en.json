@@ -428,7 +428,8 @@
     "roleOrgOwner": "Corporate Admin",
     "roleOrgMember": "Corporate Member",
     "subscription": "Subscription",
-    "manage": "Manage subscription"
+    "manage": "Manage subscription",
+    "avatar": "Profile photo"
   },
   "subscription": {
     "kicker": "Membership",
@@ -627,7 +628,9 @@
     "storageCleanup": "Clean up orphans",
     "storageCleanupTitle": "Clean up orphaned files",
     "storageCleanupConfirm": "{count} orphaned files ({size}) will be permanently deleted from storage. No training or episode is affected.",
-    "storageEmpty": "No panel-uploaded files yet."
+    "storageEmpty": "No panel-uploaded files yet.",
+    "storageUsed": "storage",
+    "instructors": "Instructors"
   },
   "organization": {
     "kicker": "For Business",
@@ -731,13 +734,20 @@
     "opening": "Opening…",
     "upgradeCta": "Upgrade to Unlimited",
     "upgrading": "Upgrading…",
-    "upgradeDone": "Your package was upgraded. The change appears within a few seconds.",
+    "upgradeDone": "Your package was upgraded and the difference was charged to your saved card.",
     "upgradeFailed": "Upgrade failed, please try again.",
     "currentPlan": "Current package",
     "seatsUnlimited": "Unlimited",
     "errNoProfile": "Company profile not found.",
     "errSeats": "Not enough seats. {remaining} remaining, {requested} requested.",
-    "errSeatsUpgrade": "Not enough seats. {remaining} remaining, {requested} requested. Upgrade your package for more seats."
+    "errSeatsUpgrade": "Not enough seats. {remaining} remaining, {requested} requested. Upgrade your package for more seats.",
+    "statStorage": "Storage",
+    "contentInstructorsBody": "Your company's instructor pool. These instructors can only be credited on your own trainings and are only visible to your employees.",
+    "upgradeConfirmBody": "Your package will be upgraded to Corporate Unlimited. The prorated difference for the rest of the period is charged to your company's saved card immediately. Do you want to continue?",
+    "upgradeConfirmCta": "Yes, upgrade and charge",
+    "companyLogo": "Company logo",
+    "companyLogoBody": "The logo replaces the company initial on the My Company page and in the panel.",
+    "saveCompanyLogo": "Save logo"
   },
   "themeToggle": {
     "label": "Theme",
@@ -798,6 +808,7 @@
     "saved": "Saved",
     "created": "Created",
     "deleted": "Deleted",
-    "sent": "Sent"
+    "sent": "Sent",
+    "error": "Something went wrong. Please try again."
   }
 }

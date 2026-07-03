@@ -7,6 +7,11 @@ type Props = {
   name: string;
   defaultValue?: string;
   required?: boolean;
+  /** Preview shape: "wide" (16:9, hero images) or "avatar" (compact circle,
+      person photos — sized to line up with a standard h-11 input). */
+  shape?: "wide" | "avatar";
+  /** Signed-upload endpoint; defaults to the staff/studio editor route. */
+  endpoint?: string;
 };
 
 /**
@@ -14,7 +19,13 @@ type Props = {
  * resulting public URL via a visually hidden input — the raw URL is never
  * shown or hand-editable (the preview thumbnail is the source of truth).
  */
-export function ImageUpload({ name, defaultValue, required }: Props) {
+export function ImageUpload({
+  name,
+  defaultValue,
+  required,
+  shape = "wide",
+  endpoint = "/api/editor/image-upload",
+}: Props) {
   const t = useTranslations("editor");
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
@@ -44,7 +55,7 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
     setError(null);
     setProgress(0);
     try {
-      const res = await fetch("/api/editor/image-upload", {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -97,7 +108,13 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
   return (
     <div>
       <div className="flex items-start gap-3">
-        <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-11 border border-border bg-muted">
+        <div
+          className={`relative shrink-0 overflow-hidden border border-border bg-muted ${
+            shape === "avatar"
+              ? "h-11 w-11 rounded-full"
+              : "aspect-video w-36 rounded-11"
+          }`}
+        >
           {url ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -125,7 +142,11 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
             className="sr-only"
           />
           {uploading ? (
-            <div className="flex h-full min-h-[3.5rem] flex-col justify-center rounded-11 border border-dashed border-border bg-muted/40 px-4">
+            <div
+              className={`flex h-full flex-col justify-center rounded-11 border border-dashed border-border bg-muted/40 px-4 ${
+                shape === "avatar" ? "min-h-11 py-1.5" : "min-h-[3.5rem]"
+              }`}
+            >
               <p className="text-xs text-muted-foreground">
                 {t("uploading")} — {progress}%
               </p>
@@ -140,7 +161,9 @@ export function ImageUpload({ name, defaultValue, required }: Props) {
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
-              className={`flex min-h-[3.5rem] w-full items-center justify-center gap-2 rounded-11 border border-dashed px-4 text-sm font-medium transition-colors ${
+              className={`flex w-full items-center justify-center gap-2 rounded-11 border border-dashed px-4 text-sm font-medium transition-colors ${
+                shape === "avatar" ? "h-11" : "min-h-[3.5rem]"
+              } ${
                 url
                   ? "border-primary bg-primary/10 text-muted-foreground hover:text-foreground"
                   : "border-border bg-muted/40 text-muted-foreground hover:text-foreground"

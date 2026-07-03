@@ -94,9 +94,10 @@ model Organization {
   invitations Invitation[]
   departments Department[]
 
-  companyProfile CompanyProfile?
-  titleAudience  TitleOrganization[]
-  createdTitles  Title[]
+  companyProfile     CompanyProfile?
+  titleAudience      TitleOrganization[]
+  createdTitles      Title[]
+  createdInstructors Instructor[]
 
   @@map("organization")
 }
@@ -299,8 +300,14 @@ model Instructor {
   photoUrl String?
   userId   String? @unique
   user     User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+  // Set when a company created this instructor in its content studio; such
+  // instructors are only assignable to that org's own titles.
+  createdByOrgId String?
+  createdByOrg   Organization? @relation(fields: [createdByOrgId], references: [id], onDelete: Cascade)
 
   credits TitleInstructor[]
+
+  @@index([createdByOrgId])
 }
 
 model TitleInstructor {

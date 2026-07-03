@@ -9,6 +9,12 @@ type Props = {
   confirmTitle?: string;
   /** Confirm button label; defaults to the generic confirm label. */
   confirmLabel?: string;
+  /** When set, confirming runs this instead of submitting the wrapping form
+      (for onClick-driven actions). */
+  onConfirm?: () => void;
+  /** Confirm action tone: destructive red (default) or brand primary. */
+  tone?: "danger" | "primary";
+  disabled?: boolean;
   className?: string;
   children: ReactNode;
 };
@@ -22,6 +28,9 @@ export function ConfirmButton({
   confirmText,
   confirmTitle,
   confirmLabel,
+  onConfirm,
+  tone = "danger",
+  disabled,
   className,
   children,
 }: Props) {
@@ -46,6 +55,7 @@ export function ConfirmButton({
       <button
         ref={triggerRef}
         type="button"
+        disabled={disabled}
         className={className}
         onClick={() => setOpen(true)}
       >
@@ -66,7 +76,13 @@ export function ConfirmButton({
             className="relative w-full max-w-md rounded-11 border border-border bg-background p-6 text-foreground shadow-[0_30px_80px_-20px_rgba(16,13,8,0.45)]"
           >
             <div className="flex items-start gap-4">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-950/40">
+              <span
+                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                  tone === "danger"
+                    ? "bg-red-50 text-red-600 dark:bg-red-950/40"
+                    : "bg-primary/20 text-primary-foreground dark:text-primary"
+                }`}
+              >
                 <WarningIcon />
               </span>
               <div className="min-w-0">
@@ -91,9 +107,14 @@ export function ConfirmButton({
                 type="button"
                 onClick={() => {
                   setOpen(false);
-                  triggerRef.current?.form?.requestSubmit();
+                  if (onConfirm) onConfirm();
+                  else triggerRef.current?.form?.requestSubmit();
                 }}
-                className="rounded-11 bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-600/40"
+                className={`rounded-11 px-4 py-2 text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 ${
+                  tone === "danger"
+                    ? "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600/40"
+                    : "bg-surface-dark text-surface-dark-foreground hover:bg-surface-dark/90 focus-visible:ring-foreground/30 dark:bg-primary dark:text-primary-foreground dark:hover:bg-primary/90"
+                }`}
               >
                 {confirmLabel ?? t("confirmAction")}
               </button>

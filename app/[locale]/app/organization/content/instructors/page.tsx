@@ -1,63 +1,33 @@
-import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
-import { redirect } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import { localizedPath, type Locale } from "@/lib/i18n/routing";
+import type { Locale } from "@/lib/i18n/routing";
+import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/access";
+import { requireOrgContentStudio } from "@/lib/corporate";
+import {
+  createOrgInstructor,
+  updateOrgInstructor,
+  deleteOrgInstructor,
+} from "../actions";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
 
-async function backToList() {
-  const locale = await getLocale();
-  redirect(localizedPath(locale, "/app/editor/instructors"));
-}
-
-async function createInstructor(formData: FormData) {
-  "use server";
-  await requireRole(["platform_editor", "admin"]);
-  const name = String(formData.get("name") || "").trim();
-  const bio = String(formData.get("bio") || "").trim() || null;
-  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
-  if (!name) throw new Error("Missing fields");
-
-  await prisma.instructor.create({ data: { name, bio, photoUrl } });
-  await backToList();
-}
-
-async function updateInstructor(formData: FormData) {
-  "use server";
-  await requireRole(["platform_editor", "admin"]);
-  const id = String(formData.get("id"));
-  const name = String(formData.get("name") || "").trim();
-  const bio = String(formData.get("bio") || "").trim() || null;
-  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
-  if (!name) throw new Error("Missing fields");
-
-  await prisma.instructor.update({ where: { id }, data: { name, bio, photoUrl } });
-  await backToList();
-}
-
-async function deleteInstructor(formData: FormData) {
-  "use server";
-  await requireRole(["platform_editor", "admin"]);
-  const id = String(formData.get("id"));
-  await prisma.instructor.delete({ where: { id } });
-  await backToList();
-}
-
-export default async function EditorInstructorsPage({
+export default async function OrgInstructorsPage({
   params,
 }: {
   params: Promise<{ locale: Locale }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireRole(["platform_editor", "admin"]);
-  const [t, instructors] = await Promise.all([
+  const { membership } = await requireOrgContentStudio();
+
+  const [t, te, instructors] = await Promise.all([
+    getTranslations("organization"),
     getTranslations("editor"),
     prisma.instructor.findMany({
+      where: { createdByOrgId: membership.organizationId },
       orderBy: { name: "asc" },
       include: { credits: { include: { title: { select: { title: true } } } } },
     }),
@@ -66,34 +36,37 @@ export default async function EditorInstructorsPage({
   return (
     <div className="space-y-8">
       <header>
-        <span className="font-accent text-lg text-muted-foreground">
-          {t("kicker")}
-        </span>
-        <h1 className="mt-1 text-3xl md:text-5xl">{t("instructors")}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          {t("instructorsBody")}
+        <Link
+          href="/app/organization/content"
+          className="text-xs text-muted-foreground underline-offset-4 hover:underline"
+        >
+          ← {t("contentStudio")}
+        </Link>
+        <h1 className="mt-2 text-3xl md:text-5xl">{te("instructors")}</h1>
+        <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+          {t("contentInstructorsBody")}
         </p>
       </header>
 
       <section className="rounded-11 border border-border/60 bg-background p-6">
-        <h2 className="font-display text-2xl">{t("newInstructor")}</h2>
-        <form action={createInstructor} className="mt-5 space-y-4">
+        <h2 className="font-display text-2xl">{te("newInstructor")}</h2>
+        <form action={createOrgInstructor} className="mt-5 space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <Label htmlFor="new-name">{t("instructorName")}</Label>
+              <Label htmlFor="new-name">{te("instructorName")}</Label>
               <Input id="new-name" name="name" required />
             </div>
             <div>
-              <Label>{t("instructorPhoto")}</Label>
+              <Label>{te("instructorPhoto")}</Label>
               <ImageUpload name="photoUrl" shape="avatar" />
             </div>
           </div>
           <div>
-            <Label htmlFor="new-bio">{t("instructorBio")}</Label>
+            <Label htmlFor="new-bio">{te("instructorBio")}</Label>
             <Textarea id="new-bio" name="bio" rows={3} />
           </div>
           <Button type="submit" variant="dark">
-            {t("addInstructor")}
+            {te("addInstructor")}
           </Button>
         </form>
       </section>
@@ -101,7 +74,7 @@ export default async function EditorInstructorsPage({
       <section className="rounded-11 border border-border/60 bg-background">
         {instructors.length === 0 ? (
           <p className="p-6 text-sm text-muted-foreground">
-            {t("noInstructorsYet")}
+            {te("noInstructorsYet")}
           </p>
         ) : (
           <div className="divide-y divide-border/70">
@@ -124,36 +97,36 @@ export default async function EditorInstructorsPage({
                       <p className="truncate text-xs text-muted-foreground">
                         {i.credits.length > 0
                           ? i.credits.map((c) => c.title.title).join(", ")
-                          : t("noCredits")}
+                          : te("noCredits")}
                       </p>
                     </div>
                   </div>
-                  <form action={deleteInstructor}>
+                  <form action={deleteOrgInstructor}>
                     <input type="hidden" name="id" value={i.id} />
                     <ConfirmButton
-                      confirmText={t("deleteInstructorConfirm", {
+                      confirmText={te("deleteInstructorConfirm", {
                         name: i.name,
                       })}
                       className="shrink-0 text-xs text-red-600 underline-offset-4 hover:underline"
                     >
-                      {t("delete")}
+                      {te("delete")}
                     </ConfirmButton>
                   </form>
                 </div>
 
                 <details className="mt-3">
                   <summary className="cursor-pointer text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
-                    {t("editInstructor")}
+                    {te("editInstructor")}
                   </summary>
                   <form
-                    action={updateInstructor}
+                    action={updateOrgInstructor}
                     className="mt-3 space-y-4 rounded-11 border border-border/60 bg-muted/30 p-4"
                   >
                     <input type="hidden" name="id" value={i.id} />
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
                         <Label htmlFor={`name-${i.id}`}>
-                          {t("instructorName")}
+                          {te("instructorName")}
                         </Label>
                         <Input
                           id={`name-${i.id}`}
@@ -163,7 +136,7 @@ export default async function EditorInstructorsPage({
                         />
                       </div>
                       <div>
-                        <Label>{t("instructorPhoto")}</Label>
+                        <Label>{te("instructorPhoto")}</Label>
                         <ImageUpload
                           name="photoUrl"
                           defaultValue={i.photoUrl ?? ""}
@@ -173,7 +146,7 @@ export default async function EditorInstructorsPage({
                     </div>
                     <div>
                       <Label htmlFor={`bio-${i.id}`}>
-                        {t("instructorBio")}
+                        {te("instructorBio")}
                       </Label>
                       <Textarea
                         id={`bio-${i.id}`}
@@ -183,7 +156,7 @@ export default async function EditorInstructorsPage({
                       />
                     </div>
                     <Button type="submit" variant="dark">
-                      {t("saved")}
+                      {te("saved")}
                     </Button>
                   </form>
                 </details>

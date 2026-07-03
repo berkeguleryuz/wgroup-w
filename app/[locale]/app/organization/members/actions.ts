@@ -107,6 +107,7 @@ export async function resendInvitation(formData: FormData) {
     organizationName: membership.organization.name,
     inviterName: session.user.name || session.user.email,
     inviteUrl: `${APP_URL}/invite/${id}`,
+    locale: await getLocale(),
   });
   await back(ok ? "?resent=1" : "?err=email");
 }

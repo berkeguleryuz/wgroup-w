@@ -6,6 +6,7 @@ import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
+import { cleanupStorageRefs } from "@/lib/storage-cleanup";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { AddEpisodeForm } from "@/components/editor/AddEpisodeForm";
@@ -41,10 +42,19 @@ async function updateTitle(formData: FormData) {
   const heroImageUrl = String(formData.get("heroImageUrl") || "").trim() || null;
   const trailerUrl = String(formData.get("trailerUrl") || "").trim() || null;
 
+  const before = await prisma.title.findUnique({
+    where: { id },
+    select: { heroImageUrl: true, trailerUrl: true },
+  });
   await prisma.title.update({
     where: { id },
     data: { title, synopsis, heroImageUrl, trailerUrl },
   });
+  // Drop replaced media from storage once nothing references it.
+  await cleanupStorageRefs([
+    before?.heroImageUrl !== heroImageUrl ? before?.heroImageUrl : null,
+    before?.trailerUrl !== trailerUrl ? before?.trailerUrl : null,
+  ]);
   await backToTitle(id);
 }
 
@@ -95,7 +105,20 @@ async function deleteTitle(formData: FormData) {
   // cannot remove it (episodes + watch progress go with it).
   await requireRole(["admin"]);
   const id = String(formData.get("id"));
+  const doomed = await prisma.title.findUnique({
+    where: { id },
+    include: {
+      episodes: { select: { videoPath: true, subtitles: { select: { vttPath: true } } } },
+    },
+  });
   await prisma.title.delete({ where: { id } });
+  if (doomed) {
+    await cleanupStorageRefs([
+      doomed.heroImageUrl,
+      doomed.trailerUrl,
+      ...doomed.episodes.flatMap((e) => [e.videoPath, ...e.subtitles.map((s) => s.vttPath)]),
+    ]);
+  }
   updateTag("featured-titles");
   const locale = await getLocale();
   redirect(localizedPath(locale, "/app/editor/titles?toast=deleted"));
@@ -148,6 +171,9 @@ async function updateEpisode(formData: FormData) {
 
   if (!name) throw new Error("Missing fields");
 
+  const before = videoPath
+    ? await prisma.episode.findUnique({ where: { id }, select: { videoPath: true } })
+    : null;
   await prisma.episode.update({
     where: { id },
     data: {
@@ -160,6 +186,10 @@ async function updateEpisode(formData: FormData) {
       ...(videoPath ? { videoPath } : {}),
     },
   });
+  // Drop the replaced video from storage once nothing references it.
+  if (before && before.videoPath !== videoPath) {
+    await cleanupStorageRefs([before.videoPath]);
+  }
   await backToTitle(titleId);
 }
 
@@ -168,7 +198,17 @@ async function deleteEpisode(formData: FormData) {
   await requireRole(["platform_editor", "admin"]);
   const id = String(formData.get("id"));
   const titleId = String(formData.get("titleId"));
+  const doomed = await prisma.episode.findUnique({
+    where: { id },
+    include: { subtitles: { select: { vttPath: true } } },
+  });
   await prisma.episode.delete({ where: { id } });
+  if (doomed) {
+    await cleanupStorageRefs([
+      doomed.videoPath,
+      ...doomed.subtitles.map((s) => s.vttPath),
+    ]);
+  }
   await backToTitle(titleId, "deleted");
 }
 
@@ -244,11 +284,18 @@ async function addSubtitle(formData: FormData) {
   if (!episodeId || !lang || !vttPath) throw new Error("Missing fields");
 
   const label = LANG_LABELS[lang] ?? lang.toUpperCase();
+  const before = await prisma.subtitle.findUnique({
+    where: { episodeId_lang: { episodeId, lang } },
+    select: { vttPath: true },
+  });
   await prisma.subtitle.upsert({
     where: { episodeId_lang: { episodeId, lang } },
     create: { episodeId, lang, label, vttPath },
     update: { vttPath, label },
   });
+  if (before && before.vttPath !== vttPath) {
+    await cleanupStorageRefs([before.vttPath]);
+  }
   await backToTitle(titleId);
 }
 
@@ -257,7 +304,12 @@ async function deleteSubtitle(formData: FormData) {
   await requireRole(["platform_editor", "admin"]);
   const id = String(formData.get("id"));
   const titleId = String(formData.get("titleId"));
+  const doomed = await prisma.subtitle.findUnique({
+    where: { id },
+    select: { vttPath: true },
+  });
   await prisma.subtitle.delete({ where: { id } });
+  await cleanupStorageRefs([doomed?.vttPath]);
   await backToTitle(titleId, "deleted");
 }
 
@@ -300,7 +352,13 @@ export default async function EditorTitleDetail({
   const nextEpisodeNumber =
     (title.episodes[title.episodes.length - 1]?.episodeNumber ?? 0) + 1;
   const creditedIds = new Set(title.credits.map((c) => c.instructorId));
-  const assignable = instructors.filter((i) => !creditedIds.has(i.id));
+  // Company-scoped instructors are only assignable to that company's own
+  // titles — keep them out of the pool for platform content.
+  const assignable = instructors.filter(
+    (i) =>
+      !creditedIds.has(i.id) &&
+      (i.createdByOrgId === null || i.createdByOrgId === title.createdByOrgId),
+  );
 
   return (
     <div className="space-y-10">
