@@ -86,7 +86,7 @@
     "f4Body": "Bring dein ganzes Unternehmen in wenigen Minuten an Bord. Preise pro Sitzplatz, Nutzungsstatistiken und ein zentrales Admin-Dashboard in einem."
   },
   "categories": {
-    "sectionTag": "Drei Räume, eine Bibliothek",
+    "sectionTag": "Vier Räume, eine Bibliothek",
     "heading": "Was läuft.",
     "seriesTitle": "Serien",
     "seriesTag": "Langform",
@@ -98,9 +98,14 @@
     "filmsCount": "12 Filme",
     "talentTitle": "Talent Management",
     "talentTag": "Neu",
-    "talentBody": "Ein eigener Bereich für HR und People Leader. Bald: KI-Copilot für Karrierewege.",
+    "talentBody": "Ein Bereich für deine persönliche Entwicklung: Neue Skills aufbauen, Stärken entdecken, Karriereweg planen. Bald: KI-gestützter Karriere-Copilot.",
     "talentCount": "Start 2026",
-    "startWatching": "Jetzt ansehen →"
+    "startWatching": "Jetzt ansehen →",
+    "corporateTitle": "Business",
+    "corporateTag": "Für Teams",
+    "corporateBody": "Ein Firmenkonto für dein ganzes Team: Zugänge pro Sitzplatz, Statistiken und ein Admin-Panel.",
+    "corporateCount": "Preis pro Sitzplatz",
+    "corporateCta": "Business entdecken →"
   },
   "featuredLibrary": {
     "sectionTag": "Empfohlen",
@@ -115,7 +120,7 @@
     "sectionTag": "Mitgliedschaft",
     "headingLine1": "Ein Preis,",
     "headingLine2": "die ganze Bibliothek.",
-    "description": "Beide Pläne sind die Vollversion. Mit dem Jahresplan bekommst du 2 Monate geschenkt — €39 gespart. Teams rechnen wir pro Sitzplatz.",
+    "description": "Beide Pläne sind die Vollversion. Mit dem Jahresplan bekommst du 2 Monate geschenkt und sparst €39. Teams rechnen wir pro Sitzplatz.",
     "ctaPlans": "Pläne ansehen",
     "ctaSales": "Vertrieb kontaktieren",
     "highlight1": "Unbegrenzter Zugriff auf alle Titel",
@@ -230,6 +235,8 @@
     "formContact": "Ansprechperson",
     "formEmail": "E-Mail",
     "formPhone": "Telefon",
+    "formPhoneHint": "Muss mit + oder 0 beginnen und darf nur Ziffern enthalten (z. B. +49 151 2345678)",
+    "formPhonePlaceholder": "+49 151 2345678",
     "formSeats": "Geschätzte Sitzplätze",
     "formMessage": "Notizen",
     "formSubmit": "Anfrage senden",

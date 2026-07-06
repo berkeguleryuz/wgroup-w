@@ -21,7 +21,7 @@ export function CorporateCTA() {
 
   return (
     <section className="border-b border-border/60 bg-background">
-      <div className="mx-auto max-w-7xl px-6 py-24 md:px-10 md:py-32 xl:px-16">
+      <div className="mx-auto max-w-[1800px] px-6 py-24 md:px-10 md:py-32 xl:px-16">
         <div className="flex items-center justify-between border-b border-foreground/10 pb-5">
           <span className="font-accent text-xl text-muted-foreground">
             {t("sectionTag")}

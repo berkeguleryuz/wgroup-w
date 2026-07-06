@@ -1,8 +1,9 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { cacheLife, cacheTag } from "next/cache";
 
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { formatDuration } from "@/lib/utils";
 
 async function loadFeatured() {
@@ -37,14 +38,15 @@ const gradients = [
 ];
 
 export async function FeaturedLibrary() {
-  const [titles, t] = await Promise.all([
+  const [titles, t, locale] = await Promise.all([
     loadFeatured(),
     getTranslations("featuredLibrary"),
+    getLocale(),
   ]);
 
   return (
     <section id="library" className="border-b border-border/60 bg-muted/40">
-      <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
+      <div className="mx-auto max-w-[1800px] px-6 py-20 md:px-10 md:py-24 xl:px-16">
         <div className="flex items-end justify-between gap-6 flex-wrap">
           <div>
             <span className="font-accent text-xl text-muted-foreground">
@@ -98,8 +100,7 @@ export async function FeaturedLibrary() {
                     <div>
                       <p className="font-accent text-sm opacity-90">
                         {title.type === "SERIES" ? t("series") : t("film")} ·{" "}
-                        {/* Turkish category name — keep the dotted İ under uppercase. */}
-                        <span lang="tr">{title.category.title}</span>
+                        {categoryTitle(title.category, locale)}
                       </p>
                       <h3 className="mt-2 font-display text-2xl leading-tight line-clamp-2">
                         {title.title}

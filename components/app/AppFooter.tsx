@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -12,6 +13,13 @@ export function AppFooter() {
       <div className="grid w-full gap-10 px-4 py-12 md:grid-cols-4 md:px-6 lg:px-8">
         <div className="md:col-span-2">
           <Wordmark href="/app" />
+          <Image
+            src="/logo-transparent.webp"
+            alt={t("common.appName")}
+            width={57}
+            height={80}
+            className="mt-4 h-20 w-auto"
+          />
           <p className="mt-4 max-w-sm text-sm text-muted-foreground">
             {t("footer.tagline")}
           </p>

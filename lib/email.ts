@@ -195,7 +195,7 @@ function wrap(
             <tr>
               <td style="border-radius:11px 11px 0 0;background:#0c0907;padding:30px 40px 26px" align="center">
                 <a href="${APP_URL}" style="text-decoration:none">
-                  <img src="cid:${LOGO_CID}" width="59" height="80" alt="Busyflix" style="display:block;border:0;margin:0 auto 12px" />
+                  <img src="cid:${LOGO_CID}" width="58" height="80" alt="Busyflix" style="display:block;border:0;margin:0 auto 12px" />
                   <span style="font-family:Georgia,'Times New Roman',serif;font-size:24px;font-weight:600;letter-spacing:0.5px;color:#fbf7f6">busyflix</span>
                 </a>
               </td>

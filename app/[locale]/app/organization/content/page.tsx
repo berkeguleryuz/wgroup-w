@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { requireOrgContentStudio } from "@/lib/corporate";
 import { createOrgTitle } from "./actions";
 import { Button } from "@/components/ui/Button";
@@ -99,9 +100,9 @@ export default async function OrgContentPage({
                 <div className="min-w-0">
                   <p className="truncate font-medium">{title.title}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {title.category.parent?.title ?? title.category.title}
+                    {categoryTitle(title.category.parent ?? title.category, locale)}
                     {title.category.parent
-                      ? ` / ${title.category.title}`
+                      ? ` / ${categoryTitle(title.category, locale)}`
                       : null}{" "}
                     ·{" "}
                     {title.type === "SERIES"
@@ -151,9 +152,9 @@ export default async function OrgContentPage({
                 <div className="min-w-0">
                   <p className="truncate font-medium">{title.title}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    {title.category.parent?.title ?? title.category.title}
+                    {categoryTitle(title.category.parent ?? title.category, locale)}
                     {title.category.parent
-                      ? ` / ${title.category.title}`
+                      ? ` / ${categoryTitle(title.category, locale)}`
                       : null}{" "}
                     ·{" "}
                     {title.type === "SERIES"

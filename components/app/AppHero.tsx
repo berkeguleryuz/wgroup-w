@@ -93,10 +93,7 @@ export function AppHero({
               <span className="font-accent text-lg text-muted-foreground dark:text-primary md:text-xl">
                 {title.type === "SERIES" ? seriesLabel : filmLabel}
                 {" · "}
-                {/* Category names are Turkish content; mark the language so the
-                    uppercase transform keeps the dotted İ even when the page
-                    locale is English. */}
-                <span lang="tr">{title.categoryTitle}</span>
+                {title.categoryTitle}
               </span>
               <h1 className="mt-3 font-display text-4xl leading-[1.04] tracking-[-0.02em] md:text-6xl lg:text-7xl">
                 {title.title}

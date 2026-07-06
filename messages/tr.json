@@ -86,7 +86,7 @@
     "f4Body": "Şirketini dakikalar içinde platforma ekle. Kullanıcı bazlı fiyatlandırma, izlenme istatistikleri ve tek panelden yönetim bir arada."
   },
   "categories": {
-    "sectionTag": "Üç oda, tek kütüphane",
+    "sectionTag": "Dört oda, tek kütüphane",
     "heading": "Neler var?",
     "seriesTitle": "Diziler",
     "seriesTag": "Uzun form",
@@ -98,9 +98,14 @@
     "filmsCount": "12 film",
     "talentTitle": "Talent Management",
     "talentTag": "Yeni",
-    "talentBody": "İnsan kaynakları ve ekip liderleri için özel bir bölüm. Yakında: kariyer planlama için AI yardımcı.",
+    "talentBody": "Kişisel gelişimine odaklı bölüm: yeni beceriler edin, güçlü yönlerini keşfet, kariyer yolunu planla. Yakında: AI destekli kariyer yardımcısı.",
     "talentCount": "2026'da açılıyor",
-    "startWatching": "İzlemeye başla →"
+    "startWatching": "İzlemeye başla →",
+    "corporateTitle": "Kurumsal",
+    "corporateTag": "Ekipler için",
+    "corporateBody": "Şirket hesabıyla tüm ekibine tek yerden erişim: koltuk bazlı üyelik, izleme istatistikleri ve yönetim paneli.",
+    "corporateCount": "Koltuk bazlı fiyatlandırma",
+    "corporateCta": "Kurumsalı keşfet →"
   },
   "featuredLibrary": {
     "sectionTag": "Öne çıkan",
@@ -115,7 +120,7 @@
     "sectionTag": "Üyelik",
     "headingLine1": "Tek fiyat,",
     "headingLine2": "tüm kütüphane.",
-    "description": "Her iki plan da tam sürümdür. Yıllık ödemede 2 ay hediye — €39 tasarruf edersin. Kurumsal planlar için satışla konuş.",
+    "description": "Her iki plan da tam sürümdür. Yıllık ödemede 2 ay hediye, €39 tasarruf edersin. Kurumsal planlar için satışla konuş.",
     "ctaPlans": "Planları gör",
     "ctaSales": "Satışa ulaş",
     "highlight1": "Tüm kütüphaneye sınırsız erişim",
@@ -230,6 +235,8 @@
     "formContact": "İletişim kişisi",
     "formEmail": "E-posta",
     "formPhone": "Telefon",
+    "formPhoneHint": "+ veya 0 ile başlamalı ve yalnızca rakamlardan oluşmalı (örn. +90 532 1234567)",
+    "formPhonePlaceholder": "+90 532 123 45 67",
     "formSeats": "Tahmini koltuk",
     "formMessage": "Notlar",
     "formSubmit": "Teklif talebi gönder",

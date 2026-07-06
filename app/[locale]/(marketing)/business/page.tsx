@@ -35,7 +35,9 @@ async function submitLead(formData: FormData) {
   }
 
   const emailOk = /^\S+@\S+\.\S+$/.test(email);
+  const phoneOk = !phone || /^[+0][0-9\s\-()]{6,19}$/.test(phone);
   if (
+    !phoneOk ||
     !companyName ||
     companyName.length > 200 ||
     !contactName ||
@@ -129,7 +131,15 @@ export default async function BusinessPage({
             <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <Label htmlFor="phone">{t("formPhone")}</Label>
-                <Input id="phone" name="phone" />
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  inputMode="tel"
+                  pattern="[+0][0-9\s\-\(\)]{6,19}"
+                  title={t("formPhoneHint")}
+                  placeholder={t("formPhonePlaceholder")}
+                />
               </div>
               <div>
                 <Label htmlFor="seatTarget">{t("formSeats")}</Label>

@@ -9,17 +9,17 @@ export function PricingTeaser() {
 
   return (
     <section className="relative overflow-hidden rounded-11 border-b border-black/40 bg-surface-dark text-surface-dark-foreground">
+      {/* Film-strip rhythm: widely spaced vertical hairlines. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06]"
+        className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
-          backgroundSize: "80px 80px",
+            "repeating-linear-gradient(to right, rgba(255,255,255,0.055) 0 2px, transparent 2px 170px)",
         }}
       />
 
-      <div className="relative mx-auto grid max-w-7xl gap-14 px-6 py-24 md:grid-cols-[1.05fr_1fr] md:gap-16 md:py-28 md:px-10 xl:px-16">
+      <div className="relative mx-auto grid max-w-[1800px] gap-14 px-6 py-24 md:grid-cols-[1.05fr_1fr] md:gap-16 md:py-28 md:px-10 xl:px-16">
         <div className="flex flex-col">
           <span className="font-accent text-xl opacity-70">
             {t("sectionTag")}
@@ -120,8 +120,7 @@ function PlanCard({
       }`}
     >
       {highlight && badge ? (
-        <span className="absolute right-5 top-5 inline-flex items-center gap-1.5 rounded-11 border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary-foreground">
-          <SparkIcon />
+        <span className="absolute right-5 top-5 inline-flex items-center rounded-11 border border-primary-foreground/20 bg-primary-foreground/10 px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.22em] text-primary-foreground">
           {badge}
         </span>
       ) : null}
@@ -214,18 +213,5 @@ function ArrowIcon() {
         <path d="M12 5 L17 10 L12 15" />
       </svg>
     </span>
-  );
-}
-
-function SparkIcon() {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      className="h-3.5 w-3.5"
-      fill="currentColor"
-      aria-hidden
-    >
-      <path d="M10 2 L11.8 7.2 L17 9 L11.8 10.8 L10 16 L8.2 10.8 L3 9 L8.2 7.2 Z" />
-    </svg>
   );
 }

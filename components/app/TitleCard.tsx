@@ -1,7 +1,8 @@
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import type { Title, Category, Episode } from "@prisma/client";
 
 import { Link } from "@/lib/i18n/navigation";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { formatDuration } from "@/lib/utils";
 
 type Props = {
@@ -27,6 +28,7 @@ export function TitleCard({
   progressPercent,
 }: Props) {
   const t = useTranslations("featuredLibrary");
+  const locale = useLocale();
   const total = title.episodes.reduce((s, e) => s + e.durationSec, 0);
   // Covers are landscape (16:9) — creators upload video-frame stills, Netflix-style.
   const aspect = "aspect-video";
@@ -65,8 +67,7 @@ export function TitleCard({
         <div className="absolute inset-0 flex flex-col justify-between p-5 text-surface-dark-foreground [text-shadow:0_1px_3px_rgba(0,0,0,0.7)]">
           <p className="font-accent text-xs opacity-90">
             {title.type === "SERIES" ? t("series") : t("film")} ·{" "}
-            {/* Turkish category name — keep the dotted İ under uppercase. */}
-            <span lang="tr">{title.category.title}</span>
+            {categoryTitle(title.category, locale)}
           </p>
           <div>
             <h3 className="font-display text-xl leading-tight line-clamp-2">

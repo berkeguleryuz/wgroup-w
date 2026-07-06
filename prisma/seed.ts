@@ -34,15 +34,15 @@ type TitleSeed = {
 };
 
 const CATEGORIES = [
-  { slug: "diziler", title: "Diziler", section: Section.SERIES, sortOrder: 0, parent: null },
-  { slug: "filmler", title: "Filmler", section: Section.MOVIE, sortOrder: 1, parent: null },
-  { slug: "talent-management", title: "Talent Management", section: Section.TALENT, sortOrder: 2, parent: null },
-  { slug: "liderlik", title: "Liderlik", section: Section.SERIES, parent: "diziler" },
-  { slug: "girisimcilik", title: "Girişimcilik", section: Section.SERIES, parent: "diziler" },
-  { slug: "pazarlama", title: "Pazarlama", section: Section.SERIES, parent: "diziler" },
-  { slug: "belgesel", title: "Belgesel", section: Section.MOVIE, parent: "filmler" },
-  { slug: "masterclass", title: "Masterclass", section: Section.MOVIE, parent: "filmler" },
-  { slug: "kariyer-gelisim", title: "Kariyer Gelişim", section: Section.TALENT, parent: "talent-management" },
+  { slug: "diziler", title: "Diziler", titleEn: "Series", titleDe: "Serien", section: Section.SERIES, sortOrder: 0, parent: null },
+  { slug: "filmler", title: "Filmler", titleEn: "Films", titleDe: "Filme", section: Section.MOVIE, sortOrder: 1, parent: null },
+  { slug: "talent-management", title: "Talent Management", titleEn: "Talent Management", titleDe: "Talent Management", section: Section.TALENT, sortOrder: 2, parent: null },
+  { slug: "liderlik", title: "Liderlik", titleEn: "Leadership", titleDe: "Führung", section: Section.SERIES, parent: "diziler" },
+  { slug: "girisimcilik", title: "Girişimcilik", titleEn: "Entrepreneurship", titleDe: "Unternehmertum", section: Section.SERIES, parent: "diziler" },
+  { slug: "pazarlama", title: "Pazarlama", titleEn: "Marketing", titleDe: "Marketing", section: Section.SERIES, parent: "diziler" },
+  { slug: "belgesel", title: "Belgesel", titleEn: "Documentary", titleDe: "Dokumentation", section: Section.MOVIE, parent: "filmler" },
+  { slug: "masterclass", title: "Masterclass", titleEn: "Masterclass", titleDe: "Masterclass", section: Section.MOVIE, parent: "filmler" },
+  { slug: "kariyer-gelisim", title: "Kariyer Gelişim", titleEn: "Career Development", titleDe: "Karriereentwicklung", section: Section.TALENT, parent: "talent-management" },
 ];
 
 const INSTRUCTORS = [
@@ -201,10 +201,12 @@ async function main() {
   for (const c of CATEGORIES) {
     const row = await prisma.category.upsert({
       where: { slug: c.slug },
-      update: { title: c.title, section: c.section },
+      update: { title: c.title, titleEn: c.titleEn, titleDe: c.titleDe, section: c.section },
       create: {
         slug: c.slug,
         title: c.title,
+        titleEn: c.titleEn,
+        titleDe: c.titleDe,
         section: c.section,
         sortOrder: c.sortOrder ?? 0,
         parentId: c.parent ? categoryId.get(c.parent) : null,
