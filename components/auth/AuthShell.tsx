@@ -2,6 +2,9 @@ import type { ReactNode } from "react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
+import LightRays from "@/components/marketing/LightRays";
+import GradientDotMesh from "@/components/pixel-perfect/gradient-dot-mesh";
+
 export async function AuthShell({
   kicker,
   heading,
@@ -18,15 +21,19 @@ export async function AuthShell({
   return (
     <div className="grid flex-1 md:grid-cols-[1fr_1.05fr]">
       <aside className="relative hidden overflow-hidden bg-surface-dark text-surface-dark-foreground md:flex md:flex-col md:justify-between md:p-12 lg:p-16">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.05]"
-          style={{
-            backgroundImage:
-              "linear-gradient(to right, #fff 1px, transparent 1px), linear-gradient(to bottom, #fff 1px, transparent 1px)",
-            backgroundSize: "72px 72px",
-          }}
-        />
+        <GradientDotMesh patternColor="rgba(255,255,255,0.12)" />
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          <LightRays
+            raysOrigin="top-center"
+            raysColor="#edddb9"
+            raysSpeed={0.9}
+            lightSpread={0.8}
+            rayLength={1.6}
+            followMouse
+            mouseInfluence={0.1}
+            noiseAmount={0.05}
+          />
+        </div>
 
         <div aria-hidden />
 
@@ -52,8 +59,9 @@ export async function AuthShell({
         <div aria-hidden />
       </aside>
 
-      <main className="relative flex flex-1 flex-col justify-center px-6 pb-12 pt-24 md:px-12 md:pb-16 md:pt-28 lg:px-20">
-        <div className="mx-auto w-full max-w-md">
+      <main className="relative flex flex-1 flex-col justify-center overflow-hidden px-6 pb-12 pt-24 md:px-12 md:pb-16 md:pt-28 lg:px-20">
+        <GradientDotMesh className="[mask-image:radial-gradient(ellipse_80%_70%_at_50%_40%,black_30%,transparent_100%)]" />
+        <div className="relative mx-auto w-full max-w-md">
           <div className="mb-10">
             <span className="font-accent text-xl text-muted-foreground">
               {kicker}

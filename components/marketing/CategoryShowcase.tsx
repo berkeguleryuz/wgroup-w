@@ -37,8 +37,7 @@ export function CategoryShowcase() {
       tag: t("talentTag"),
       body: t("talentBody"),
       count: t("talentCount"),
-      surface:
-        "[background:linear-gradient(135deg,#2b2016,#5b4630)] text-surface-dark-foreground dark:[background:linear-gradient(135deg,#e6d3a8,#b8945a)] dark:text-[#100D08]",
+      surface: darkCard,
       href: "/register",
       cta: t("startWatching"),
     },
@@ -78,7 +77,7 @@ export function CategoryShowcase() {
                   <div className="inline-flex items-center rounded-11 border border-current/20 px-2.5 py-1 text-xs font-medium opacity-90">
                     {c.tag}
                   </div>
-                  <h3 className="mt-5 font-display text-4xl md:text-5xl leading-none">
+                  <h3 className="mt-5 whitespace-nowrap font-display text-[clamp(1.5rem,1.9vw,2.5rem)] leading-none max-md:text-3xl">
                     {c.title}
                   </h3>
                   <p className="mt-4 text-sm opacity-85 max-w-xs">{c.body}</p>

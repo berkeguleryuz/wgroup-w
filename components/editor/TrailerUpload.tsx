@@ -93,61 +93,72 @@ export function TrailerUpload({ name, defaultValue, required }: Props) {
     }
   }
 
+  // Mirrors ImageUpload's layout (small 16:9 thumb + controls) so the hero
+  // image and trailer columns line up in the editor form.
   return (
     <div>
-      <input
-        type="text"
-        name={name}
-        value={url}
-        required={required}
-        onChange={(e) => setUrl(e.target.value)}
-        placeholder="https://…"
-        className="flex h-11 w-full rounded-11 border border-border bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
-      />
-
-      {url ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <video
-          src={url}
-          className="mt-2 aspect-video w-full rounded-11 border border-border bg-muted object-cover"
-          controls
-          muted
-          preload="metadata"
-        />
-      ) : null}
-
-      {uploading ? (
-        <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted">
-          <div
-            className="h-full rounded-full bg-foreground transition-[width] duration-200"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      ) : (
-        <div className="mt-2 flex items-center gap-3 text-xs">
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            className="font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
-          >
-            {t("uploadSelect")}
-          </button>
+      <div className="flex items-start gap-3">
+        <div className="relative aspect-video w-36 shrink-0 overflow-hidden rounded-11 border border-border bg-muted">
           {url ? (
-            <button
-              type="button"
-              onClick={() => {
-                setUrl("");
-                if (inputRef.current) inputRef.current.value = "";
-              }}
-              className="text-red-600 underline-offset-2 hover:underline"
-            >
-              {t("uploadRemove")}
-            </button>
-          ) : null}
+            <video
+              src={url}
+              className="h-full w-full bg-black object-cover"
+              controls
+              muted
+              preload="metadata"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground/70">
+              —
+            </div>
+          )}
         </div>
-      )}
 
-      {error ? <p className="mt-1.5 text-xs text-red-600">{error}</p> : null}
+        <div className="min-w-0 flex-1 space-y-2">
+          <input
+            type="text"
+            name={name}
+            value={url}
+            required={required}
+            onChange={(e) => setUrl(e.target.value)}
+            placeholder="https://…"
+            className="flex h-11 w-full rounded-11 border border-border bg-background px-3 text-sm placeholder:text-muted-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-foreground/20"
+          />
+
+          {uploading ? (
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full rounded-full bg-foreground transition-[width] duration-200"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          ) : (
+            <div className="flex items-center gap-3 text-xs">
+              <button
+                type="button"
+                onClick={() => inputRef.current?.click()}
+                className="font-medium text-muted-foreground underline-offset-2 transition-colors hover:text-foreground hover:underline"
+              >
+                {t("uploadSelect")}
+              </button>
+              {url ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUrl("");
+                    if (inputRef.current) inputRef.current.value = "";
+                  }}
+                  className="text-red-600 underline-offset-2 hover:underline"
+                >
+                  {t("uploadRemove")}
+                </button>
+              ) : null}
+            </div>
+          )}
+
+          {error ? <p className="text-xs text-red-600">{error}</p> : null}
+        </div>
+      </div>
 
       <input
         ref={inputRef}

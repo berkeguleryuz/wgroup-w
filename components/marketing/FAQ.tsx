@@ -30,7 +30,7 @@ export function FAQ() {
                 className="group inline-flex items-center justify-between gap-4 rounded-11 border border-foreground/15 bg-background px-5 py-4 text-sm transition-colors hover:border-foreground/40 hover:bg-muted"
               >
                 <span className="flex items-center gap-3">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-11 bg-surface-dark text-surface-dark-foreground">
+                  <span className="inline-flex h-8 w-8 items-center justify-center">
                     <MailIcon />
                   </span>
                   <span>
@@ -49,12 +49,15 @@ export function FAQ() {
 
           <div>
             <ol className="divide-y divide-foreground/10 border-y border-foreground/10">
-              {items.map((it, i) => (
+              {items.map((it) => (
                 <li key={it.q}>
                   <details className="group">
                     <summary className="flex cursor-pointer list-none items-center gap-5 py-6 outline-none transition-colors hover:text-foreground md:py-8">
-                      <span className="font-mono text-xs uppercase tracking-[0.22em] text-muted-foreground md:text-sm">
-                        {String(i + 1).padStart(2, "0")}
+                      <span
+                        aria-hidden
+                        className="text-xs text-muted-foreground md:text-sm"
+                      >
+                        ✦
                       </span>
                       <span className="flex-1 text-lg font-medium leading-snug md:text-2xl">
                         {it.q}

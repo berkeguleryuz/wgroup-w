@@ -14,7 +14,7 @@ import { isNextRedirect } from "@/lib/utils";
 
 /** Refresh the companies page and flash a one-shot toast (`?toast=<key>`). */
 async function backToCompanies(toast: string, emsg?: string) {
-  revalidatePath("/app/admin/companies");
+  revalidatePath("/", "layout");
   const locale = await getLocale();
   const q = emsg ? `&emsg=${encodeURIComponent(emsg)}` : "";
   redirect(localizedPath(locale, `/app/admin/companies?toast=${toast}${q}`));

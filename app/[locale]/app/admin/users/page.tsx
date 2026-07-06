@@ -71,6 +71,12 @@ export default async function AdminUsersPage({
                     <input type="hidden" name="userId" value={u.id} />
                     <select
                       name="role"
+                      // Keyed by the current role: an uncontrolled select
+                      // ignores defaultValue changes after mount (and React
+                      // resets the form to it after the action), so without a
+                      // remount the dropdown kept showing the old role until a
+                      // hard refresh.
+                      key={u.role ?? "individual"}
                       defaultValue={u.role ?? "individual"}
                       className="h-9 rounded-11 border border-border bg-background px-2 text-sm"
                     >

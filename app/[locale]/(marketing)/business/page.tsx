@@ -92,10 +92,10 @@ export default async function BusinessPage({
           </p>
 
           <div id="how-it-works" className="mt-10 space-y-6">
-            <Step n="01" title={t("step1Title")} body={t("step1Body")} />
-            <Step n="02" title={t("step2Title")} body={t("step2Body")} />
-            <Step n="03" title={t("step3Title")} body={t("step3Body")} />
-            <Step n="04" title={t("step4Title")} body={t("step4Body")} />
+            <Step title={t("step1Title")} body={t("step1Body")} />
+            <Step title={t("step2Title")} body={t("step2Body")} />
+            <Step title={t("step3Title")} body={t("step3Body")} />
+            <Step title={t("step4Title")} body={t("step4Body")} />
           </div>
         </div>
 
@@ -177,10 +177,12 @@ export default async function BusinessPage({
   );
 }
 
-function Step({ n, title, body }: { n: string; title: string; body: string }) {
+function Step({ title, body }: { title: string; body: string }) {
   return (
     <div className="flex gap-4">
-      <span className="font-display text-3xl text-muted-foreground">{n}</span>
+      <span aria-hidden className="text-xl leading-8 text-muted-foreground">
+        ✦
+      </span>
       <div>
         <h3 className="font-semibold">{title}</h3>
         <p className="mt-1 text-sm text-muted-foreground">{body}</p>
