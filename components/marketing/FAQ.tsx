@@ -11,7 +11,7 @@ export function FAQ() {
 
   return (
     <section id="faq" className="border-b border-border/60 bg-background">
-      <div className="mx-auto max-w-7xl px-6 py-20 md:px-10 md:py-28 xl:px-16">
+      <div className="mx-auto max-w-[1800px] px-6 py-20 md:px-10 md:py-28 xl:px-16">
         <div className="grid gap-14 md:grid-cols-[0.85fr_1.15fr] md:gap-20">
           <aside className="md:sticky md:top-28 md:self-start">
             <span className="block font-accent text-xl text-muted-foreground">

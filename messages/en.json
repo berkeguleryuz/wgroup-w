@@ -86,7 +86,7 @@
     "f4Body": "Bring your whole company on board in minutes. Per-seat pricing, viewing analytics and a single admin dashboard, all in one place."
   },
   "categories": {
-    "sectionTag": "Three rooms, one library",
+    "sectionTag": "Four rooms, one library",
     "heading": "What's on.",
     "seriesTitle": "Series",
     "seriesTag": "Long-form",
@@ -98,9 +98,14 @@
     "filmsCount": "12 films",
     "talentTitle": "Talent Management",
     "talentTag": "New",
-    "talentBody": "A dedicated track for HR and people leaders. Soon: AI co-pilot for career pathing.",
+    "talentBody": "A track for your personal growth: build new skills, discover your strengths and map your career path. Soon: AI-powered career co-pilot.",
     "talentCount": "Launching 2026",
-    "startWatching": "Start watching →"
+    "startWatching": "Start watching →",
+    "corporateTitle": "Business",
+    "corporateTag": "For teams",
+    "corporateBody": "One company account for your whole team: seat-based access, viewing insights and an admin panel.",
+    "corporateCount": "Seat-based pricing",
+    "corporateCta": "Explore business →"
   },
   "featuredLibrary": {
     "sectionTag": "Featured",
@@ -115,7 +120,7 @@
     "sectionTag": "Membership",
     "headingLine1": "One price,",
     "headingLine2": "the whole library.",
-    "description": "Both plans are the full version. Pick yearly and get 2 months free — save €39. For teams, we price per seat.",
+    "description": "Both plans are the full version. Pick yearly and get 2 months free, saving €39. For teams, we price per seat.",
     "ctaPlans": "See plans",
     "ctaSales": "Talk to sales",
     "highlight1": "Unlimited access to every title",
@@ -230,6 +235,8 @@
     "formContact": "Contact person",
     "formEmail": "Email",
     "formPhone": "Phone",
+    "formPhoneHint": "Must start with + or 0 and contain only digits (e.g. +49 151 2345678)",
+    "formPhonePlaceholder": "+1 555 123 4567",
     "formSeats": "Estimated seats",
     "formMessage": "Notes",
     "formSubmit": "Send request",

@@ -175,6 +175,8 @@ model Category {
   id        String     @id @default(cuid())
   slug      String     @unique
   title     String
+  titleEn   String?
+  titleDe   String?
   section   Section
   parentId  String?
   parent    Category?  @relation("Sub", fields: [parentId], references: [id])

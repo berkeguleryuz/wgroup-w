@@ -3,6 +3,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { categoryTitle } from "@/lib/i18n/category-title";
 
 export default async function EditorDashboardPage({
   params,
@@ -76,7 +77,7 @@ export default async function EditorDashboardPage({
                 <div>
                   <p className="font-medium">{item.title}</p>
                   <p className="text-xs text-muted-foreground">
-                    {item.category.title} ·{" "}
+                    {categoryTitle(item.category, locale)} ·{" "}
                     {t("statEpisodes").toLowerCase()}: {item.episodes.length} ·{" "}
                     {item.published
                       ? t("statusPublished")

@@ -3,6 +3,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { Button } from "@/components/ui/Button";
 
 export default async function EditorTitlesPage({
@@ -64,7 +65,7 @@ export default async function EditorTitlesPage({
                   </Link>
                 </td>
                 <td className="px-5 py-3 text-muted-foreground">
-                  {item.category.title}
+                  {categoryTitle(item.category, locale)}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground">
                   {item.type === "SERIES"

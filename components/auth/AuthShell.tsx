@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 
 export async function AuthShell({
@@ -30,6 +31,14 @@ export async function AuthShell({
         <div aria-hidden />
 
         <div className="relative max-w-lg">
+          <Image
+            src="/logo-transparent.webp"
+            alt=""
+            aria-hidden
+            width={86}
+            height={120}
+            className="mb-8 h-28 w-auto"
+          />
           <h2 className="font-display text-4xl leading-[1.05] tracking-[-0.01em] md:text-5xl lg:text-6xl">
             {t("headingLine1")}
             <br />

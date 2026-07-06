@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
+import { categoryTitle } from "@/lib/i18n/category-title";
 
 export default async function EditorCategoriesPage({
   params,
@@ -43,10 +44,10 @@ export default async function EditorCategoriesPage({
           <tbody className="divide-y divide-border/70">
             {categories.map((c) => (
               <tr key={c.id}>
-                <td className="px-5 py-3 font-medium">{c.title}</td>
+                <td className="px-5 py-3 font-medium">{categoryTitle(c, locale)}</td>
                 <td className="px-5 py-3 text-muted-foreground">{c.section}</td>
                 <td className="px-5 py-3 text-muted-foreground">
-                  {c.parent ? c.parent.title : t("parentTop")}
+                  {c.parent ? categoryTitle(c.parent, locale) : t("parentTop")}
                 </td>
                 <td className="px-5 py-3 text-muted-foreground">
                   {c.titles.length}

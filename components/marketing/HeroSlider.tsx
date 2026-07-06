@@ -325,20 +325,8 @@ function Monogram({ mark, color }: { mark: string; color: string }) {
     <div className="relative flex h-full w-full items-center justify-center">
       <div
         aria-hidden
-        className="absolute inset-0 blur-3xl opacity-60"
-        style={{
-          background: `radial-gradient(closest-side, ${color}44, transparent 70%)`,
-          transform:
-            "translate3d(calc(var(--hero-px, 0) * 12px), calc(var(--hero-py, 0) * 8.8px), 0)",
-          transition: "transform 120ms ease-out",
-        }}
-      />
-
-      <div
-        aria-hidden
         className="relative flex h-full w-full items-center justify-center"
         style={{
-          filter: `drop-shadow(0 20px 80px ${color}55)`,
           transform:
             "translate3d(calc(var(--hero-px, 0) * 30px), calc(var(--hero-py, 0) * 22px), 0)",
           transition: "transform 120ms ease-out",

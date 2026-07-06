@@ -5,6 +5,7 @@ import { updateTag } from "next/cache";
 import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { requireRole } from "@/lib/access";
 import { cleanupStorageRefs } from "@/lib/storage-cleanup";
 import { Button } from "@/components/ui/Button";
@@ -372,8 +373,8 @@ export default async function EditorTitleDetail({
           </Link>
           <h1 className="mt-2 text-3xl md:text-5xl">{title.title}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {title.category.parent?.title ?? title.category.title}
-            {title.category.parent ? ` / ${title.category.title}` : null} ·{" "}
+            {categoryTitle(title.category.parent ?? title.category, locale)}
+            {title.category.parent ? ` / ${categoryTitle(title.category, locale)}` : null} ·{" "}
             {title.type === "SERIES"
               ? t("formTypeSeries")
               : t("formTypeMovie")}{" "}

@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
 import {
   getViewerAudience,
@@ -141,7 +142,7 @@ export default async function AppHomePage({
                 type: featured.type,
                 heroImageUrl: featured.heroImageUrl,
                 trailerUrl: featured.trailerUrl,
-                categoryTitle: featured.category.title,
+                categoryTitle: categoryTitle(featured.category, locale),
               }
             : null
         }

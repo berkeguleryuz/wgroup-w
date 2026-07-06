@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { prisma } from "@/lib/prisma";
 import { episodePath } from "@/lib/episode-path";
 import { requireSession, getEffectiveAccess } from "@/lib/access";
@@ -87,8 +88,7 @@ export default async function TitleDetailPage({
               <span className="font-accent text-lg text-primary md:text-xl">
                 {title.type === "SERIES" ? tFl("series") : tFl("film")}
                 {" · "}
-                {/* Turkish category name — keep the dotted İ under uppercase. */}
-                <span lang="tr">{title.category.title}</span>
+                {categoryTitle(title.category, locale)}
               </span>
               <h1 className="mt-3 font-display text-4xl leading-[1.05] tracking-[-0.02em] md:text-6xl">
                 {title.title}

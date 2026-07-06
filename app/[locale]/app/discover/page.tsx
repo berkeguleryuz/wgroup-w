@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
+import { categoryTitle } from "@/lib/i18n/category-title";
 import { prisma } from "@/lib/prisma";
 import { Section, TitleType } from "@prisma/client";
 import { requireSession } from "@/lib/access";
@@ -53,10 +54,16 @@ export default async function BrowsePage({
       orderBy: { sortOrder: "asc" },
     }),
     section
-      ? prisma.category.findMany({
-          where: { section, parentId: { not: null } },
-          orderBy: { title: "asc" },
-        })
+      ? prisma.category
+          .findMany({ where: { section, parentId: { not: null } } })
+          .then((cats) =>
+            cats.sort((a, b) =>
+              categoryTitle(a, locale).localeCompare(
+                categoryTitle(b, locale),
+                locale,
+              ),
+            ),
+          )
       : Promise.resolve([]),
     prisma.title.findMany({
       where: {
@@ -129,7 +136,7 @@ export default async function BrowsePage({
               active={sp.category === c.id}
               small
             >
-              {c.title}
+              {categoryTitle(c, locale)}
             </FilterPill>
           ))}
         </nav>

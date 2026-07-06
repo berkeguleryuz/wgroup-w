@@ -4,7 +4,7 @@ export function FeaturedLibrarySkeleton() {
   const t = useTranslations("featuredLibrary");
   return (
     <section id="library" className="border-b border-border/60 bg-muted/40">
-      <div className="mx-auto max-w-7xl px-6 py-20 md:py-24">
+      <div className="mx-auto max-w-[1800px] px-6 py-20 md:px-10 md:py-24 xl:px-16">
         <div>
           <span className="font-accent text-xl text-muted-foreground">
             {t("sectionTag")}
