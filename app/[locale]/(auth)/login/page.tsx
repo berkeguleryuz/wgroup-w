@@ -1,7 +1,9 @@
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-import type { Locale } from "@/lib/i18n/routing";
+import { getSession } from "@/lib/access";
+import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { AuthShell } from "@/components/auth/AuthShell";
 import { SignInForm } from "./SignInForm";
 
@@ -22,6 +24,12 @@ export default async function LoginPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
+
+  // Already signed in — the login form is pointless, go straight to the app.
+  if (await getSession()) {
+    redirect(localizedPath(locale, "/app"));
+  }
+
   const t = await getTranslations("login");
 
   return (

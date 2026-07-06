@@ -15,6 +15,8 @@ import { Autoplay, EffectFade, Keyboard } from "swiper/modules";
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
 import { HeroGlyph, HeroGlyphIcon } from "@/components/marketing/HeroGlyphs";
+import LightRays from "@/components/marketing/LightRays";
+import GradientDotMesh from "@/components/pixel-perfect/gradient-dot-mesh";
 import { HeroShortcutIcon } from "@/components/marketing/HeroShortcutIcons";
 
 import "swiper/css";
@@ -164,6 +166,19 @@ export function HeroSlider() {
     >
       <Rain />
       <GridOverlay />
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor={theme.accent}
+          raysSpeed={1}
+          lightSpread={0.9}
+          rayLength={1.4}
+          followMouse
+          mouseInfluence={0.08}
+          noiseAmount={0.06}
+          distortion={0.03}
+        />
+      </div>
 
       <Swiper
         modules={[Autoplay, EffectFade, Keyboard]}
@@ -172,6 +187,13 @@ export function HeroSlider() {
         speed={700}
         slidesPerView={1}
         loop
+        // Swiper's loopFix (run on every autoplay wrap-around) flips
+        // `allowClick` to false and, without touch input, nothing ever resets
+        // it — after the first loop the capture-phase click guard swallows
+        // every click inside the slider, making the CTA links dead. The
+        // slider isn't drag-driven, so the click guards are safe to disable.
+        preventClicks={false}
+        preventClicksPropagation={false}
         keyboard={{ enabled: true }}
         autoplay={{
           delay: 10000,
@@ -208,14 +230,14 @@ export function HeroSlider() {
                   style={{ background: theme.accent, opacity: 0.4 }}
                 />
                 <span
-                  className="font-display text-3xl"
+                  className="hero-slide-icon-bob inline-flex"
                   style={{ color: theme.accent }}
                 >
-                  0{i + 1}
+                  <SlideBadgeIcon index={i} color={theme.accent} />
                 </span>
               </aside>
 
-              <div className="relative col-span-12 flex h-[360px] items-center justify-center md:col-span-6 md:h-[560px]">
+              <div className="relative col-span-12 flex h-[360px] items-center justify-center md:col-span-5 md:h-[560px]">
                 <Monogram mark={slide.theme.mark} color={slide.theme.letter} />
               </div>
 
@@ -283,8 +305,8 @@ export function HeroSlider() {
         ))}
       </Swiper>
 
-      <nav className="absolute right-4 top-1/2 z-20 -translate-y-1/2 md:right-8">
-        <ul className="flex flex-col gap-3">
+      <nav className="absolute left-1/2 top-20 z-20 -translate-x-1/2 md:left-auto md:right-8 md:top-1/2 md:-translate-y-1/2 md:translate-x-0">
+        <ul className="flex flex-row gap-3 md:flex-col">
           {slides.map((s, i) => (
             <li key={s.title}>
               <button
@@ -317,6 +339,85 @@ export function HeroSlider() {
         </ul>
       </nav>
     </section>
+  );
+}
+
+function SlideBadgeIcon({ index, color }: { index: number; color: string }) {
+  if (index === 1) {
+    // Filmler — dönen film makarası
+    return (
+      <svg viewBox="0 0 36 36" width="34" height="34" fill="none" aria-hidden>
+        <g className="hero-reel-spin">
+          <circle cx="18" cy="18" r="13" stroke={color} strokeWidth="1.6" />
+          <circle cx="18" cy="18" r="2.4" fill={color} />
+          <circle cx="18" cy="10.5" r="2.6" stroke={color} strokeWidth="1.4" />
+          <circle cx="25.1" cy="15.6" r="2.6" stroke={color} strokeWidth="1.4" />
+          <circle cx="22.4" cy="24" r="2.6" stroke={color} strokeWidth="1.4" />
+          <circle cx="13.6" cy="24" r="2.6" stroke={color} strokeWidth="1.4" />
+          <circle cx="10.9" cy="15.6" r="2.6" stroke={color} strokeWidth="1.4" />
+        </g>
+      </svg>
+    );
+  }
+
+  if (index === 2) {
+    // Yetenek — parıldayan yıldız
+    return (
+      <svg viewBox="0 0 36 36" width="34" height="34" fill="none" aria-hidden>
+        <path
+          className="hero-star-pulse"
+          d="M18 6 L21 15 L30 18 L21 21 L18 30 L15 21 L6 18 L15 15 Z"
+          fill={color}
+        />
+        <circle className="hero-spark" cx="28" cy="8" r="1.4" fill={color} />
+        <circle
+          className="hero-spark"
+          cx="8"
+          cy="27"
+          r="1.1"
+          fill={color}
+          style={{ animationDelay: "0.7s" }}
+        />
+        <circle
+          className="hero-spark"
+          cx="30"
+          cy="28"
+          r="1"
+          fill={color}
+          style={{ animationDelay: "1.3s" }}
+        />
+      </svg>
+    );
+  }
+
+  // Liderlik — taç, sırayla parlayan taşlar
+  return (
+    <svg viewBox="0 0 36 36" width="34" height="34" fill="none" aria-hidden>
+      <path
+        d="M6 24 L6 12.5 L12 18 L18 9 L24 18 L30 12.5 L30 24 Z"
+        stroke={color}
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+      <path d="M6 27.5 H30" stroke={color} strokeWidth="1.6" strokeLinecap="round" />
+      <circle className="hero-crown-gem" cx="12" cy="22" r="1.3" fill={color} />
+      <circle
+        className="hero-crown-gem"
+        cx="18"
+        cy="21"
+        r="1.3"
+        fill={color}
+        style={{ animationDelay: "0.4s" }}
+      />
+      <circle
+        className="hero-crown-gem"
+        cx="24"
+        cy="22"
+        r="1.3"
+        fill={color}
+        style={{ animationDelay: "0.8s" }}
+      />
+    </svg>
   );
 }
 
@@ -523,16 +624,9 @@ function Rain() {
 
 function GridOverlay() {
   return (
-    <div
-      aria-hidden
-      className="pointer-events-none absolute inset-0 z-0 opacity-[0.08]"
-      style={{
-        backgroundImage:
-          "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
-        backgroundSize: "80px 80px",
-        maskImage:
-          "radial-gradient(ellipse 70% 60% at 50% 40%, black 40%, transparent 100%)",
-      }}
+    <GradientDotMesh
+      patternColor="rgba(255,255,255,0.14)"
+      className="z-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,black_40%,transparent_100%)]"
     />
   );
 }

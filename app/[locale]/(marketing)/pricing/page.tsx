@@ -164,8 +164,14 @@ function PlanCard({
       <div className="px-7 pt-6 md:px-8">
         <h2 className="font-display text-3xl md:text-4xl">{name}</h2>
 
-        <div className="mt-5 flex items-baseline gap-2">
-          <span className="font-display text-5xl leading-none md:text-6xl">
+        <div className="mt-5 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+          <span
+            className={`font-display leading-none ${
+              price.length > 8
+                ? "text-4xl md:text-5xl"
+                : "text-5xl md:text-6xl"
+            }`}
+          >
             {price}
           </span>
           <span className={`text-sm ${microColor}`}>{period}</span>

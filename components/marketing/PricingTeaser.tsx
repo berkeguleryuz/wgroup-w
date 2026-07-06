@@ -3,21 +3,28 @@ import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
 import { Button } from "@/components/ui/Button";
+import LightRays from "@/components/marketing/LightRays";
+import GradientDotMesh from "@/components/pixel-perfect/gradient-dot-mesh";
 
 export function PricingTeaser() {
   const t = useTranslations("pricingTeaser");
 
   return (
     <section className="relative overflow-hidden rounded-11 border-b border-black/40 bg-surface-dark text-surface-dark-foreground">
-      {/* Film-strip rhythm: widely spaced vertical hairlines. */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            "repeating-linear-gradient(to right, rgba(255,255,255,0.055) 0 2px, transparent 2px 170px)",
-        }}
-      />
+      <GradientDotMesh patternColor="rgba(255,255,255,0.12)" />
+
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        <LightRays
+          raysOrigin="top-center"
+          raysColor="#edddb9"
+          raysSpeed={0.9}
+          lightSpread={0.8}
+          rayLength={1.6}
+          followMouse
+          mouseInfluence={0.1}
+          noiseAmount={0.05}
+        />
+      </div>
 
       <div className="relative mx-auto grid max-w-[1800px] gap-14 px-6 py-24 md:grid-cols-[1.05fr_1fr] md:gap-16 md:py-28 md:px-10 xl:px-16">
         <div className="flex flex-col">

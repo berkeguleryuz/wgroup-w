@@ -24,6 +24,7 @@ import { VideoUpload } from "@/components/editor/VideoUpload";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
 import { formatDuration } from "@/lib/utils";
+import { resolveVideoUrl } from "@/lib/storage";
 
 export default async function OrgContentDetail({
   params,
@@ -60,6 +61,15 @@ export default async function OrgContentDetail({
     }),
   ]);
   if (!title || title.createdByOrgId !== membership.organizationId) notFound();
+
+  // Playable URL per episode so the edit form can preview the current video.
+  const episodeVideoUrls = new Map(
+    await Promise.all(
+      title.episodes.map(
+        async (ep) => [ep.id, await resolveVideoUrl(ep.videoPath)] as const,
+      ),
+    ),
+  );
 
   const creditedIds = new Set(title.credits.map((c) => c.instructorId));
   const assignableInstructors = orgInstructors.filter(
@@ -369,7 +379,11 @@ export default async function OrgContentDetail({
                     <div>
                       <Label>{te("replaceVideo")}</Label>
                       {/* New file also refreshes durationSec from metadata. */}
-                      <VideoUpload name="videoPath" durationName="durationSec" />
+                      <VideoUpload
+                        name="videoPath"
+                        durationName="durationSec"
+                        currentUrl={episodeVideoUrls.get(ep.id)}
+                      />
                       <p className="mt-1 text-xs text-muted-foreground">
                         {te("replaceVideoHint")}
                       </p>

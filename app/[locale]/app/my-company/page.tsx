@@ -10,19 +10,24 @@ import { TitleCard } from "@/components/app/TitleCard";
 
 export default async function MyCompanyPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
+  searchParams?: Promise<{ org?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const [t, session] = await Promise.all([
+  const [t, session, sp] = await Promise.all([
     getTranslations("myCompany"),
     requireSession(),
+    searchParams,
   ]);
   const userId = session.user.id;
 
-  // The user's corporate membership (org with a company profile).
-  const membership = await prisma.member.findFirst({
+  // All corporate memberships (orgs with a company profile). The ?org param
+  // only ever selects among the user's OWN memberships — a foreign org id
+  // never resolves, so it can't expose another company's page.
+  const memberships = await prisma.member.findMany({
     where: { organization: { companyProfile: { isNot: null } }, userId },
     include: {
       department: { select: { name: true } },
@@ -33,11 +38,68 @@ export default async function MyCompanyPage({
         },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" },
   });
 
-  if (!membership || !membership.organization.companyProfile) {
+  if (memberships.length === 0) {
     redirect(localizedPath(locale, "/app"));
+  }
+
+  const membership =
+    memberships.length === 1
+      ? memberships[0]
+      : memberships.find((m) => m.organizationId === sp?.org);
+
+  // Multiple companies and no (valid) selection → pick one first.
+  if (!membership) {
+    return (
+      <div className="space-y-8">
+        <header>
+          <span className="font-accent text-lg text-muted-foreground">
+            {t("kicker")}
+          </span>
+          <h1 className="mt-1 text-3xl md:text-5xl">{t("chooseTitle")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {t("chooseBody")}
+          </p>
+        </header>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {memberships.map((m) => (
+            <Link
+              key={m.id}
+              href={`/app/my-company?org=${m.organizationId}`}
+              className="group flex items-center gap-4 rounded-11 border border-border bg-muted/40 p-5 transition-colors hover:border-foreground/25 hover:bg-muted"
+            >
+              <span
+                className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-xl ${
+                  m.organization.logo ? "" : "bg-primary text-primary-foreground"
+                }`}
+              >
+                {m.organization.logo ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={m.organization.logo}
+                    alt={m.organization.name}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  m.organization.name.slice(0, 1).toUpperCase()
+                )}
+              </span>
+              <span className="min-w-0">
+                <span className="block truncate font-display text-lg">
+                  {m.organization.name}
+                </span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {t(m.role === "owner" ? "roleOwner" : "roleMember")} ·{" "}
+                  {t("teamSizeValue", { count: m.organization._count.members })}
+                </span>
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
   }
 
   const org = membership.organization;
@@ -86,6 +148,15 @@ export default async function MyCompanyPage({
             {t("kicker")}
           </span>
           <h1 className="mt-1 text-3xl md:text-5xl">{org.name}</h1>
+          {memberships.length > 1 ? (
+            <Link
+              href="/app/my-company"
+              className="mt-2 inline-flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            >
+              <SwitchIcon />
+              {t("switchCompany")}
+            </Link>
+          ) : null}
         </div>
         {isOwner ? (
           <Link
@@ -236,6 +307,15 @@ const iconProps = {
   strokeLinejoin: "round",
   "aria-hidden": true,
 } as const;
+
+function SwitchIcon() {
+  return (
+    <svg {...iconProps} className="h-3.5 w-3.5">
+      <path d="M13.5 4.5 16 7l-2.5 2.5M16 7H6.5A3.5 3.5 0 0 0 3 10.5" />
+      <path d="M6.5 15.5 4 13l2.5-2.5M4 13h9.5a3.5 3.5 0 0 0 3.5-3.5" />
+    </svg>
+  );
+}
 
 function PanelIcon() {
   return (

@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { categoryTitle } from "@/lib/i18n/category-title";
 import { requireRole } from "@/lib/access";
 import { cleanupStorageRefs } from "@/lib/storage-cleanup";
+import { resolveVideoUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { AddEpisodeForm } from "@/components/editor/AddEpisodeForm";
@@ -346,6 +347,15 @@ export default async function EditorTitleDetail({
     }),
   ]);
   if (!title) notFound();
+
+  // Playable URL per episode so the edit form can preview the current video.
+  const episodeVideoUrls = new Map(
+    await Promise.all(
+      title.episodes.map(
+        async (ep) => [ep.id, await resolveVideoUrl(ep.videoPath)] as const,
+      ),
+    ),
+  );
 
   const audienceOrgIds = new Set(title.orgAudience.map((a) => a.organizationId));
   const assignableOrgs = organizations.filter((o) => !audienceOrgIds.has(o.id));
@@ -778,7 +788,11 @@ export default async function EditorTitleDetail({
                     <div>
                       <Label>{t("replaceVideo")}</Label>
                       {/* New file also refreshes durationSec from metadata. */}
-                      <VideoUpload name="videoPath" durationName="durationSec" />
+                      <VideoUpload
+                        name="videoPath"
+                        durationName="durationSec"
+                        currentUrl={episodeVideoUrls.get(ep.id)}
+                      />
                       <p className="mt-1 text-xs text-muted-foreground">
                         {t("replaceVideoHint")}
                       </p>

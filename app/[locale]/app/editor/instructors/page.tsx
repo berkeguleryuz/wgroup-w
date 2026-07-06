@@ -9,9 +9,51 @@ import { Input, Textarea, Label } from "@/components/ui/Input";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
 
-async function backToList() {
+async function backToList(error?: string) {
   const locale = await getLocale();
-  redirect(localizedPath(locale, "/app/editor/instructors"));
+  redirect(
+    localizedPath(locale, "/app/editor/instructors") +
+      (error ? `?error=${error}` : ""),
+  );
+}
+
+/**
+ * Resolve the optional "user e-mail" field to a platform user id. Returns the
+ * error code instead of the id when the address doesn't match a user, or the
+ * user is already linked to another instructor profile. Linking also promotes
+ * a plain `individual` account to the `instructor` role (never touches
+ * staff/admin roles).
+ */
+async function resolveLinkedUser(
+  formData: FormData,
+  currentInstructorId?: string,
+): Promise<{ userId: string | null } | { error: string }> {
+  const email = String(formData.get("userEmail") || "")
+    .trim()
+    .toLowerCase();
+  if (!email) return { userId: null };
+
+  const user = await prisma.user.findUnique({
+    where: { email },
+    select: { id: true, role: true },
+  });
+  if (!user) return { error: "userNotFound" };
+
+  const existing = await prisma.instructor.findUnique({
+    where: { userId: user.id },
+    select: { id: true },
+  });
+  if (existing && existing.id !== currentInstructorId) {
+    return { error: "userAlreadyLinked" };
+  }
+
+  if (!user.role || user.role === "individual") {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { role: "instructor" },
+    });
+  }
+  return { userId: user.id };
 }
 
 async function createInstructor(formData: FormData) {
@@ -22,7 +64,12 @@ async function createInstructor(formData: FormData) {
   const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
   if (!name) throw new Error("Missing fields");
 
-  await prisma.instructor.create({ data: { name, bio, photoUrl } });
+  const linked = await resolveLinkedUser(formData);
+  if ("error" in linked) return backToList(linked.error);
+
+  await prisma.instructor.create({
+    data: { name, bio, photoUrl, userId: linked.userId },
+  });
   await backToList();
 }
 
@@ -35,7 +82,13 @@ async function updateInstructor(formData: FormData) {
   const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
   if (!name) throw new Error("Missing fields");
 
-  await prisma.instructor.update({ where: { id }, data: { name, bio, photoUrl } });
+  const linked = await resolveLinkedUser(formData, id);
+  if ("error" in linked) return backToList(linked.error);
+
+  await prisma.instructor.update({
+    where: { id },
+    data: { name, bio, photoUrl, userId: linked.userId },
+  });
   await backToList();
 }
 
@@ -47,21 +100,29 @@ async function deleteInstructor(formData: FormData) {
   await backToList();
 }
 
+const LINK_ERRORS = ["userNotFound", "userAlreadyLinked"] as const;
+
 export default async function EditorInstructorsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: Locale }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, { error }] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
   await requireRole(["platform_editor", "admin"]);
   const [t, instructors] = await Promise.all([
     getTranslations("editor"),
     prisma.instructor.findMany({
       orderBy: { name: "asc" },
-      include: { credits: { include: { title: { select: { title: true } } } } },
+      include: {
+        credits: { include: { title: { select: { title: true } } } },
+        user: { select: { email: true } },
+      },
     }),
   ]);
+  const linkError = LINK_ERRORS.find((e) => e === error);
 
   return (
     <div className="space-y-8">
@@ -75,6 +136,16 @@ export default async function EditorInstructorsPage({
         </p>
       </header>
 
+      {linkError ? (
+        <p className="rounded-11 border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {t(
+            linkError === "userNotFound"
+              ? "instructorUserNotFound"
+              : "instructorUserAlreadyLinked",
+          )}
+        </p>
+      ) : null}
+
       <section className="rounded-11 border border-border/60 bg-background p-6">
         <h2 className="font-display text-2xl">{t("newInstructor")}</h2>
         <form action={createInstructor} className="mt-5 space-y-4">
@@ -87,6 +158,18 @@ export default async function EditorInstructorsPage({
               <Label>{t("instructorPhoto")}</Label>
               <ImageUpload name="photoUrl" shape="avatar" />
             </div>
+          </div>
+          <div>
+            <Label htmlFor="new-user-email">{t("instructorUserEmail")}</Label>
+            <Input
+              id="new-user-email"
+              name="userEmail"
+              type="email"
+              placeholder="ornek@sirket.com"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              {t("instructorUserEmailHint")}
+            </p>
           </div>
           <div>
             <Label htmlFor="new-bio">{t("instructorBio")}</Label>
@@ -120,7 +203,14 @@ export default async function EditorInstructorsPage({
                       ) : null}
                     </div>
                     <div className="min-w-0">
-                      <p className="font-medium">{i.name}</p>
+                      <p className="font-medium">
+                        {i.name}
+                        {i.user ? (
+                          <span className="ml-2 rounded-full bg-primary/60 px-2 py-0.5 text-[11px] font-normal text-primary-foreground">
+                            {i.user.email}
+                          </span>
+                        ) : null}
+                      </p>
                       <p className="truncate text-xs text-muted-foreground">
                         {i.credits.length > 0
                           ? i.credits.map((c) => c.title.title).join(", ")
@@ -170,6 +260,21 @@ export default async function EditorInstructorsPage({
                           shape="avatar"
                         />
                       </div>
+                    </div>
+                    <div>
+                      <Label htmlFor={`user-email-${i.id}`}>
+                        {t("instructorUserEmail")}
+                      </Label>
+                      <Input
+                        id={`user-email-${i.id}`}
+                        name="userEmail"
+                        type="email"
+                        defaultValue={i.user?.email ?? ""}
+                        placeholder="ornek@sirket.com"
+                      />
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("instructorUserEmailHint")}
+                      </p>
                     </div>
                     <div>
                       <Label htmlFor={`bio-${i.id}`}>

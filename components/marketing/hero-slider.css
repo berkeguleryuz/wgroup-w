@@ -38,8 +38,79 @@
   }
 }
 
+/* Animated per-slide badge icons (left rail) */
+.hero-slide-icon-bob {
+  animation: hero-icon-bob 3.2s ease-in-out infinite;
+}
+
+.hero-crown-gem {
+  animation: hero-gem-blink 2.4s ease-in-out infinite;
+}
+
+.hero-reel-spin {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: hero-reel-spin 7s linear infinite;
+}
+
+.hero-star-pulse {
+  transform-origin: center;
+  transform-box: fill-box;
+  animation: hero-star-pulse 2.6s ease-in-out infinite;
+}
+
+.hero-spark {
+  animation: hero-gem-blink 2.2s ease-in-out infinite;
+}
+
+@keyframes hero-icon-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
+@keyframes hero-gem-blink {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes hero-reel-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes hero-star-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    transform: scale(1.12);
+    opacity: 1;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-rain {
     display: none;
+  }
+
+  .hero-slide-icon-bob,
+  .hero-crown-gem,
+  .hero-reel-spin,
+  .hero-star-pulse,
+  .hero-spark {
+    animation: none;
   }
 }
