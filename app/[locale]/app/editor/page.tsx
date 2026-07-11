@@ -4,6 +4,7 @@ import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { categoryTitle } from "@/lib/i18n/category-title";
+import StatCard from "@/components/dashboard/StatCard";
 
 export default async function EditorDashboardPage({
   params,
@@ -39,10 +40,26 @@ export default async function EditorDashboardPage({
       </header>
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label={t("statTotal")} value={totalTitles} />
-        <Stat label={t("statPublished")} value={published} />
-        <Stat label={t("statDraft")} value={draft} />
-        <Stat label={t("statEpisodes")} value={totalEpisodes} />
+        <StatCard label={t("statTotal")} value={totalTitles} icon="film" />
+        <StatCard
+          label={t("statPublished")}
+          value={published}
+          icon="clapper"
+          tone="dark"
+          floatDelay={0.5}
+        />
+        <StatCard
+          label={t("statDraft")}
+          value={draft}
+          icon="pencil"
+          floatDelay={1}
+        />
+        <StatCard
+          label={t("statEpisodes")}
+          value={totalEpisodes}
+          icon="reel"
+          floatDelay={1.5}
+        />
       </section>
 
       <section>
@@ -92,17 +109,6 @@ export default async function EditorDashboardPage({
           )}
         </div>
       </section>
-    </div>
-  );
-}
-
-function Stat({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-11 border border-border/60 bg-background p-5">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-2 font-display text-3xl">{value}</p>
     </div>
   );
 }

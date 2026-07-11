@@ -85,10 +85,35 @@ async function main() {
   if (!video) die("dosyada video akışı yok");
   const hasAudio = (probe.streams || []).some((s) => s.codec_type === "audio");
   const srcHeight = Number(video.height) || 1080;
+  const srcWidth = Number(video.width) || 1920;
   const durationSec = Math.round(Number(probe.format?.duration ?? video.duration)) || 0;
 
-  let renditions = LADDER.filter((r) => r.height <= srcHeight);
-  if (renditions.length === 0) renditions = [LADDER[0]];
+  // 16:9-equivalent height: ultrawide (cinemascope) sources are classed by
+  // width, so a 1280x536 film still gets its 720p rendition.
+  const effectiveHeight = Math.max(srcHeight, Math.round((srcWidth * 9) / 16));
+  let renditions = LADDER.filter((r) => r.height <= effectiveHeight).map((r) => ({
+    ...r,
+    width: Math.round((r.height * 16) / 9),
+  }));
+  if (renditions.length === 0) renditions = [{ ...LADDER[0], width: 640 }];
+
+  // Kaynağın kendi kalitesi her zaman en üst seçenek: en yüksek basamağı
+  // aşıyorsa (900p, 1440p, 4K…) doğal çözünürlükte "orig" varyantı eklenir
+  // (4K genişlikle sınırlı), bitrate 1080p basamağından ölçeklenir.
+  if (effectiveHeight > renditions[renditions.length - 1].height) {
+    const kbps = Math.min(
+      16000,
+      Math.max(6500, Math.round((5000 * srcWidth * srcHeight) / (1920 * 1080))),
+    );
+    renditions.push({
+      name: "orig",
+      height: effectiveHeight,
+      width: Math.min(srcWidth, 3840),
+      vBitrate: `${kbps}k`,
+      maxrate: `${Math.round(kbps * 1.07)}k`,
+      bufsize: `${Math.round(kbps * 1.5)}k`,
+    });
+  }
 
   const base = path.basename(input).replace(/\.[a-z0-9]+$/i, "");
   const outDir = outArg || path.join(path.dirname(input), `${base}-hls`);
@@ -104,7 +129,10 @@ async function main() {
   const args = ["-y", "-i", input];
   const filter = [
     `[0:v]split=${renditions.length}${renditions.map((_, i) => `[v${i}]`).join("")}`,
-    ...renditions.map((r, i) => `[v${i}]scale=-2:${r.height}[vout${i}]`),
+    // Scale by width, never upscaling: min(iw, target).
+    ...renditions.map(
+      (r, i) => `[v${i}]scale=min(iw\\,${r.width}):-2[vout${i}]`,
+    ),
   ];
   args.push("-filter_complex", filter.join(";"));
   renditions.forEach((r, i) => {

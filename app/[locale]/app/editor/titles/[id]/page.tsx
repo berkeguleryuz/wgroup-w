@@ -18,6 +18,7 @@ import { VideoUpload } from "@/components/editor/VideoUpload";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { TrailerUpload } from "@/components/editor/TrailerUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
+import { TranscodeRefresh } from "@/components/editor/TranscodeRefresh";
 import { formatDuration } from "@/lib/utils";
 
 const LANG_LABELS: Record<string, string> = {
@@ -706,6 +707,14 @@ export default async function EditorTitleDetail({
 
       <section className="rounded-11 border border-border/60 bg-background p-6">
         <h2 className="font-display text-2xl">{t("episodes")}</h2>
+        {/* Auto-refresh the badges while a transcode is pending. */}
+        {title.episodes.some(
+          (e) =>
+            e.transcodeJob?.status === "QUEUED" ||
+            e.transcodeJob?.status === "PROCESSING",
+        ) ? (
+          <TranscodeRefresh />
+        ) : null}
         <div className="mt-4 divide-y divide-border/70">
           {title.episodes.length === 0 ? (
             <p className="py-6 text-sm text-muted-foreground">
