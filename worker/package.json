@@ -1,0 +1,13 @@
+{
+  "name": "busyflix-transcode-worker",
+  "private": true,
+  "type": "module",
+  "description": "Drains the TranscodeJob queue: raw MP4 -> HLS ladder -> R2. Runs in GitHub Actions (or any box with node+ffmpeg).",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1057.0",
+    "pg": "^8.20.0"
+  }
+}

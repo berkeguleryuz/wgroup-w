@@ -23,6 +23,7 @@ const titleInclude = {
   category: true,
   episodes: { select: { durationSec: true } },
   orgAudience: { select: { organizationId: true } },
+  hiddenBy: { select: { organizationId: true } },
   departmentAudience: { select: { departmentId: true } },
 } as const;
 

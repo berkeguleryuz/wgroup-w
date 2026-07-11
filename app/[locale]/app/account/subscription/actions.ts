@@ -5,7 +5,12 @@ import { getLocale } from "next-intl/server";
 
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { stripe, priceIdFor, type PlanInterval } from "@/lib/stripe";
+import {
+  stripe,
+  priceIdFor,
+  STRIPE_AUTOMATIC_TAX,
+  type PlanInterval,
+} from "@/lib/stripe";
 import { localizedPath } from "@/lib/i18n/routing";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
@@ -48,6 +53,15 @@ export async function startCheckout(plan: PlanInterval): Promise<string | null> 
     cancel_url: `${returnUrl}?cancel=1`,
     client_reference_id: userId,
     metadata: { userId, plan },
+    // Stripe Tax: needs the customer's billing address saved back onto the
+    // customer so renewal invoices keep taxing correctly.
+    ...(STRIPE_AUTOMATIC_TAX
+      ? {
+          automatic_tax: { enabled: true },
+          billing_address_collection: "required" as const,
+          customer_update: { address: "auto" as const, name: "auto" as const },
+        }
+      : {}),
   });
 
   return checkout.url;

@@ -12,6 +12,9 @@ export type ViewerAudience = {
   ownerOrgIds: string[];
   /** Departments the user is assigned to. */
   departmentIds: string[];
+  /** Orgs where the user is a plain member (not owner) — org-level catalog
+      hiding (OrganizationHiddenTitle) applies only to these. */
+  memberOnlyOrgIds: string[];
 };
 
 /** The viewer's org/department memberships in one query (request-cached). */
@@ -29,6 +32,9 @@ export const getViewerAudience = cache(
       departmentIds: members
         .map((m) => m.departmentId)
         .filter((id): id is string => !!id),
+      memberOnlyOrgIds: members
+        .filter((m) => m.role !== "owner")
+        .map((m) => m.organizationId),
     };
   },
 );
@@ -48,11 +54,22 @@ export function audienceWhere(
   audience: ViewerAudience,
 ): Prisma.TitleWhereInput {
   if (isStaff(role)) return {};
-  const { orgIds, ownerOrgIds, departmentIds } = audience;
+  const { orgIds, ownerOrgIds, departmentIds, memberOnlyOrgIds } = audience;
   if (orgIds.length === 0) return { visibility: "PUBLIC" };
+  // An org owner can hide individual PUBLIC titles from their members —
+  // owners themselves (and staff) keep seeing everything.
+  const publicBranch: Prisma.TitleWhereInput =
+    memberOnlyOrgIds.length > 0
+      ? {
+          visibility: "PUBLIC",
+          hiddenBy: {
+            none: { organizationId: { in: memberOnlyOrgIds } },
+          },
+        }
+      : { visibility: "PUBLIC" };
   return {
     OR: [
-      { visibility: "PUBLIC" },
+      publicBranch,
       ...(ownerOrgIds.length > 0
         ? [
             {
@@ -89,12 +106,17 @@ export function canViewTitle(
     visibility: string;
     orgAudience?: { organizationId: string }[];
     departmentAudience?: { departmentId: string }[];
+    hiddenBy?: { organizationId: string }[];
   },
   role: string | null | undefined,
   audience: ViewerAudience,
 ): boolean {
   if (isStaff(role)) return true;
-  if (title.visibility === "PUBLIC") return true;
+  if (title.visibility === "PUBLIC") {
+    return !(title.hiddenBy ?? []).some((h) =>
+      audience.memberOnlyOrgIds.includes(h.organizationId),
+    );
+  }
   const audienceOrgIds = title.orgAudience?.map((a) => a.organizationId) ?? [];
   if (audienceOrgIds.some((id) => audience.ownerOrgIds.includes(id))) {
     return true;

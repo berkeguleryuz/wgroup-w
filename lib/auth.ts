@@ -1,3 +1,5 @@
+import { AsyncLocalStorage } from "node:async_hooks";
+
 import { betterAuth } from "better-auth";
 import { APIError } from "better-auth/api";
 import { prismaAdapter } from "better-auth/adapters/prisma";
@@ -8,10 +10,24 @@ import { prisma } from "./prisma";
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
+  sendCorporateWelcomeEmail,
   sendOrganizationInviteEmail,
 } from "./email";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+
+/**
+ * Request-scoped override for the shared `sendResetPassword` callback. When an
+ * admin provisions a corporate owner we still mint the reset token via
+ * `requestPasswordReset`, but the recipient should get a "welcome / set your
+ * password" e-mail — not the "you requested a reset" one. The activation action
+ * runs its `requestPasswordReset` call inside `resetEmailContext.run(...)`; the
+ * callback reads the store to pick the right template. AsyncLocalStorage keeps
+ * this race-free across concurrent activations.
+ */
+type ResetEmailContext = { kind: "corporate-welcome"; companyName: string };
+export const resetEmailContext =
+  new AsyncLocalStorage<ResetEmailContext | undefined>();
 
 export const USER_ROLES = [
   "individual",
@@ -35,7 +51,13 @@ export const auth = betterAuth({
       process.env.AUTH_SKIP_EMAIL_VERIFICATION !== "true",
     autoSignIn: false,
     sendResetPassword: async ({ user, url }) => {
-      void sendPasswordResetEmail(user.email, url, await requestLocale());
+      const ctx = resetEmailContext.getStore();
+      const locale = await requestLocale();
+      if (ctx?.kind === "corporate-welcome") {
+        void sendCorporateWelcomeEmail(user.email, url, ctx.companyName, locale);
+      } else {
+        void sendPasswordResetEmail(user.email, url, locale);
+      }
     },
   },
 

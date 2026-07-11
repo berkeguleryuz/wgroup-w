@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Avatar } from "@/components/app/Avatar";
 
 type Props = {
   userName: string;
@@ -85,22 +86,11 @@ export function SettingsSidebar({
 
         <div className="mt-auto rounded-11 border border-white/10 bg-white/[0.04] p-3">
           <div className="flex items-center gap-3">
-            <span
-              className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-sm ${
-                userImage ? "" : "bg-primary text-primary-foreground"
-              }`}
-            >
-              {userImage ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={userImage}
-                  alt={userName}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                userName.slice(0, 1).toUpperCase()
-              )}
-            </span>
+            <Avatar
+              src={userImage}
+              name={userName}
+              className="h-10 w-10 text-sm"
+            />
             <div className="min-w-0">
               <p className="truncate text-sm font-medium">{userName}</p>
               <p className="truncate text-xs text-surface-dark-foreground/55">

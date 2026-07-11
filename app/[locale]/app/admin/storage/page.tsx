@@ -126,7 +126,10 @@ export default async function AdminStoragePage({
                         {/* Opens the object straight from R2 so an orphan can
                             be eyeballed before deleting it. */}
                         <a
-                          href={getStorage().getPublicUrl(obj.key)}
+                          href={getStorage().getPublicUrl(
+                            // Trees open via their master playlist.
+                            obj.key.endsWith("/") ? `${obj.key}master.m3u8` : obj.key,
+                          )}
                           target="_blank"
                           rel="noreferrer"
                           className="underline-offset-4 hover:text-foreground hover:underline"
@@ -136,6 +139,11 @@ export default async function AdminStoragePage({
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {formatBytes(obj.size)}
+                        {obj.fileCount ? (
+                          <span className="ml-1 text-xs opacity-70">
+                            · {obj.fileCount}
+                          </span>
+                        ) : null}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
                         {obj.lastModified

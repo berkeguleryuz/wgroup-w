@@ -59,6 +59,7 @@ export async function POST(request: Request) {
           published: true,
           visibility: true,
           orgAudience: { select: { organizationId: true } },
+          hiddenBy: { select: { organizationId: true } },
           departmentAudience: { select: { departmentId: true } },
         },
       },

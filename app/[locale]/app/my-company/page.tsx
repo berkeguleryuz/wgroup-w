@@ -7,6 +7,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireSession } from "@/lib/access";
 import { TitleCard } from "@/components/app/TitleCard";
+import { Avatar } from "@/components/app/Avatar";
 
 export default async function MyCompanyPage({
   params,
@@ -70,22 +71,11 @@ export default async function MyCompanyPage({
               href={`/app/my-company?org=${m.organizationId}`}
               className="group flex items-center gap-4 rounded-11 border border-border bg-muted/40 p-5 transition-colors hover:border-foreground/25 hover:bg-muted"
             >
-              <span
-                className={`flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-xl ${
-                  m.organization.logo ? "" : "bg-primary text-primary-foreground"
-                }`}
-              >
-                {m.organization.logo ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={m.organization.logo}
-                    alt={m.organization.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  m.organization.name.slice(0, 1).toUpperCase()
-                )}
-              </span>
+              <Avatar
+                src={m.organization.logo}
+                name={m.organization.name}
+                className="h-12 w-12 text-xl"
+              />
               <span className="min-w-0">
                 <span className="block truncate font-display text-lg">
                   {m.organization.name}
@@ -178,22 +168,11 @@ export default async function MyCompanyPage({
       <section className="rounded-11 border border-white/10 bg-surface-dark p-6 text-surface-dark-foreground md:p-8 dark:border-border dark:bg-muted/50">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
-            <span
-              className={`flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full font-display text-2xl ${
-                org.logo ? "" : "bg-primary text-primary-foreground"
-              }`}
-            >
-              {org.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={org.logo}
-                  alt={org.name}
-                  className="h-full w-full object-cover"
-                />
-              ) : (
-                org.name.slice(0, 1).toUpperCase()
-              )}
-            </span>
+            <Avatar
+              src={org.logo}
+              name={org.name}
+              className="h-14 w-14 text-2xl"
+            />
             <div className="min-w-0">
               <p className="truncate text-lg font-semibold">{org.name}</p>
               <div className="mt-1.5 flex flex-wrap items-center gap-2.5">

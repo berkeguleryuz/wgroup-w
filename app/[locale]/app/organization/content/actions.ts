@@ -9,6 +9,7 @@ import { localizedPath } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { requireOrgContentStudio } from "@/lib/corporate";
 import { cleanupStorageRefs } from "@/lib/storage-cleanup";
+import { enqueueTranscode } from "@/lib/transcode";
 import { slugify, isNextRedirect } from "@/lib/utils";
 
 /** Resolve the caller's org and assert it owns the title. */
@@ -182,7 +183,7 @@ export async function addOrgEpisode(formData: FormData) {
   const videoPath = String(formData.get("videoPath") || "").trim();
   if (!name || !videoPath) throw new Error("Missing fields");
 
-  await prisma.episode.create({
+  const created = await prisma.episode.create({
     data: {
       titleId,
       name,
@@ -194,6 +195,7 @@ export async function addOrgEpisode(formData: FormData) {
       videoPath,
     },
   });
+  await enqueueTranscode(created.id, videoPath);
   await backToContent(titleId, "created");
   } catch (e) {
     if (isNextRedirect(e)) throw e;
@@ -237,6 +239,7 @@ export async function updateOrgEpisode(formData: FormData) {
   if (videoPath && episode.videoPath !== videoPath) {
     await cleanupStorageRefs([episode.videoPath]);
   }
+  if (videoPath) await enqueueTranscode(id, videoPath);
   await backToContent(titleId, "saved");
 }
 

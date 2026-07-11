@@ -1,0 +1,54 @@
+# Background HLS transcode worker.
+#
+# Triggered by the app via repository_dispatch (lib/transcode.ts) right after
+# an episode gets a raw MP4, plus a cron safety net for anything missed while
+# the token was unset or a run was cancelled. `concurrency` keeps runs from
+# overlapping — a second dispatch while one is running just queues behind it,
+# and the running worker drains the whole queue anyway.
+#
+# Required repository secrets:
+#   DATABASE_URL, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
+#   R2_BUCKET, R2_PUBLIC_BASE_URL
+
+name: transcode
+
+on:
+  repository_dispatch:
+    types: [transcode]
+  workflow_dispatch:
+  schedule:
+    # Safety net: drain anything the dispatch trigger missed.
+    - cron: "0 */6 * * *"
+
+concurrency:
+  group: transcode
+  cancel-in-progress: false
+
+jobs:
+  transcode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Ensure ffmpeg
+        run: ffmpeg -version >/dev/null 2>&1 || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+
+      - name: Install worker deps
+        working-directory: worker
+        run: npm install --no-audit --no-fund
+
+      - name: Drain transcode queue
+        working-directory: worker
+        run: node index.mjs
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET: ${{ secrets.R2_BUCKET }}
+          R2_PUBLIC_BASE_URL: ${{ secrets.R2_PUBLIC_BASE_URL }}

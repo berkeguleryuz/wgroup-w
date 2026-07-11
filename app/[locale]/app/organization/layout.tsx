@@ -27,6 +27,11 @@ export default async function CorporateAdminLayout({
         ]
       : []),
     {
+      href: "/app/organization/catalog",
+      label: t("catalogHeading"),
+      icon: "content",
+    },
+    {
       href: "/app/organization/departments",
       label: t("departments"),
       icon: "departments",

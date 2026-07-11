@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import { authClient } from "@/lib/auth-client";
+import { Avatar } from "@/components/app/Avatar";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Wordmark } from "@/components/Wordmark";
@@ -192,22 +193,7 @@ export function AppTopbar({
               onClick={() => setOpen((v) => !v)}
               className="flex items-center gap-2 text-sm text-foreground transition-opacity hover:opacity-80"
             >
-              <span
-                className={`flex h-8 w-8 items-center justify-center overflow-hidden rounded-full font-display text-xs ${
-                  userImage ? "" : "bg-primary text-primary-foreground"
-                }`}
-              >
-                {userImage ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={userImage}
-                    alt={userName}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  userName.slice(0, 1).toUpperCase()
-                )}
-              </span>
+              <Avatar src={userImage} name={userName} className="h-8 w-8 text-xs" />
               <span className="hidden max-w-[120px] truncate md:inline">
                 {userName}
               </span>

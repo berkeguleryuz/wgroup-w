@@ -122,6 +122,11 @@ const EMAIL_MESSAGES = {
     inviteBody: (inviter: string, org: string) =>
       `<p><strong>${inviter}</strong> has invited you to Busyflix on behalf of <strong>${org}</strong>.</p>`,
     inviteCta: "Accept invitation",
+    welcomeSubject: (org: string) => `Busyflix — Your ${org} account is ready`,
+    welcomeTitle: (org: string) => `Your ${org} account is ready`,
+    welcomeBody: (org: string) =>
+      `<p>Your corporate Busyflix account for <strong>${org}</strong> has been created. Set your password with the button below to sign in for the first time.</p>`,
+    welcomeCta: "Set your password",
   },
   tr: {
     footerTag: "Busyflix · İş dünyası için sinema kalitesinde yapımlar.",
@@ -144,6 +149,11 @@ const EMAIL_MESSAGES = {
     inviteBody: (inviter: string, org: string) =>
       `<p><strong>${inviter}</strong>, seni <strong>${org}</strong> adına Busyflix'e davet etti.</p>`,
     inviteCta: "Daveti kabul et",
+    welcomeSubject: (org: string) => `Busyflix — ${org} kurumsal hesabınız hazır`,
+    welcomeTitle: (org: string) => `${org} hesabınız hazır`,
+    welcomeBody: (org: string) =>
+      `<p><strong>${org}</strong> kurumsal Busyflix hesabınız oluşturuldu. İlk girişini yapmak için aşağıdaki butonla şifreni belirle.</p>`,
+    welcomeCta: "Şifreni belirle",
   },
   de: {
     footerTag: "Busyflix · Produktionen in Kinoqualität für die Businesswelt.",
@@ -166,6 +176,11 @@ const EMAIL_MESSAGES = {
     inviteBody: (inviter: string, org: string) =>
       `<p><strong>${inviter}</strong> hat dich im Namen von <strong>${org}</strong> zu Busyflix eingeladen.</p>`,
     inviteCta: "Einladung annehmen",
+    welcomeSubject: (org: string) => `Busyflix — Ihr Konto für ${org} ist bereit`,
+    welcomeTitle: (org: string) => `Ihr Konto für ${org} ist bereit`,
+    welcomeBody: (org: string) =>
+      `<p>Ihr Busyflix-Firmenkonto für <strong>${org}</strong> wurde erstellt. Legen Sie mit dem Button unten Ihr Passwort fest, um sich zum ersten Mal anzumelden.</p>`,
+    welcomeCta: "Passwort festlegen",
   },
 } as const;
 
@@ -256,6 +271,27 @@ export async function sendPasswordResetEmail(
     to,
     subject: m.resetSubject,
     html: wrap(m.resetTitle, m.resetBody, { label: m.resetCta, url }, l),
+  });
+}
+
+/**
+ * First-touch e-mail for an admin-provisioned corporate owner. Carries the
+ * same set-password link as the reset flow, but framed as a welcome (the owner
+ * never chose a password) instead of a "you requested a reset" notice.
+ */
+export async function sendCorporateWelcomeEmail(
+  to: string,
+  url: string,
+  companyName: string,
+  locale?: string | null,
+) {
+  const l = resolveEmailLocale(locale);
+  const m = EMAIL_MESSAGES[l];
+  const org = escapeHtml(companyName);
+  return send({
+    to,
+    subject: m.welcomeSubject(org),
+    html: wrap(m.welcomeTitle(org), m.welcomeBody(org), { label: m.welcomeCta, url }, l),
   });
 }
 

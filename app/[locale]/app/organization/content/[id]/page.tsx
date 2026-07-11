@@ -44,6 +44,7 @@ export default async function OrgContentDetail({
         category: { include: { parent: true } },
         episodes: {
           orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
+          include: { transcodeJob: { select: { status: true } } },
         },
         departmentAudience: { select: { departmentId: true } },
         credits: { include: { instructor: true } },
@@ -291,6 +292,17 @@ export default async function OrgContentDetail({
                       {formatDuration(ep.durationSec)} · {te("preview")}:{" "}
                       {ep.previewSec}s
                     </p>
+                    {/* Multi-quality pipeline status (read-only for org users) */}
+                    {/\.m3u8(\?|$)/i.test(ep.videoPath) ? (
+                      <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-500">
+                        ✓ {te("transcodeReady")}
+                      </p>
+                    ) : ep.transcodeJob?.status === "QUEUED" ||
+                      ep.transcodeJob?.status === "PROCESSING" ? (
+                      <p className="mt-1 text-xs text-amber-600">
+                        {te("transcodeQueued")}
+                      </p>
+                    ) : null}
                   </div>
                   <form action={deleteOrgEpisode}>
                     <input type="hidden" name="id" value={ep.id} />

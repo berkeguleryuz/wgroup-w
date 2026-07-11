@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { categoryTitle } from "@/lib/i18n/category-title";
 import { requireRole } from "@/lib/access";
 import { cleanupStorageRefs } from "@/lib/storage-cleanup";
+import { enqueueTranscode } from "@/lib/transcode";
 import { resolveVideoUrl } from "@/lib/storage";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
@@ -140,7 +141,7 @@ async function addEpisode(formData: FormData) {
 
   if (!name || !videoPath) throw new Error("Missing fields");
 
-  await prisma.episode.create({
+  const created = await prisma.episode.create({
     data: {
       titleId,
       name,
@@ -152,6 +153,7 @@ async function addEpisode(formData: FormData) {
       videoPath,
     },
   });
+  await enqueueTranscode(created.id, videoPath);
   await backToTitle(titleId);
 }
 
@@ -192,6 +194,7 @@ async function updateEpisode(formData: FormData) {
   if (before && before.videoPath !== videoPath) {
     await cleanupStorageRefs([before.videoPath]);
   }
+  if (videoPath) await enqueueTranscode(id, videoPath);
   await backToTitle(titleId);
 }
 
@@ -301,6 +304,19 @@ async function addSubtitle(formData: FormData) {
   await backToTitle(titleId);
 }
 
+async function retryTranscode(formData: FormData) {
+  "use server";
+  await requireRole(["platform_editor", "admin"]);
+  const episodeId = String(formData.get("episodeId"));
+  const titleId = String(formData.get("titleId"));
+  const ep = await prisma.episode.findUnique({
+    where: { id: episodeId },
+    select: { videoPath: true },
+  });
+  if (ep) await enqueueTranscode(episodeId, ep.videoPath);
+  await backToTitle(titleId);
+}
+
 async function deleteSubtitle(formData: FormData) {
   "use server";
   await requireRole(["platform_editor", "admin"]);
@@ -333,7 +349,10 @@ export default async function EditorTitleDetail({
         category: { include: { parent: true } },
         episodes: {
           orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }],
-          include: { subtitles: { orderBy: { label: "asc" } } },
+          include: {
+            subtitles: { orderBy: { label: "asc" } },
+            transcodeJob: { select: { status: true, error: true } },
+          },
         },
         credits: { include: { instructor: true } },
         orgAudience: { include: { organization: { select: { id: true, name: true } } } },
@@ -704,6 +723,33 @@ export default async function EditorTitleDetail({
                       {ep.videoPath} · {formatDuration(ep.durationSec)} ·{" "}
                       {t("preview")}: {ep.previewSec}s
                     </p>
+                    {/* Multi-quality pipeline status */}
+                    {/\.m3u8(\?|$)/i.test(ep.videoPath) ? (
+                      <p className="mt-1 text-xs text-emerald-700 dark:text-emerald-500">
+                        ✓ {t("transcodeReady")}
+                      </p>
+                    ) : ep.transcodeJob?.status === "QUEUED" ||
+                      ep.transcodeJob?.status === "PROCESSING" ? (
+                      <p className="mt-1 text-xs text-amber-600">
+                        {t("transcodeQueued")}
+                      </p>
+                    ) : ep.transcodeJob?.status === "FAILED" ? (
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-red-600">
+                        <span title={ep.transcodeJob.error ?? undefined}>
+                          {t("transcodeFailed")}
+                        </span>
+                        <form action={retryTranscode} className="inline-flex">
+                          <input type="hidden" name="episodeId" value={ep.id} />
+                          <input type="hidden" name="titleId" value={title.id} />
+                          <button
+                            type="submit"
+                            className="underline underline-offset-2 hover:text-red-700"
+                          >
+                            {t("transcodeRetry")}
+                          </button>
+                        </form>
+                      </div>
+                    ) : null}
                   </div>
                   <form action={deleteEpisode}>
                     <input type="hidden" name="id" value={ep.id} />

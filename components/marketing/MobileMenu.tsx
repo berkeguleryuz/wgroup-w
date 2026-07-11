@@ -7,6 +7,7 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { Avatar } from "@/components/app/Avatar";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 
 gsap.registerPlugin(useGSAP);
@@ -165,18 +166,11 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
         <div className="flex items-center justify-between">
           {user ? (
             <span className="flex items-center gap-2 text-sm font-semibold text-[#f3e9d0]">
-              <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-[#edddb9] font-display text-xs text-[#0b0906]">
-                {user.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.image}
-                    alt={user.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  user.name.slice(0, 1).toUpperCase()
-                )}
-              </span>
+              <Avatar
+                src={user.image}
+                name={user.name}
+                className="h-7 w-7 text-xs"
+              />
               <span className="max-w-[160px] truncate">{user.name}</span>
             </span>
           ) : (
