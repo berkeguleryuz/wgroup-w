@@ -13,6 +13,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
     { href: "/app/admin/users", label: t("users") },
     { href: "/app/admin/companies", label: t("companies") },
     { href: "/app/admin/subscribers", label: t("subscribersHeading") },
+    { href: "/app/admin/billing", label: t("billingHeading") },
     { href: "/app/admin/storage", label: t("storageHeading") },
     // Instructor management lives in the editor area; admins have access to
     // it, so surface a direct shortcut here.

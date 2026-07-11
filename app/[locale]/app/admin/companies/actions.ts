@@ -7,7 +7,7 @@ import { headers } from "next/headers";
 
 import { localizedPath } from "@/lib/i18n/routing";
 
-import { auth } from "@/lib/auth";
+import { auth, resetEmailContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { requireRole } from "@/lib/access";
 import { isNextRedirect } from "@/lib/utils";
@@ -170,12 +170,16 @@ export async function activateCompany(formData: FormData) {
       .catch(() => {});
   }
 
-  // 6) Provisioned owners get a set-password e-mail (also their first sign-in).
+  // 6) Provisioned owners get a "welcome / set your password" e-mail (also their
+  //    first sign-in). Same reset token as forgot-password, but the context flag
+  //    swaps the generic reset template for the corporate welcome one.
   if (provisioned) {
-    await auth.api
-      .requestPasswordReset({
-        body: { email: ownerEmail, redirectTo: `${APP_URL}/reset-password` },
-      })
+    await resetEmailContext
+      .run({ kind: "corporate-welcome", companyName }, () =>
+        auth.api.requestPasswordReset({
+          body: { email: ownerEmail, redirectTo: `${APP_URL}/reset-password` },
+        }),
+      )
       .catch(() => {});
   }
 

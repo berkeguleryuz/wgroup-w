@@ -6,6 +6,20 @@ export const stripe = key
   ? new Stripe(key, { apiVersion: "2026-03-25.dahlia" })
   : (null as unknown as Stripe);
 
+// Stripe Tax must first be activated in the Stripe Dashboard (Settings → Tax),
+// otherwise checkout creation with automatic_tax fails — hence the env gate.
+// When on: 19% German VAT at home, destination-country VAT for EU B2C (OSS),
+// reverse charge for EU B2B with a validated VAT ID, untaxed outside the EU.
+export const STRIPE_AUTOMATIC_TAX =
+  process.env.STRIPE_AUTOMATIC_TAX === "1" ||
+  process.env.STRIPE_AUTOMATIC_TAX === "true";
+
+// Bank-transfer (customer balance / virtual IBAN) invoices — requires the
+// "Bank transfers" payment method to be activated in the Stripe Dashboard.
+export const STRIPE_BANK_TRANSFER =
+  process.env.STRIPE_BANK_TRANSFER === "1" ||
+  process.env.STRIPE_BANK_TRANSFER === "true";
+
 export const STRIPE_PRICE_MONTHLY = process.env.STRIPE_PRICE_MONTHLY || "";
 export const STRIPE_PRICE_YEARLY = process.env.STRIPE_PRICE_YEARLY || "";
 

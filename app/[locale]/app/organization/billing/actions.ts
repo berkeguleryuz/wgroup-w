@@ -7,6 +7,7 @@ import { requireOrgOwner } from "@/lib/corporate";
 import {
   stripe,
   corpPriceIdFor,
+  STRIPE_AUTOMATIC_TAX,
   STRIPE_PRICE_CORP_LARGE,
   type CorporatePackage,
 } from "@/lib/stripe";
@@ -80,6 +81,17 @@ export async function startCorporateCheckout(
     cancel_url: `${url}?cancel=1`,
     metadata: { organizationId },
     subscription_data: { metadata: { organizationId } },
+    // Stripe Tax + VAT-ID collection: an EU company entering a valid USt-IdNr.
+    // gets reverse charge (0%, "Steuerschuldnerschaft des Leistungsempfängers"
+    // note on the invoice); German companies get 19% USt.
+    ...(STRIPE_AUTOMATIC_TAX
+      ? {
+          automatic_tax: { enabled: true },
+          billing_address_collection: "required" as const,
+          tax_id_collection: { enabled: true },
+          customer_update: { address: "auto" as const, name: "auto" as const },
+        }
+      : {}),
   });
 
   return checkout.url;

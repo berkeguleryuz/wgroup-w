@@ -1,6 +1,7 @@
 import { useTranslations } from "next-intl";
 
 import { Link } from "@/lib/i18n/navigation";
+import { Avatar } from "@/components/app/Avatar";
 import { LocaleSwitcher } from "@/components/LocaleSwitcher";
 import { MobileMenu } from "@/components/marketing/MobileMenu";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -55,18 +56,11 @@ export function MarketingHeader({ user }: { user?: MarketingUser | null }) {
               href="/app"
               className="hidden h-9 items-center gap-2 rounded-11 border border-border/60 bg-background/95 py-1 pl-1 pr-3 text-sm font-semibold text-foreground transition-colors hover:bg-muted md:inline-flex"
             >
-              <span className="flex h-7 w-7 items-center justify-center overflow-hidden rounded-full bg-primary font-display text-xs text-primary-foreground">
-                {user.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    src={user.image}
-                    alt={user.name}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  user.name.slice(0, 1).toUpperCase()
-                )}
-              </span>
+              <Avatar
+                src={user.image}
+                name={user.name}
+                className="h-7 w-7 text-xs"
+              />
               <span className="max-w-[120px] truncate">{user.name}</span>
             </Link>
           ) : (

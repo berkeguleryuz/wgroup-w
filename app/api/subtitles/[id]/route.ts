@@ -22,6 +22,7 @@ export async function GET(
           title: {
             include: {
               orgAudience: { select: { organizationId: true } },
+              hiddenBy: { select: { organizationId: true } },
               departmentAudience: { select: { departmentId: true } },
             },
           },

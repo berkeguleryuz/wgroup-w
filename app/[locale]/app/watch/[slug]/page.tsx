@@ -32,6 +32,7 @@ export default async function TitleDetailPage({
         episodes: { orderBy: [{ seasonNumber: "asc" }, { episodeNumber: "asc" }] },
         credits: { include: { instructor: true } },
         orgAudience: { select: { organizationId: true } },
+        hiddenBy: { select: { organizationId: true } },
         departmentAudience: { select: { departmentId: true } },
       },
     }),
