@@ -6,6 +6,7 @@ import { getStorage, isR2Configured } from "@/lib/storage";
 import { getStorageInventory } from "./inventory";
 import { deleteStorageObject, deleteAllOrphans } from "./actions";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
+import StatCard from "@/components/dashboard/StatCard";
 
 function formatBytes(bytes: number) {
   if (bytes >= 1024 ** 3) return `${(bytes / 1024 ** 3).toFixed(2)} GB`;
@@ -51,35 +52,27 @@ export default async function AdminStoragePage({
       ) : (
         <>
           <section className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-11 border border-border/60 bg-background p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t("storageTotal")}
-              </p>
-              <p className="mt-1 font-display text-3xl">{inventory.length}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {formatBytes(totalSize)}
-              </p>
-            </div>
-            <div className="rounded-11 border border-border/60 bg-background p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t("storageInUse")}
-              </p>
-              <p className="mt-1 font-display text-3xl">
-                {inventory.length - orphans.length}
-              </p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {formatBytes(totalSize - orphanSize)}
-              </p>
-            </div>
-            <div className="rounded-11 border border-border/60 bg-background p-5">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                {t("storageOrphans")}
-              </p>
-              <p className="mt-1 font-display text-3xl">{orphans.length}</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                {formatBytes(orphanSize)}
-              </p>
-            </div>
+            <StatCard
+              label={t("storageTotal")}
+              value={inventory.length}
+              sub={formatBytes(totalSize)}
+              icon="database"
+            />
+            <StatCard
+              label={t("storageInUse")}
+              value={inventory.length - orphans.length}
+              sub={formatBytes(totalSize - orphanSize)}
+              icon="check"
+              floatDelay={0.5}
+            />
+            <StatCard
+              label={t("storageOrphans")}
+              value={orphans.length}
+              sub={formatBytes(orphanSize)}
+              icon="trash"
+              alert={orphans.length > 0}
+              floatDelay={1}
+            />
           </section>
 
           {orphans.length > 0 ? (

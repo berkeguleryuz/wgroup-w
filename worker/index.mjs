@@ -100,18 +100,47 @@ async function probe(input) {
   return {
     durationSec: Math.round(Number(data.format?.duration ?? video.duration)) || 0,
     height: Number(video.height) || 1080,
+    width: Number(video.width) || 1920,
     hasAudio: (data.streams || []).some((s) => s.codec_type === "audio"),
   };
 }
 
 async function buildLadder(input, outDir, info) {
-  let renditions = LADDER.filter((r) => r.height <= info.height);
-  if (renditions.length === 0) renditions = [LADDER[0]];
+  // Pick renditions by the source's 16:9-equivalent height so ultrawide
+  // (cinemascope) sources still get their full ladder — a 1280x536 film is
+  // 720p-class by width even though it is only 536px tall.
+  const effectiveHeight = Math.max(info.height, Math.round((info.width * 9) / 16));
+  let renditions = LADDER.filter((r) => r.height <= effectiveHeight).map((r) => ({
+    ...r,
+    width: Math.round((r.height * 16) / 9),
+  }));
+  if (renditions.length === 0) renditions = [{ ...LADDER[0], width: 640 }];
+
+  // The source's native quality is always the top option: when it exceeds the
+  // highest ladder rung (900p, 1440p, 4K…), add an "orig" rendition at native
+  // resolution (capped at 4K width) with a bitrate scaled from the 1080p rung.
+  if (effectiveHeight > renditions[renditions.length - 1].height) {
+    const kbps = Math.min(
+      16000,
+      Math.max(6500, Math.round((5000 * info.width * info.height) / (1920 * 1080))),
+    );
+    renditions.push({
+      name: "orig",
+      height: effectiveHeight,
+      width: Math.min(info.width, 3840),
+      vBitrate: `${kbps}k`,
+      maxrate: `${Math.round(kbps * 1.07)}k`,
+      bufsize: `${Math.round(kbps * 1.5)}k`,
+    });
+  }
 
   const args = ["-y", "-i", input];
   const filter = [
     `[0:v]split=${renditions.length}${renditions.map((_, i) => `[v${i}]`).join("")}`,
-    ...renditions.map((r, i) => `[v${i}]scale=-2:${r.height}[vout${i}]`),
+    // Scale by width, never upscaling: min(iw, target).
+    ...renditions.map(
+      (r, i) => `[v${i}]scale=min(iw\\,${r.width}):-2[vout${i}]`,
+    ),
   ];
   args.push("-filter_complex", filter.join(";"));
   renditions.forEach((r, i) => {

@@ -2,8 +2,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { connection } from "next/server";
 
 import type { Locale } from "@/lib/i18n/routing";
-import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
+import DashboardBoard from "@/components/admin/DashboardBoard";
 
 async function loadStats() {
   // cacheComponents: reading the current time requires request-scoped data
@@ -83,92 +83,46 @@ export default async function AdminDashboard({
         <h1 className="mt-1 text-3xl md:text-5xl">{t("dashboard")}</h1>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-        <Stat label={t("users")} value={users} sub={t("recentSignups", { count: recentSignups })} />
-        <Stat label={t("activeIndividual")} value={activeSubs} />
-        <Stat
-          label={t("companies")}
-          value={companies}
-          sub={t("corporateSeats", { count: corporateSeats })}
-          href="/app/admin/companies"
-        />
-        <Stat
-          label={t("newRequests")}
-          value={pendingLeads}
-          href="/app/admin/companies"
-        />
-        <Stat label={t("publishedContent")} value={publishedTitles} />
-      </section>
-
-      <section className="grid gap-4 sm:grid-cols-3">
-        <Stat label={t("watchHours")} value={watchHours} />
-        <Stat label={t("completedEpisodes")} value={completedCount} />
-        <Stat
-          label={t("completionRate")}
-          value={completionRate}
-          suffix="%"
-        />
-      </section>
-
-      <section className="rounded-11 border border-border/60 bg-background">
-        <h2 className="border-b border-border/60 px-5 py-4 font-display text-xl">
-          {t("topTitles")}
-        </h2>
-        {topTitles.length === 0 ? (
-          <p className="px-5 py-6 text-sm text-muted-foreground">
-            {t("noViewsYet")}
-          </p>
-        ) : (
-          <table className="w-full text-sm">
-            <thead className="border-b border-border/60 text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <tr>
-                <th className="px-5 py-3">{t("titleCol")}</th>
-                <th className="px-5 py-3 text-right">{t("uniqueViewers")}</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/70">
-              {topTitles.map((x) => (
-                <tr key={x.id}>
-                  <td className="px-5 py-3 font-medium">{x.title}</td>
-                  <td className="px-5 py-3 text-right text-muted-foreground">
-                    {x.viewers}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </section>
+      <DashboardBoard
+        hero={{
+          pulse: t("platformPulse"),
+          label: t("users"),
+          value: users,
+          sub: t("recentSignups", { count: recentSignups }),
+        }}
+        cells={[
+          { label: t("activeIndividual"), value: activeSubs, icon: "play" },
+          {
+            label: t("companies"),
+            value: companies,
+            sub: t("corporateSeats", { count: corporateSeats }),
+            href: "/app/admin/companies",
+            icon: "building",
+          },
+          {
+            label: t("newRequests"),
+            value: pendingLeads,
+            href: "/app/admin/companies",
+            alert: pendingLeads > 0,
+            icon: "bell",
+          },
+          {
+            label: t("publishedContent"),
+            value: publishedTitles,
+            tone: "dark",
+            icon: "clapper",
+          },
+        ]}
+        hours={{ label: t("watchHours"), value: watchHours }}
+        completed={{ label: t("completedEpisodes"), value: completedCount }}
+        rate={{ label: t("completionRate"), value: completionRate }}
+        topTitles={{
+          heading: t("topTitles"),
+          empty: t("noViewsYet"),
+          viewersLabel: t("uniqueViewers"),
+          items: topTitles,
+        }}
+      />
     </div>
   );
-}
-
-function Stat({
-  label,
-  value,
-  sub,
-  suffix,
-  href,
-}: {
-  label: string;
-  value: number;
-  sub?: string;
-  suffix?: string;
-  href?: string;
-}) {
-  const body = (
-    <div className="rounded-11 border border-border/60 bg-background p-5">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground">
-        {label}
-      </p>
-      <p className="mt-2 font-display text-3xl">
-        {value}
-        {suffix}
-      </p>
-      {sub ? (
-        <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
-      ) : null}
-    </div>
-  );
-  return href ? <Link href={href}>{body}</Link> : body;
 }

@@ -77,6 +77,17 @@ export default async function AdminCorporatePage({
     : null;
 
   const STATUSES = ["pending", "active", "grace", "expired"] as const;
+  const subStatusLabels: Record<string, string> = {
+    pending: t("subStatusPending"),
+    active: t("subStatusActive"),
+    grace: t("subStatusGrace"),
+    expired: t("subStatusExpired"),
+  };
+  const leadStatusLabels: Record<string, string> = {
+    new: t("leadStatusNew"),
+    contacted: t("leadStatusContacted"),
+    converted: t("converted"),
+  };
 
   return (
     <div className="space-y-12">
@@ -124,7 +135,7 @@ export default async function AdminCorporatePage({
                     </td>
                     <td className="px-4 py-3">
                       <span className="rounded-11 bg-muted px-2 py-1 text-xs">
-                        {l.status}
+                        {leadStatusLabels[l.status] ?? l.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted-foreground">
@@ -277,7 +288,10 @@ export default async function AdminCorporatePage({
                     <p className="font-medium">{c.organization.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {c.organization._count.members} / {c.seatCount}{" "}
-                      {t("seatsUsed")} · {c.subscriptionStatus} ·{" "}
+                      {t("seatsUsed")} ·{" "}
+                      {subStatusLabels[c.subscriptionStatus] ??
+                        c.subscriptionStatus}{" "}
+                      ·{" "}
                       {formatBytes(storageUsages.get(c.organizationId) ?? 0)}{" "}
                       {t("storageUsed")}
                     </p>
@@ -347,7 +361,7 @@ export default async function AdminCorporatePage({
                     >
                       {STATUSES.map((s) => (
                         <option key={s} value={s}>
-                          {s}
+                          {subStatusLabels[s]}
                         </option>
                       ))}
                     </select>
