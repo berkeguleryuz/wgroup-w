@@ -8,10 +8,8 @@ import { startCheckout } from "./actions";
 
 export function SubscribeButton({
   plan,
-  highlight,
 }: {
   plan: "monthly" | "yearly";
-  highlight?: boolean;
 }) {
   const t = useTranslations("subscription");
   const [loading, setLoading] = useState(false);

@@ -21,11 +21,11 @@ export async function AuthShell({
   return (
     <div className="grid flex-1 md:grid-cols-[1fr_1.05fr]">
       <aside className="relative hidden overflow-hidden bg-surface-dark text-surface-dark-foreground md:flex md:flex-col md:justify-between md:p-12 lg:p-16">
-        <GradientDotMesh patternColor="rgba(255,255,255,0.12)" />
+        <GradientDotMesh patternColor="rgb(var(--white-rgb) / 0.12)" />
         <div aria-hidden className="pointer-events-none absolute inset-0">
           <LightRays
             raysOrigin="top-center"
-            raysColor="#edddb9"
+            raysColor="var(--primary)"
             raysSpeed={0.9}
             lightSpread={0.8}
             rayLength={1.6}

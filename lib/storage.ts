@@ -59,6 +59,7 @@ export interface StorageProvider {
   createSignedUploadUrl(
     key: string,
     contentType?: string,
+    contentLength?: number,
   ): Promise<SignedUpload>;
   createSignedReadUrl(key: string, expiresInSec?: number): Promise<string>;
   /** List objects under a prefix (admin/ops tooling). */
@@ -129,7 +130,7 @@ const r2Provider: StorageProvider = {
       : `https://${R2_BUCKET}.r2.dev`;
     return `${base}/${stripLeadingSlash(key)}`;
   },
-  async createSignedUploadUrl(key, contentType = "video/mp4") {
+  async createSignedUploadUrl(key, contentType = "video/mp4", contentLength) {
     const client = await getR2Client();
     const { PutObjectCommand } = await import("@aws-sdk/client-s3");
     const { getSignedUrl } = await import("@aws-sdk/s3-request-presigner");
@@ -139,8 +140,9 @@ const r2Provider: StorageProvider = {
         Bucket: R2_BUCKET,
         Key: stripLeadingSlash(key),
         ContentType: contentType,
+        ContentLength: contentLength,
       }),
-      { expiresIn: 60 * 60 },
+      { expiresIn: 10 * 60 },
     );
     return {
       uploadUrl,

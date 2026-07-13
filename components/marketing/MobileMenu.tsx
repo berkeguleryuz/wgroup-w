@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
 import gsap from "gsap";
@@ -20,11 +20,13 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
   // The overlay is portaled to <body>: the header pill uses backdrop-blur,
   // which makes it the containing block for fixed descendants and would trap
   // the "fullscreen" panel inside the pill.
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
   const overlayRef = useRef<HTMLDivElement>(null);
   const tlRef = useRef<gsap.core.Timeline | null>(null);
-
-  useEffect(() => setMounted(true), []);
 
   const links = [
     { href: "/#library", label: t("nav.library") },
@@ -116,7 +118,7 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
       className="invisible fixed inset-0 z-30 flex flex-col opacity-0 md:hidden"
       style={{
         background:
-          "radial-gradient(120% 80% at 70% 20%, #2b2016 0%, #14100a 55%, #0b0906 100%)",
+          "radial-gradient(120% 80% at 70% 20%, var(--cinema-800) 0%, var(--cinema-900) 55%, var(--cinema-950) 100%)",
       }}
       aria-hidden={!open}
     >
@@ -125,7 +127,7 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
         className="pointer-events-none absolute inset-0 opacity-[0.07]"
         style={{
           backgroundImage:
-            "linear-gradient(rgba(255,255,255,0.4) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.4) 1px, transparent 1px)",
+            "linear-gradient(rgb(var(--white-rgb) / 0.4) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--white-rgb) / 0.4) 1px, transparent 1px)",
           backgroundSize: "64px 64px",
           maskImage:
             "radial-gradient(ellipse 80% 70% at 50% 30%, black 40%, transparent 100%)",
@@ -133,23 +135,23 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
       />
 
       <nav className="relative flex flex-1 flex-col justify-center px-6 pt-20">
-        <p className="font-accent mb-4 text-sm tracking-wide text-[#edddb9]/70">
+        <p className="font-accent mb-4 text-sm tracking-wide text-primary/70">
           {t("hero.sideLabel")}
         </p>
         <ul>
           {links.map((link, i) => (
             <li key={link.href} className="overflow-hidden">
-              <span className="mm-rule block h-px w-full bg-[#edddb9]/20" />
+              <span className="mm-rule block h-px w-full bg-primary/20" />
               <div className="overflow-hidden py-1">
                 <Link
                   href={link.href}
                   onClick={() => setOpen(false)}
                   className="mm-link flex items-baseline gap-4 py-3"
                 >
-                  <span className="font-mono text-xs text-[#edddb9]/50">
+                  <span className="font-mono text-xs text-primary/50">
                     0{i + 1}
                   </span>
-                  <span className="font-display text-4xl leading-tight text-[#f3e9d0]">
+                  <span className="font-display text-4xl leading-tight text-surface-dark-foreground">
                     {link.label}
                   </span>
                 </Link>
@@ -157,7 +159,7 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
             </li>
           ))}
           <li>
-            <span className="mm-rule block h-px w-full bg-[#edddb9]/20" />
+            <span className="mm-rule block h-px w-full bg-primary/20" />
           </li>
         </ul>
       </nav>
@@ -165,7 +167,7 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
       <div className="mm-footer relative flex flex-col gap-3 px-6 pb-8">
         <div className="flex items-center justify-between">
           {user ? (
-            <span className="flex items-center gap-2 text-sm font-semibold text-[#f3e9d0]">
+            <span className="flex items-center gap-2 text-sm font-semibold text-surface-dark-foreground">
               <Avatar
                 src={user.image}
                 name={user.name}
@@ -177,7 +179,7 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
             <Link
               href="/login"
               onClick={() => setOpen(false)}
-              className="text-sm font-semibold text-[#f3e9d0] underline-offset-4 hover:underline"
+              className="text-sm font-semibold text-surface-dark-foreground underline-offset-4 hover:underline"
             >
               {t("common.login")}
             </Link>
@@ -187,7 +189,7 @@ export function MobileMenu({ user }: { user?: MarketingUser | null }) {
         <Link
           href={user ? "/app" : "/register"}
           onClick={() => setOpen(false)}
-          className="inline-flex h-12 items-center justify-center rounded-11 bg-[#edddb9] px-4 text-sm font-semibold text-[#0b0906]"
+          className="inline-flex h-12 items-center justify-center rounded-11 bg-primary px-4 text-sm font-semibold text-primary-foreground"
         >
           {user ? t("common.goToApp") : t("common.getStarted")}
         </Link>

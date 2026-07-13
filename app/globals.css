@@ -14,6 +14,55 @@
   --muted: #f1ebe7;
   --muted-foreground: #5b534a;
   --border: #e6dccc;
+
+  /* Fixed visual-system colors for cinematic surfaces and illustrations.
+     Components consume these variables instead of defining their own colors. */
+  --near-white: #feffff;
+  --cinema-950: #0b0906;
+  --cinema-900: #14100a;
+  --cinema-850: #1c150d;
+  --cinema-800: #2b2016;
+  --cinema-700: #3a2e1f;
+  --cinema-600: #5b4630;
+  --gold-700: #c9a86a;
+  --gold-600: #d9c08a;
+  --hero-cream-text: #f3e9d0;
+  --hero-amber-950: #090604;
+  --hero-amber-900: #1a0f08;
+  --hero-amber-800: #3a2010;
+  --hero-amber-text: #ffe0b7;
+  --hero-amber: #eaa742;
+  --hero-amber-light: #ffca79;
+  --hero-sky-950: #050a10;
+  --hero-sky-900: #0a1420;
+  --hero-sky-800: #0f2236;
+  --hero-sky-text: #d6e8ff;
+  --hero-sky: #8ec9ff;
+  --hero-sky-light: #c6e5ff;
+  --feature-art-white: #ffffff;
+  --feature-cyan-bg: #d4f1f4;
+  --feature-cyan-bg-soft: #e8f9fb;
+  --feature-cyan-text: #0d3b44;
+  --feature-cyan-accent: #1aa3b5;
+  --feature-cyan-soft: #7dd3dd;
+  --feature-green-bg: #dcf2dc;
+  --feature-green-bg-soft: #edf9ed;
+  --feature-green-text: #14401f;
+  --feature-green-accent: #2f8f4f;
+  --feature-green-soft: #8fd6a6;
+  --feature-violet-bg: #dcd9f5;
+  --feature-violet-bg-soft: #edeafa;
+  --feature-violet-text: #271f5a;
+  --feature-violet-accent: #5a47c9;
+  --feature-violet-soft: #a89bf0;
+  --feature-pink-bg: #f7d9ea;
+  --feature-pink-bg-soft: #fbe9f2;
+  --feature-pink-text: #5e1737;
+  --feature-pink-accent: #c24c87;
+  --feature-pink-soft: #eaa8c9;
+  --white-rgb: 255 255 255;
+  --black-rgb: 0 0 0;
+  --shadow-rgb: 16 13 8;
 }
 
 /* Dark theme — the inverse of the light palette. Background/foreground swap;
@@ -55,6 +104,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-near-white: var(--near-white);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

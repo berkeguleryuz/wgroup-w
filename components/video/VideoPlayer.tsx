@@ -322,7 +322,6 @@ export function VideoPlayer({
         controlsVisible || !playing ? "[&_video]:cursor-default" : "cursor-none"
       } ${className ?? ""}`}
     >
-      {/* eslint-disable-next-line jsx-a11y/media-has-caption */}
       <video
         ref={setRefs}
         poster={poster}

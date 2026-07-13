@@ -9,28 +9,28 @@ type CardTheme = {
 
 const CARD_THEMES: CardTheme[] = [
   {
-    bg: "linear-gradient(160deg, #d4f1f4 0%, #e8f9fb 55%, #d4f1f4 100%)",
-    text: "#0d3b44",
-    accent: "#1aa3b5",
-    soft: "#7dd3dd",
+    bg: "linear-gradient(160deg, var(--feature-cyan-bg) 0%, var(--feature-cyan-bg-soft) 55%, var(--feature-cyan-bg) 100%)",
+    text: "var(--feature-cyan-text)",
+    accent: "var(--feature-cyan-accent)",
+    soft: "var(--feature-cyan-soft)",
   },
   {
-    bg: "linear-gradient(160deg, #dcf2dc 0%, #edf9ed 55%, #dcf2dc 100%)",
-    text: "#14401f",
-    accent: "#2f8f4f",
-    soft: "#8fd6a6",
+    bg: "linear-gradient(160deg, var(--feature-green-bg) 0%, var(--feature-green-bg-soft) 55%, var(--feature-green-bg) 100%)",
+    text: "var(--feature-green-text)",
+    accent: "var(--feature-green-accent)",
+    soft: "var(--feature-green-soft)",
   },
   {
-    bg: "linear-gradient(160deg, #dcd9f5 0%, #edeafa 55%, #dcd9f5 100%)",
-    text: "#271f5a",
-    accent: "#5a47c9",
-    soft: "#a89bf0",
+    bg: "linear-gradient(160deg, var(--feature-violet-bg) 0%, var(--feature-violet-bg-soft) 55%, var(--feature-violet-bg) 100%)",
+    text: "var(--feature-violet-text)",
+    accent: "var(--feature-violet-accent)",
+    soft: "var(--feature-violet-soft)",
   },
   {
-    bg: "linear-gradient(160deg, #f7d9ea 0%, #fbe9f2 55%, #f7d9ea 100%)",
-    text: "#5e1737",
-    accent: "#c24c87",
-    soft: "#eaa8c9",
+    bg: "linear-gradient(160deg, var(--feature-pink-bg) 0%, var(--feature-pink-bg-soft) 55%, var(--feature-pink-bg) 100%)",
+    text: "var(--feature-pink-text)",
+    accent: "var(--feature-pink-accent)",
+    soft: "var(--feature-pink-soft)",
   },
 ];
 
@@ -115,7 +115,7 @@ export function FeatureGrid() {
         }
         .feature-card:hover {
           transform: translateY(-6px);
-          box-shadow: 0 30px 60px -30px rgba(16, 13, 8, 0.25);
+          box-shadow: 0 30px 60px -30px rgb(var(--shadow-rgb) / 0.25);
         }
         .feature-card-heading { min-height: 5rem; }
         .feature-card-body    { min-height: 4.75rem; }
@@ -161,7 +161,7 @@ function ArtLibrary({ accent, soft }: ArtProps) {
         width="284"
         height="176"
         rx="14"
-        fill="#fff"
+        fill="var(--feature-art-white)"
         opacity="0.55"
       />
       <rect
@@ -205,7 +205,7 @@ function ArtLibrary({ accent, soft }: ArtProps) {
         </g>
       </g>
       <g className="art-lib-badge">
-        <rect x="124" y="72" width="72" height="76" rx="10" fill="#fff" />
+        <rect x="124" y="72" width="72" height="76" rx="10" fill="var(--feature-art-white)" />
         <path d="M 152 96 L 172 110 L 152 124 Z" fill={accent} />
       </g>
       <defs>
@@ -247,7 +247,7 @@ function ArtDepth({ accent, soft }: ArtProps) {
         width="280"
         height="192"
         rx="16"
-        fill="#fff"
+        fill="var(--feature-art-white)"
         opacity="0.7"
       />
       <rect
@@ -261,7 +261,7 @@ function ArtDepth({ accent, soft }: ArtProps) {
         opacity="0.4"
       />
       <rect x="36" y="30" width="96" height="72" rx="10" fill={soft} />
-      <circle cx="84" cy="66" r="16" fill="#fff" opacity="0.9" />
+      <circle cx="84" cy="66" r="16" fill="var(--feature-art-white)" opacity="0.9" />
       <path d="M 79 58 L 92 66 L 79 74 Z" fill={accent} />
       <rect
         x="148"
@@ -368,7 +368,7 @@ function ArtDevices({ accent, soft }: ArtProps) {
         .art-dev-sync-dot-c { animation-delay: 1.4s; }
       `}</style>
       <g className="art-dev-laptop">
-        <rect x="36" y="52" width="180" height="118" rx="10" fill="#fff" />
+        <rect x="36" y="52" width="180" height="118" rx="10" fill="var(--feature-art-white)" />
         <rect
           x="36"
           y="52"
@@ -388,7 +388,7 @@ function ArtDevices({ accent, soft }: ArtProps) {
           fill={soft}
           opacity="0.7"
         />
-        <circle cx="126" cy="107" r="16" fill="#fff" />
+        <circle cx="126" cy="107" r="16" fill="var(--feature-art-white)" />
         <path d="M 121 99 L 134 107 L 121 115 Z" fill={accent} />
         <rect
           x="20"
@@ -401,7 +401,7 @@ function ArtDevices({ accent, soft }: ArtProps) {
         />
       </g>
       <g className="art-dev-phone" transform="translate(234 58)">
-        <rect x="0" y="0" width="62" height="112" rx="10" fill="#fff" />
+        <rect x="0" y="0" width="62" height="112" rx="10" fill="var(--feature-art-white)" />
         <rect
           x="0"
           y="0"
@@ -421,7 +421,7 @@ function ArtDevices({ accent, soft }: ArtProps) {
           fill={soft}
           opacity="0.8"
         />
-        <circle cx="31" cy="47" r="10" fill="#fff" />
+        <circle cx="31" cy="47" r="10" fill="var(--feature-art-white)" />
         <path d="M 28 42 L 35 47 L 28 52 Z" fill={accent} />
         <rect
           x="18"
@@ -541,7 +541,7 @@ function ArtTeam({ accent, soft }: ArtProps) {
       </g>
 
       <g>
-        <rect x="128" y="82" width="64" height="56" rx="10" fill="#fff" />
+        <rect x="128" y="82" width="64" height="56" rx="10" fill="var(--feature-art-white)" />
         <rect
           x="128"
           y="82"
@@ -623,7 +623,7 @@ function ArtTeam({ accent, soft }: ArtProps) {
             width="72"
             height="32"
             rx="9"
-            fill="#fff"
+            fill="var(--feature-art-white)"
             opacity="0.9"
           />
           <rect
@@ -637,8 +637,8 @@ function ArtTeam({ accent, soft }: ArtProps) {
             opacity="0.4"
           />
           <circle cx="14" cy="16" r="9" fill={i % 2 === 0 ? accent : soft} />
-          <circle cx="14" cy="13.5" r="3" fill="#fff" opacity="0.9" />
-          <path d="M 9 21 Q 14 17 19 21" fill="#fff" opacity="0.9" />
+          <circle cx="14" cy="13.5" r="3" fill="var(--feature-art-white)" opacity="0.9" />
+          <path d="M 9 21 Q 14 17 19 21" fill="var(--feature-art-white)" opacity="0.9" />
           <rect
             x="28"
             y="11"

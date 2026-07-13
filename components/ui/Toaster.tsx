@@ -99,7 +99,7 @@ export function Toaster() {
             onClick={() =>
               setItems((prev) => prev.filter((i) => i.id !== item.id))
             }
-            className={`bf-toast pointer-events-auto flex items-center gap-3 rounded-11 border px-4 py-3 text-left text-sm text-surface-dark-foreground shadow-[0_20px_50px_-20px_rgba(16,13,8,0.55)] ${
+            className={`bf-toast pointer-events-auto flex items-center gap-3 rounded-11 border px-4 py-3 text-left text-sm text-surface-dark-foreground shadow-[0_20px_50px_-20px_rgb(var(--shadow-rgb)/0.55)] ${
               item.type === "error"
                 ? "border-red-500/40 bg-surface-dark"
                 : "border-white/10 bg-surface-dark"

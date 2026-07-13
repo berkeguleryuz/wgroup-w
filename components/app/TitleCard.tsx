@@ -1,4 +1,5 @@
 import { useLocale, useTranslations } from "next-intl";
+import Image from "next/image";
 import type { Title, Category, Episode } from "@prisma/client";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -15,10 +16,10 @@ type Props = {
 };
 
 const palette = [
-  "linear-gradient(135deg, #100D08 0%, #3a2e1f 100%)",
-  "linear-gradient(135deg, #2b2016 0%, #5b4630 100%)",
-  "linear-gradient(135deg, #5b534a 0%, #100D08 100%)",
-  "linear-gradient(135deg, #100D08 0%, #5b4630 100%)",
+  "linear-gradient(135deg, var(--surface-dark) 0%, var(--cinema-700) 100%)",
+  "linear-gradient(135deg, var(--cinema-800) 0%, var(--cinema-600) 100%)",
+  "linear-gradient(135deg, var(--muted-foreground) 0%, var(--surface-dark) 100%)",
+  "linear-gradient(135deg, var(--surface-dark) 0%, var(--cinema-600) 100%)",
 ];
 
 export function TitleCard({
@@ -40,10 +41,12 @@ export function TitleCard({
     >
       <div className={`relative ${aspect}`}>
         {title.heroImageUrl ? (
-          <img
+          <Image
             src={title.heroImageUrl}
             alt={title.title}
-            className="absolute inset-0 h-full w-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
           />
         ) : (
           <div
@@ -64,7 +67,7 @@ export function TitleCard({
           className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-black/60 to-transparent"
         />
 
-        <div className="absolute inset-0 flex flex-col justify-between p-5 text-surface-dark-foreground [text-shadow:0_1px_3px_rgba(0,0,0,0.7)]">
+        <div className="absolute inset-0 flex flex-col justify-between p-5 text-surface-dark-foreground [text-shadow:0_1px_3px_rgb(var(--black-rgb)/0.7)]">
           <p className="font-accent text-xs opacity-90">
             {title.type === "SERIES" ? t("series") : t("film")} ·{" "}
             {categoryTitle(title.category, locale)}

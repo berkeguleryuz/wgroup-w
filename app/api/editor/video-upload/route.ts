@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/access";
 import { getSelfServeOrgId } from "@/lib/corporate";
 import { getStorage } from "@/lib/storage";
+import { parseUploadRequest } from "@/lib/security/upload-policy";
 
 const STAFF = new Set(["admin", "platform_editor"]);
 
@@ -20,24 +21,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const body = (await request.json().catch(() => null)) as
-    | { filename?: string; contentType?: string }
-    | null;
-  const filename = body?.filename?.trim();
-  if (!filename) {
-    return NextResponse.json({ error: "filename required" }, { status: 400 });
+  const body = await request.json().catch(() => null);
+  const kind =
+    typeof body === "object" && body !== null && "contentType" in body &&
+    body.contentType === "text/vtt"
+      ? "subtitle"
+      : "video";
+  const upload = parseUploadRequest(kind, body);
+  if (!upload.success) {
+    return NextResponse.json({ error: "invalid upload" }, { status: 400 });
   }
+  const { filename, contentType, size } = upload.data;
 
   const safe = filename.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
   const orgPrefix = selfServeOrgId ? `org/${selfServeOrgId}/` : "";
   const path = `uploads/${orgPrefix}${Date.now()}-${safe}`;
-  const contentType = body?.contentType?.trim() || "video/mp4";
-
   try {
     const storage = getStorage();
     const { uploadUrl, key, headers } = await storage.createSignedUploadUrl(
       path,
       contentType,
+      size,
     );
     return NextResponse.json({
       uploadUrl,
@@ -47,7 +51,7 @@ export async function POST(request: Request) {
       // as-is rather than resolving the key through a signed URL.
       publicUrl: storage.getPublicUrl(key),
     });
-  } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "upload unavailable" }, { status: 500 });
   }
 }

@@ -29,6 +29,7 @@ model User {
   individualSubscription  IndividualSubscription?
   instructorProfile       Instructor?
   agentConversations      AgentConversation[]
+  agentQuota              AgentQuota?
 
   @@map("user")
 }
@@ -435,6 +436,15 @@ model AgentMessage {
   createdAt DateTime @default(now())
 
   @@index([conversationId, createdAt])
+}
+
+model AgentQuota {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  windowStartedAt DateTime @default(now())
+  requestCount    Int      @default(0)
+  activeCount     Int      @default(0)
+  updatedAt       DateTime @updatedAt
 }
 
 model CorporateLead {

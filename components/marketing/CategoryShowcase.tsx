@@ -9,9 +9,9 @@ export function CategoryShowcase() {
   // mode and the gold cards turn dark, so all four keep contrast against
   // the page background.
   const darkCard =
-    "[background:linear-gradient(135deg,#100D08,#3a2e1f)] text-surface-dark-foreground dark:[background:linear-gradient(135deg,#edddb9,#c9a86a)] dark:text-[#100D08]";
+    "[background:linear-gradient(135deg,var(--surface-dark),var(--cinema-700))] text-surface-dark-foreground dark:[background:linear-gradient(135deg,var(--primary),var(--gold-700))] dark:text-primary-foreground";
   const goldCard =
-    "[background:linear-gradient(135deg,#edddb9,#c9a86a)] text-[#100D08] dark:[background:linear-gradient(135deg,#100D08,#3a2e1f)] dark:text-surface-dark-foreground";
+    "[background:linear-gradient(135deg,var(--primary),var(--gold-700))] text-primary-foreground dark:[background:linear-gradient(135deg,var(--surface-dark),var(--cinema-700))] dark:text-surface-dark-foreground";
 
   const categories = [
     {

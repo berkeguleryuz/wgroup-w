@@ -2,6 +2,8 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Resend } from "resend";
 
+import { maskEmail, safeErrorMessage } from "./security/log-redaction";
+
 const FROM = process.env.EMAIL_FROM || "Busyflix <noreply@businessflix.app>";
 
 // Logo ships as an inline CID attachment instead of a remote URL: mail
@@ -50,9 +52,10 @@ export function escapeHtml(s: string) {
 async function send({ to, subject, html }: SendArgs): Promise<boolean> {
   const resend = getClient();
   if (!resend) {
-    console.warn("[email] RESEND_API_KEY missing — logging instead of sending");
-    console.info({ to, subject, html });
-    return true; // dev no-op is not a user-facing failure
+    console.warn("[email] RESEND_API_KEY missing", {
+      recipient: maskEmail(to),
+    });
+    return true;
   }
   try {
     const logo = html.includes(`cid:${LOGO_CID}`) ? getLogoBuffer() : null;
@@ -75,14 +78,18 @@ async function send({ to, subject, html }: SendArgs): Promise<boolean> {
         : {}),
     });
     if (error) {
-      console.error(`[email] Resend error: ${error.message}`);
-      console.info({ to, subject, html });
+      console.error("[email] Resend error", {
+        recipient: maskEmail(to),
+        error: safeErrorMessage(error),
+      });
       return false;
     }
     return true;
   } catch (err) {
-    console.error("[email] send failed:", err);
-    console.info({ to, subject, html });
+    console.error("[email] send failed", {
+      recipient: maskEmail(to),
+      error: safeErrorMessage(err),
+    });
     return false;
   }
 }

@@ -53,11 +53,18 @@ export const auth = betterAuth({
     sendResetPassword: async ({ user, url }) => {
       const ctx = resetEmailContext.getStore();
       const locale = await requestLocale();
+      let sent: boolean;
       if (ctx?.kind === "corporate-welcome") {
-        void sendCorporateWelcomeEmail(user.email, url, ctx.companyName, locale);
+        sent = await sendCorporateWelcomeEmail(
+          user.email,
+          url,
+          ctx.companyName,
+          locale,
+        );
       } else {
-        void sendPasswordResetEmail(user.email, url, locale);
+        sent = await sendPasswordResetEmail(user.email, url, locale);
       }
+      if (!sent) throw new Error("email delivery failed");
     },
   },
 
@@ -65,7 +72,12 @@ export const auth = betterAuth({
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      void sendVerificationEmail(user.email, url, await requestLocale());
+      const sent = await sendVerificationEmail(
+        user.email,
+        url,
+        await requestLocale(),
+      );
+      if (!sent) throw new Error("email delivery failed");
     },
   },
 
@@ -130,7 +142,7 @@ export const auth = betterAuth({
       },
       async sendInvitationEmail(data) {
         const inviteUrl = `${APP_URL}/invite/${data.id}`;
-        await sendOrganizationInviteEmail({
+        const sent = await sendOrganizationInviteEmail({
           to: data.email,
           organizationName: data.organization.name,
           inviterName: data.inviter.user.name,
@@ -139,6 +151,7 @@ export const auth = betterAuth({
           // company's language until the invitee has an own preference.
           locale: await requestLocale(),
         });
+        if (!sent) throw new Error("email delivery failed");
       },
     }),
     nextCookies(),

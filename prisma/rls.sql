@@ -15,13 +15,17 @@ alter table "Subtitle"               enable row level security;
 alter table "Instructor"             enable row level security;
 alter table "TitleInstructor"        enable row level security;
 alter table "TitleOrganization"      enable row level security;
+alter table "TitleDepartment"        enable row level security;
+alter table "OrganizationHiddenTitle" enable row level security;
 alter table "Progress"               enable row level security;
 alter table "IndividualSubscription" enable row level security;
 alter table "CompanyProfile"         enable row level security;
 alter table "CorporateLead"          enable row level security;
 alter table "AgentConversation"      enable row level security;
 alter table "AgentMessage"           enable row level security;
+alter table "AgentQuota"             enable row level security;
 alter table "StripeEvent"            enable row level security;
+alter table "TranscodeJob"           enable row level security;
 
 create index if not exists title_published_recent_idx
   on "Title" ("publishedAt" desc, "createdAt" desc)

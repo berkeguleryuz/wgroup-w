@@ -139,10 +139,10 @@ export function AppTopbar({
   // fades from the page background (cream in light, warm-dark in dark) instead
   // of hardcoded black — the hero top no longer starts pitch black in light.
   const headerBg = overlay
-    ? "bg-gradient-to-b from-[#feffff]/95 via-[#feffff]/40 to-transparent dark:from-background/90 dark:via-background/40"
+    ? "bg-gradient-to-b from-near-white/95 via-near-white/40 to-transparent dark:from-background/90 dark:via-background/40"
     : transparentLight
       ? "bg-transparent"
-      : "bg-background border-b border-border/60 shadow-[0_8px_30px_-16px_rgba(16,13,8,0.35)]";
+      : "bg-background border-b border-border/60 shadow-[0_8px_30px_-16px_rgb(var(--shadow-rgb)/0.35)]";
 
   return (
     <header
@@ -218,7 +218,7 @@ export function AppTopbar({
                   onClick={() => setOpen(false)}
                   aria-hidden
                 />
-                <div className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-11 border border-border bg-background text-foreground shadow-[0_20px_50px_-20px_rgba(16,13,8,0.35)]">
+                <div className="absolute right-0 z-20 mt-2 w-60 overflow-hidden rounded-11 border border-border bg-background text-foreground shadow-[0_20px_50px_-20px_rgb(var(--shadow-rgb)/0.35)]">
                   <div className="border-b border-border/60 px-4 py-3">
                     <p className="truncate text-sm font-medium">{userName}</p>
                     <p className="truncate text-xs text-muted-foreground">

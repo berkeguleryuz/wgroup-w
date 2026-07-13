@@ -1,6 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
+import Image from "next/image";
 
 const QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -20,9 +21,15 @@ export function HeroVideo({ src, poster }: { src: string; poster?: string }) {
   const reduced = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   if (reduced) {
-    // eslint-disable-next-line @next/next/no-img-element
     return poster ? (
-      <img src={poster} alt="" className="absolute inset-0 h-full w-full object-cover" />
+      <Image
+        src={poster}
+        alt=""
+        fill
+        preload
+        sizes="100vw"
+        className="object-cover"
+      />
     ) : null;
   }
 

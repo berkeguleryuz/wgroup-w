@@ -67,7 +67,7 @@ export function LocaleSwitcher() {
       {open && (
         <ul
           role="listbox"
-          className="absolute right-0 top-full z-50 mt-2 flex min-w-[10rem] flex-col overflow-hidden rounded-11 border border-border bg-background py-1 shadow-[0_10px_40px_-20px_rgba(16,13,8,0.35)]"
+          className="absolute right-0 top-full z-50 mt-2 flex min-w-[10rem] flex-col overflow-hidden rounded-11 border border-border bg-background py-1 shadow-[0_10px_40px_-20px_rgb(var(--shadow-rgb)/0.35)]"
         >
           {routing.locales.map((l) => {
             const active = l === locale;

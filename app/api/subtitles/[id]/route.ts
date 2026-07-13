@@ -2,12 +2,14 @@ import { getSession, getEffectiveAccess } from "@/lib/access";
 import { getViewerAudience, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { resolveVideoUrl } from "@/lib/storage";
+import { configuredMediaOrigins } from "@/lib/security/media-url-policy";
+import { safeMediaFetch } from "@/lib/security/safe-media-fetch";
 
 // Same-origin proxy for storage-backed (R2 / Supabase) WebVTT files, so the
 // player's <track> elements never hit a cross-origin / CORS wall. Local
 // `/subtitles/...` paths are served directly by Next and never reach here.
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await getSession();
@@ -54,7 +56,15 @@ export async function GET(
     return new Response("unavailable", { status: 404 });
   }
 
-  const upstream = await fetch(url);
+  let upstream: Response;
+  try {
+    upstream = await safeMediaFetch(url, {
+      allowedOrigins: configuredMediaOrigins(),
+      signal: request.signal,
+    });
+  } catch {
+    return new Response("upstream error", { status: 502 });
+  }
   if (!upstream.ok) return new Response("upstream error", { status: 502 });
 
   const body = await upstream.text();

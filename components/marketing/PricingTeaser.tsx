@@ -11,12 +11,12 @@ export function PricingTeaser() {
 
   return (
     <section className="relative overflow-hidden rounded-11 border-b border-black/40 bg-surface-dark text-surface-dark-foreground">
-      <GradientDotMesh patternColor="rgba(255,255,255,0.12)" />
+      <GradientDotMesh patternColor="rgb(var(--white-rgb) / 0.12)" />
 
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <LightRays
           raysOrigin="top-center"
-          raysColor="#edddb9"
+          raysColor="var(--primary)"
           raysSpeed={0.9}
           lightSpread={0.8}
           rayLength={1.6}

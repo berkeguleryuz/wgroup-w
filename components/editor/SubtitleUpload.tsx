@@ -28,7 +28,11 @@ export function SubtitleUpload({ name, required }: Props) {
       const res = await fetch("/api/editor/video-upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ filename: file.name, contentType: "text/vtt" }),
+        body: JSON.stringify({
+          filename: file.name,
+          contentType: "text/vtt",
+          size: file.size,
+        }),
       });
       const data = (await res.json()) as {
         uploadUrl?: string;

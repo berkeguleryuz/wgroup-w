@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 import { HeroVideo } from "@/components/app/HeroVideo";
 import { GooeyButton } from "@/components/app/GooeyButton";
 
@@ -43,10 +45,13 @@ export function AppHero({
           poster={title.heroImageUrl ?? undefined}
         />
       ) : title?.heroImageUrl ? (
-        <img
+        <Image
           src={title.heroImageUrl}
           alt=""
-          className="absolute inset-0 h-full w-full object-cover"
+          fill
+          preload
+          sizes="100vw"
+          className="object-cover"
         />
       ) : (
         // No-art fallback: light theme shows the page's own soft top gradient
@@ -56,7 +61,7 @@ export function AppHero({
           className="absolute inset-0 hidden dark:block"
           style={{
             background:
-              "radial-gradient(140% 120% at 0% 0%, #1c150d 0%, #14100a 45%, #0b0906 100%)",
+              "radial-gradient(140% 120% at 0% 0%, var(--cinema-850) 0%, var(--cinema-900) 45%, var(--cinema-950) 100%)",
           }}
         />
       )}
@@ -82,7 +87,7 @@ export function AppHero({
       {title && (isVideo || title.heroImageUrl) ? (
         <div
           aria-hidden
-          className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-[#feffff] via-[#feffff]/35 to-transparent dark:from-background dark:via-background/45"
+          className="absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-near-white via-near-white/35 to-transparent dark:from-background dark:via-background/45"
         />
       ) : null}
 
@@ -138,4 +143,3 @@ function PlayIcon() {
     </svg>
   );
 }
-

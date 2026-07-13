@@ -33,10 +33,17 @@ interface LightRaysProps {
   className?: string;
 }
 
-const DEFAULT_COLOR = "#ffffff";
+const DEFAULT_COLOR = "var(--surface-dark-foreground)";
 
-const hexToRgb = (hex: string): [number, number, number] => {
-  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+const cssColorToRgb = (input: string): [number, number, number] => {
+  let color = input.trim();
+  const variable = /^var\((--[^)]+)\)$/.exec(color);
+  if (variable && typeof document !== "undefined") {
+    color = getComputedStyle(document.documentElement)
+      .getPropertyValue(variable[1])
+      .trim();
+  }
+  const m = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(color);
   return m
     ? [
         parseInt(m[1], 16) / 255,
@@ -279,7 +286,7 @@ void main() {
         rayPos: { value: [0, 0] },
         rayDir: { value: [0, 1] },
 
-        raysColor: { value: hexToRgb(raysColor) },
+        raysColor: { value: cssColorToRgb(raysColor) },
         raysSpeed: { value: raysSpeed },
         lightSpread: { value: lightSpread },
         rayLength: { value: rayLength },
@@ -420,7 +427,7 @@ void main() {
     const u = uniformsRef.current;
     const renderer = rendererRef.current;
 
-    u.raysColor.value = hexToRgb(raysColor);
+    u.raysColor.value = cssColorToRgb(raysColor);
     u.raysSpeed.value = raysSpeed;
     u.lightSpread.value = lightSpread;
     u.rayLength.value = rayLength;

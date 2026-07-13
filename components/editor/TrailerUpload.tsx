@@ -49,6 +49,7 @@ export function TrailerUpload({ name, defaultValue, required }: Props) {
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type || "video/mp4",
+          size: file.size,
         }),
       });
       const data = (await res.json()) as {

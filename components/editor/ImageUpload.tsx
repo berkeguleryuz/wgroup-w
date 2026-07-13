@@ -61,6 +61,7 @@ export function ImageUpload({
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type || "image/jpeg",
+          size: file.size,
         }),
       });
       const data = (await res.json()) as {

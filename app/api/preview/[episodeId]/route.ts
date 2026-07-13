@@ -2,6 +2,8 @@ import { getSession, getEffectiveAccess } from "@/lib/access";
 import { getViewerAudience, canViewTitle } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { resolveVideoUrl } from "@/lib/storage";
+import { configuredMediaOrigins } from "@/lib/security/media-url-policy";
+import { safeMediaFetch } from "@/lib/security/safe-media-fetch";
 
 // Server-side preview gate. Non-subscribers stream video ONLY through here, and
 // only the first `previewSec`-worth of bytes is ever served — the full media
@@ -12,16 +14,22 @@ import { resolveVideoUrl } from "@/lib/storage";
 // paywall instead.)
 const ABS_MAX_PREVIEW_BYTES = 8 * 1024 * 1024; // fallback cap when duration unknown
 
-async function upstreamTotalLength(url: string): Promise<number> {
+async function upstreamTotalLength(
+  url: string,
+  allowedOrigins: readonly string[],
+): Promise<number> {
   try {
-    const head = await fetch(url, { method: "HEAD" });
+    const head = await safeMediaFetch(url, { method: "HEAD", allowedOrigins });
     const len = Number(head.headers.get("content-length") || 0);
     if (len > 0) return len;
   } catch {
     /* fall through to ranged probe */
   }
   try {
-    const probe = await fetch(url, { headers: { Range: "bytes=0-0" } });
+    const probe = await safeMediaFetch(url, {
+      headers: { Range: "bytes=0-0" },
+      allowedOrigins,
+    });
     const cr = probe.headers.get("content-range"); // bytes 0-0/12345
     const total = cr ? Number(cr.split("/")[1]) : 0;
     return Number.isFinite(total) ? total : 0;
@@ -81,7 +89,8 @@ export async function GET(
     }
   }
 
-  const total = await upstreamTotalLength(url);
+  const allowedOrigins = configuredMediaOrigins();
+  const total = await upstreamTotalLength(url, allowedOrigins);
 
   // Bytes a non-subscriber may read: proportional to previewSec, with slack for
   // container headers; subscribers/staff get the whole file.
@@ -117,9 +126,16 @@ export async function GET(
   }
   if (end < start) end = budget - 1;
 
-  const upstream = await fetch(url, {
-    headers: { Range: `bytes=${start}-${end}` },
-  });
+  let upstream: Response;
+  try {
+    upstream = await safeMediaFetch(url, {
+      headers: { Range: `bytes=${start}-${end}` },
+      allowedOrigins,
+      signal: request.signal,
+    });
+  } catch {
+    return new Response("upstream error", { status: 502 });
+  }
   if (!upstream.ok || !upstream.body) {
     return new Response("upstream error", { status: 502 });
   }
