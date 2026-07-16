@@ -84,6 +84,15 @@ model Verification {
   @@map("verification")
 }
 
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rateLimit")
+}
+
 model Organization {
   id          String       @id
   name        String
@@ -461,6 +470,14 @@ model CorporateLead {
   updatedAt   DateTime @updatedAt
 
   company CompanyProfile?
+}
+
+model PublicRateLimit {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+
+  @@index([windowStart])
 }
 
 // ---------------------------------------------------------------------------

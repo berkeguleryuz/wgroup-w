@@ -12,6 +12,7 @@ import {
 } from "next/font/google";
 
 import "../globals.css";
+import { resolvePublicAppUrl } from "@/lib/app-url";
 import { routing, type Locale } from "@/lib/i18n/routing";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ThemeInitScript } from "@/components/providers/ThemeInitScript";
@@ -35,7 +36,7 @@ const cormorant = Cormorant_Garamond({
   weight: ["400", "500", "600", "700"],
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = resolvePublicAppUrl();
 const DESCRIPTION =
   "The Netflix of business education. Leadership, entrepreneurship and talent development as streaming series.";
 

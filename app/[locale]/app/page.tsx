@@ -11,6 +11,10 @@ import {
 } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { episodePath } from "@/lib/episode-path";
+import {
+  getContentDateWindows,
+  publishedAtWhere,
+} from "@/lib/content-date-windows";
 import { Section } from "@prisma/client";
 import { AppHero } from "@/components/app/AppHero";
 import { Carousel } from "@/components/app/Carousel";
@@ -39,6 +43,7 @@ export default async function AppHomePage({
   const user = session.user as typeof session.user & { role?: string | null };
   const viewer = await getViewerAudience(user.id);
   const audience = audienceWhere(user.role, viewer);
+  const contentWindows = getContentDateWindows(new Date());
 
   const [
     t,
@@ -48,6 +53,7 @@ export default async function AppHomePage({
     featured,
     continueRaw,
     newReleases,
+    thisMonthReleases,
     series,
     movies,
     talent,
@@ -80,7 +86,21 @@ export default async function AppHomePage({
       },
     }),
     prisma.title.findMany({
-      where: { published: true, AND: [audience] },
+      where: {
+        published: true,
+        ...publishedAtWhere(contentWindows.week),
+        AND: [audience],
+      },
+      orderBy: { publishedAt: "desc" },
+      take: 12,
+      include: titleInclude,
+    }),
+    prisma.title.findMany({
+      where: {
+        published: true,
+        ...publishedAtWhere(contentWindows.month),
+        AND: [audience],
+      },
       orderBy: { publishedAt: "desc" },
       take: 12,
       include: titleInclude,
@@ -208,7 +228,17 @@ export default async function AppHomePage({
           <Carousel title={t("newReleases")} subtitle={t("newReleasesSub")}>
             {newReleases.map((item, i) => (
               <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
-                <TitleCard title={item} index={i} />
+                <TitleCard title={item} index={i} variant="compact" />
+              </div>
+            ))}
+          </Carousel>
+        ) : null}
+
+        {thisMonthReleases.length > 0 ? (
+          <Carousel title={t("thisMonth")} subtitle={t("thisMonthSub")}>
+            {thisMonthReleases.map((item, i) => (
+              <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
+                <TitleCard title={item} index={i} variant="compact" />
               </div>
             ))}
           </Carousel>

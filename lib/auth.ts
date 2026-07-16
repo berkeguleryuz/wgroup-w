@@ -1,3 +1,5 @@
+import "server-only";
+
 import { AsyncLocalStorage } from "node:async_hooks";
 
 import { betterAuth } from "better-auth";
@@ -7,6 +9,7 @@ import { admin, organization } from "better-auth/plugins";
 import { nextCookies } from "better-auth/next-js";
 
 import { prisma } from "./prisma";
+import { resolveAuthBaseUrl, resolvePublicAppUrl } from "./app-url";
 import {
   sendVerificationEmail,
   sendPasswordResetEmail,
@@ -14,7 +17,8 @@ import {
   sendOrganizationInviteEmail,
 } from "./email";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const AUTH_BASE_URL = resolveAuthBaseUrl();
+const PUBLIC_APP_URL = resolvePublicAppUrl();
 
 /**
  * Request-scoped override for the shared `sendResetPassword` callback. When an
@@ -40,10 +44,23 @@ export type UserRole = (typeof USER_ROLES)[number];
 
 export const auth = betterAuth({
   appName: "Busyflix",
-  baseURL: APP_URL,
+  baseURL: AUTH_BASE_URL,
   secret: process.env.BETTER_AUTH_SECRET,
 
   database: prismaAdapter(prisma, { provider: "postgresql" }),
+
+  rateLimit: {
+    enabled: process.env.NODE_ENV === "production",
+    storage: "database",
+    window: 60,
+    max: 100,
+  },
+
+  advanced: {
+    ipAddress: {
+      ipAddressHeaders: ["x-vercel-forwarded-for"],
+    },
+  },
 
   emailAndPassword: {
     enabled: true,
@@ -141,7 +158,7 @@ export const auth = betterAuth({
         },
       },
       async sendInvitationEmail(data) {
-        const inviteUrl = `${APP_URL}/invite/${data.id}`;
+        const inviteUrl = `${PUBLIC_APP_URL}/invite/${data.id}`;
         const sent = await sendOrganizationInviteEmail({
           to: data.email,
           organizationName: data.organization.name,

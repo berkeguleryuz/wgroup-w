@@ -1,8 +1,11 @@
+import "server-only";
+
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { Resend } from "resend";
 
 import { maskEmail, safeErrorMessage } from "./security/log-redaction";
+import { resolvePublicAppUrl } from "./app-url";
 
 const FROM = process.env.EMAIL_FROM || "Busyflix <noreply@businessflix.app>";
 
@@ -94,7 +97,7 @@ async function send({ to, subject, html }: SendArgs): Promise<boolean> {
   }
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = resolvePublicAppUrl();
 
 // ---------------------------------------------------------------------------
 // E-mail i18n. Deliberately a small inline dictionary (not next-intl): these

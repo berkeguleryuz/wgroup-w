@@ -6,6 +6,7 @@ import { getLocale } from "next-intl/server";
 import { headers } from "next/headers";
 
 import { localizedPath } from "@/lib/i18n/routing";
+import { resolvePublicAppUrl } from "@/lib/app-url";
 
 import { auth, resetEmailContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -20,7 +21,7 @@ async function backToCompanies(toast: string, emsg?: string) {
   redirect(localizedPath(locale, `/app/admin/companies?toast=${toast}${q}`));
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = resolvePublicAppUrl();
 
 export async function markLeadContacted(formData: FormData) {
   await requireRole(["admin"]);

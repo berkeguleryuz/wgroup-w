@@ -3,12 +3,13 @@
 # Triggered by the app via repository_dispatch (lib/transcode.ts) right after
 # an episode gets a raw MP4, plus a cron safety net for anything missed while
 # the token was unset or a run was cancelled. `concurrency` keeps runs from
-# overlapping — a second dispatch while one is running just queues behind it,
+# overlapping. A second dispatch while one is running just queues behind it,
 # and the running worker drains the whole queue anyway.
 #
 # Required repository secrets:
 #   DATABASE_URL, R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
-#   R2_BUCKET, R2_PUBLIC_BASE_URL
+#   R2_BUCKET, R2_PUBLIC_BASE_URL. For verified Supabase TLS, also configure
+#   DATABASE_CA_CERT_BASE64 and set the DATABASE_SSL_MODE variable to verify-full.
 
 name: transcode
 
@@ -29,9 +30,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
 
@@ -40,13 +41,15 @@ jobs:
 
       - name: Install worker deps
         working-directory: worker
-        run: npm install --no-audit --no-fund
+        run: npm ci --no-audit --no-fund
 
       - name: Drain transcode queue
         working-directory: worker
         run: node index.mjs
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DATABASE_SSL_MODE: ${{ vars.DATABASE_SSL_MODE }}
+          DATABASE_CA_CERT_BASE64: ${{ secrets.DATABASE_CA_CERT_BASE64 }}
           R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}

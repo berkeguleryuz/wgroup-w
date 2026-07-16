@@ -4,11 +4,15 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 
 import { prisma } from "@/lib/prisma";
-import { requireOrgOwner } from "@/lib/corporate";
+import { resolvePublicAppUrl } from "@/lib/app-url";
+import {
+  requireOrgOwner,
+  withOrganizationMutationLock,
+} from "@/lib/corporate";
 import { localizedPath } from "@/lib/i18n/routing";
 import { sendOrganizationInviteEmail } from "@/lib/email";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = resolvePublicAppUrl();
 
 async function back(query = "") {
   const locale = await getLocale();
@@ -40,22 +44,39 @@ export async function updateMemberRole(formData: FormData) {
   const role = String(formData.get("role") || "");
   if (role !== "owner" && role !== "member") return back();
 
-  const target = await prisma.member.findFirst({
-    where: { id: memberId, organizationId: membership.organizationId },
-  });
-  if (!target) return back();
+  const outcome = await withOrganizationMutationLock(
+    membership.organizationId,
+    async (tx) => {
+      const actorStillOwner = await tx.member.count({
+        where: {
+          id: membership.id,
+          organizationId: membership.organizationId,
+          role: "owner",
+        },
+      });
+      if (actorStillOwner !== 1) return "unauthorized";
 
-  // Never demote the last remaining owner.
-  if (target.role === "owner" && role === "member") {
-    const owners = await prisma.member.count({
-      where: { organizationId: membership.organizationId, role: "owner" },
-    });
-    if (owners <= 1) return back("?err=lastowner");
+      const target = await tx.member.findFirst({
+        where: { id: memberId, organizationId: membership.organizationId },
+      });
+      if (!target) return "missing";
+
+      if (target.role === "owner" && role === "member") {
+        const owners = await tx.member.count({
+          where: { organizationId: membership.organizationId, role: "owner" },
+        });
+        if (owners <= 1) return "last-owner";
+      }
+      await tx.member.updateMany({
+        where: { id: memberId, organizationId: membership.organizationId },
+        data: { role },
+      });
+      return "updated";
+    },
+  );
+  if (outcome === "last-owner") {
+    return back("?err=lastowner");
   }
-  await prisma.member.updateMany({
-    where: { id: memberId, organizationId: membership.organizationId },
-    data: { role },
-  });
   await back();
 }
 
@@ -63,19 +84,38 @@ export async function removeMember(formData: FormData) {
   const { session, membership } = await requireOrgOwner();
   const memberId = String(formData.get("memberId"));
 
-  const target = await prisma.member.findFirst({
-    where: { id: memberId, organizationId: membership.organizationId },
-  });
-  if (!target) return back();
-  if (target.userId === session.user.id) return back("?err=self");
+  const outcome = await withOrganizationMutationLock(
+    membership.organizationId,
+    async (tx) => {
+      const actorStillOwner = await tx.member.count({
+        where: {
+          id: membership.id,
+          userId: session.user.id,
+          organizationId: membership.organizationId,
+          role: "owner",
+        },
+      });
+      if (actorStillOwner !== 1) return "unauthorized";
 
-  if (target.role === "owner") {
-    const owners = await prisma.member.count({
-      where: { organizationId: membership.organizationId, role: "owner" },
-    });
-    if (owners <= 1) return back("?err=lastowner");
-  }
-  await prisma.member.delete({ where: { id: memberId } });
+      const target = await tx.member.findFirst({
+        where: { id: memberId, organizationId: membership.organizationId },
+      });
+      if (!target) return "missing";
+      if (target.userId === session.user.id) return "self";
+
+      if (target.role === "owner") {
+        const owners = await tx.member.count({
+          where: { organizationId: membership.organizationId, role: "owner" },
+        });
+        if (owners <= 1) return "last-owner";
+      }
+      await tx.member.delete({ where: { id: memberId } });
+      return "removed";
+    },
+  );
+
+  if (outcome === "self") return back("?err=self");
+  if (outcome === "last-owner") return back("?err=lastowner");
   await back();
 }
 

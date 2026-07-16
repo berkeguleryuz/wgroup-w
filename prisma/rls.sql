@@ -2,6 +2,8 @@ alter table "user"         enable row level security;
 alter table session        enable row level security;
 alter table account        enable row level security;
 alter table verification   enable row level security;
+alter table "rateLimit"    enable row level security;
+alter table "_prisma_migrations" enable row level security;
 alter table organization   enable row level security;
 alter table member         enable row level security;
 alter table invitation     enable row level security;
@@ -21,6 +23,7 @@ alter table "Progress"               enable row level security;
 alter table "IndividualSubscription" enable row level security;
 alter table "CompanyProfile"         enable row level security;
 alter table "CorporateLead"          enable row level security;
+alter table "PublicRateLimit"        enable row level security;
 alter table "AgentConversation"      enable row level security;
 alter table "AgentMessage"           enable row level security;
 alter table "AgentQuota"             enable row level security;
@@ -34,7 +37,7 @@ create index if not exists title_published_recent_idx
 -- Race-free seat cap: reject a member INSERT that would push an organization
 -- past its paid CompanyProfile.seatCount. The SELECT ... FOR UPDATE serializes
 -- concurrent accepts on the same company row, so the count can't be raced.
--- (Orgs without a CompanyProfile are uncapped — e.g. the owner row created
+-- (Orgs without a CompanyProfile are uncapped, e.g. the owner row created
 -- during activation before the profile exists.)
 create or replace function enforce_member_seat_limit() returns trigger as $$
 declare

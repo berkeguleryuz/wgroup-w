@@ -19,6 +19,7 @@
 .claude/
 .windsurf/
 *.md
+!docs/superpowers/**/*.md
 /out/
 .trash-old-marketing-backup/
 
@@ -37,6 +38,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # vercel
 .vercel
@@ -58,4 +60,3 @@ DEMO-ACCOUNTS.md
 # Local test media (large, not for repo)
 public/test-media/
 worker/node_modules
-worker/package-lock.json

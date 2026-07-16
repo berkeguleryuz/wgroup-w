@@ -1,6 +1,19 @@
+import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { requireSession } from "./access";
 import { prisma } from "./prisma";
+
+export async function withOrganizationMutationLock<T>(
+  organizationId: string,
+  mutation: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+  return prisma.$transaction(async (tx) => {
+    await tx.$queryRaw`
+      SELECT pg_advisory_xact_lock(hashtextextended(${organizationId}, 0))
+    `;
+    return mutation(tx);
+  });
+}
 
 export async function requireOrgOwner() {
   const session = await requireSession();

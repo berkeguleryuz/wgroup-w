@@ -1,4 +1,4 @@
-# 🔐 Demo Hesapları
+# Demo Hesapları
 
 > Bu dosya `.gitignore`'da, repoya gönderilmez. Sadece yerel test içindir.
 > Yeniden kurmak için: `npm run db:seed:demo`

@@ -359,6 +359,8 @@
     "continueWatching": "Weitergucken",
     "newReleases": "Neu hinzugefügt",
     "newReleasesSub": "Diese Woche veröffentlicht",
+    "thisMonth": "Diesen Monat hinzugefügt",
+    "thisMonthSub": "Diesen Monat veröffentlicht",
     "minutesWatched": "{name} · {minutes} Min. gesehen",
     "timeLeft": "{name} · {time} übrig",
     "removeFromList": "Aus der Liste entfernen",

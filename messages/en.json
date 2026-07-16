@@ -359,6 +359,8 @@
     "continueWatching": "Continue watching",
     "newReleases": "New releases",
     "newReleasesSub": "Published this week",
+    "thisMonth": "Added this month",
+    "thisMonthSub": "Published this month",
     "minutesWatched": "{name} · {minutes} min watched",
     "timeLeft": "{name} · {time} left",
     "removeFromList": "Remove from list",

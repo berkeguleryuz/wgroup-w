@@ -1,6 +1,5 @@
 "use client";
 
-import type { MouseEvent } from "react";
 import type { Title, Category, Episode } from "@prisma/client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
@@ -46,42 +45,17 @@ export function ContinueWatchingCard({
 
   if (remove.isSuccess || remove.isPending) return null; // optimistic removal
 
-  const handleRemove = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    remove.mutate();
-  };
-
   return (
     <div className="w-64 sm:w-72 xl:w-80 shrink-0">
-      <div className="relative">
-        <TitleCard
-          title={title}
-          index={index}
-          href={href}
-          progressPercent={percent}
-        />
-
-        <button
-          type="button"
-          onClick={handleRemove}
-          aria-label={removeLabel}
-          title={removeLabel}
-          className="absolute right-2 top-2 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-surface-dark/55 text-surface-dark-foreground backdrop-blur transition-colors hover:bg-surface-dark/90"
-        >
-          <svg
-            viewBox="0 0 20 20"
-            className="h-4 w-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            aria-hidden
-          >
-            <path d="M5 5l10 10M15 5L5 15" />
-          </svg>
-        </button>
-      </div>
+      <TitleCard
+        title={title}
+        index={index}
+        href={href}
+        progressPercent={percent}
+        variant="expanded"
+        onRemove={() => remove.mutate()}
+        removeLabel={removeLabel}
+      />
 
       <p className="mt-2 text-xs text-muted-foreground">{caption}</p>
     </div>
