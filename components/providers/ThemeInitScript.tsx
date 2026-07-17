@@ -1,6 +1,7 @@
 "use client";
 
 import { themeInitScript } from "./ThemeProvider";
+import { busyflixLoadingInitScript } from "@/lib/busyflix-loading";
 
 /**
  * Anti-FOUC theme init as a module-level constant element inside a client
@@ -10,7 +11,13 @@ import { themeInitScript } from "./ThemeProvider";
  * the dev warning "Encountered a script tag while rendering React component".
  * Server-side it still renders into <head> and runs before paint.
  */
-const el = <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />;
+const el = (
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `${themeInitScript}${busyflixLoadingInitScript}`,
+    }}
+  />
+);
 
 export function ThemeInitScript() {
   return el;

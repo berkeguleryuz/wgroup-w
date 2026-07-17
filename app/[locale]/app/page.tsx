@@ -228,7 +228,7 @@ export default async function AppHomePage({
           <Carousel title={t("newReleases")} subtitle={t("newReleasesSub")}>
             {newReleases.map((item, i) => (
               <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
-                <TitleCard title={item} index={i} variant="compact" />
+                <TitleCard title={item} index={i} />
               </div>
             ))}
           </Carousel>
@@ -238,7 +238,7 @@ export default async function AppHomePage({
           <Carousel title={t("thisMonth")} subtitle={t("thisMonthSub")}>
             {thisMonthReleases.map((item, i) => (
               <div key={item.id} className="w-64 sm:w-72 xl:w-80 shrink-0">
-                <TitleCard title={item} index={i} variant="compact" />
+                <TitleCard title={item} index={i} />
               </div>
             ))}
           </Carousel>

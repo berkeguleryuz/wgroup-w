@@ -68,6 +68,10 @@ export function VideoPlayer({
   const [levels, setLevels] = useState<Level[]>([]);
   const [currentLevel, setCurrentLevel] = useState(-1); // -1 = auto
   const [activeCaption, setActiveCaption] = useState<string | null>(null);
+  // hls.js wipes every text track's cues on attachMedia (TimelineController
+  // _cleanTracks), so <track> elements must not load before the source is
+  // attached — otherwise already-parsed cues are deleted and never reload.
+  const [tracksReady, setTracksReady] = useState(false);
   const [openMenu, setOpenMenu] = useState<"settings" | "captions" | null>(null);
   const [controlsVisible, setControlsVisible] = useState(true);
   const [fullscreen, setFullscreen] = useState(false);
@@ -84,11 +88,13 @@ export function VideoPlayer({
     let destroyed = false;
     setLevels([]);
     setCurrentLevel(-1);
+    setTracksReady(false);
 
     const isHls = HLS_RE.test(src);
     if (!isHls) {
       // Plain mp4/webm.
       video.src = src;
+      setTracksReady(true);
       return () => {
         video.removeAttribute("src");
         video.load();
@@ -106,6 +112,7 @@ export function VideoPlayer({
         hlsRef.current = hls;
         hls.loadSource(src);
         hls.attachMedia(node);
+        hls.on(Hls.Events.MEDIA_ATTACHED, () => setTracksReady(true));
         const syncLevels = () => {
           setLevels(
             hls.levels
@@ -122,6 +129,7 @@ export function VideoPlayer({
       } else {
         // Native HLS (Safari) — adapts quality on its own.
         node.src = src;
+        setTracksReady(true);
       }
     });
 
@@ -144,7 +152,7 @@ export function VideoPlayer({
       track.mode =
         activeCaption && track.language === activeCaption ? "showing" : "hidden";
     }
-  }, [activeCaption, ready, subtitles.length]);
+  }, [activeCaption, ready, subtitles.length, tracksReady]);
 
   // ---- Video element events ----
   useEffect(() => {
@@ -329,15 +337,17 @@ export function VideoPlayer({
         onClick={togglePlay}
         className="aspect-video w-full bg-black"
       >
-        {subtitles.map((s) => (
-          <track
-            key={s.lang}
-            kind="subtitles"
-            srcLang={s.lang}
-            label={s.label}
-            src={s.src}
-          />
-        ))}
+        {tracksReady
+          ? subtitles.map((s) => (
+              <track
+                key={s.lang}
+                kind="subtitles"
+                srcLang={s.lang}
+                label={s.label}
+                src={s.src}
+              />
+            ))
+          : null}
       </video>
 
       {/* Center play button when paused */}

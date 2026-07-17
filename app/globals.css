@@ -123,6 +123,113 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+.bf-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--surface-dark);
+  color: var(--surface-dark-foreground);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 180ms;
+  contain: layout paint;
+}
+
+html[data-busyflix-loading] .bf-loading-screen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+}
+
+.bf-loading-screen__content {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  transform: translateZ(0);
+}
+
+.bf-loading-screen__logo {
+  width: clamp(5.5rem, 12vw, 8rem);
+  height: auto;
+  object-fit: contain;
+  opacity: 1;
+  transform: translateZ(0) scale(1);
+}
+
+html[data-busyflix-loading] .bf-loading-screen__logo {
+  animation: bf-loading-logo-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bf-loading-screen__track {
+  position: relative;
+  display: block;
+  width: clamp(5rem, 14vw, 8.75rem);
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(var(--white-rgb) / 0.12);
+}
+
+.bf-loading-screen__progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  background: var(--primary);
+  transform: translateX(-160%) scaleX(0.7);
+  transform-origin: center;
+}
+
+html[data-busyflix-loading] .bf-loading-screen__progress {
+  animation: bf-loading-progress 900ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes bf-loading-logo-in {
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes bf-loading-progress {
+  from {
+    transform: translateX(-160%) scaleX(0.7);
+  }
+  to {
+    transform: translateX(340%) scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-loading-screen {
+    transition-duration: 100ms, 0s;
+  }
+
+  html[data-busyflix-loading] .bf-loading-screen__logo,
+  html[data-busyflix-loading] .bf-loading-screen__progress {
+    animation: none;
+  }
+
+  .bf-loading-screen__progress {
+    left: 29%;
+    transform: scaleX(1);
+    opacity: 0.7;
+  }
+}
+
 @keyframes bf-title-preview-in {
   from {
     opacity: 0;

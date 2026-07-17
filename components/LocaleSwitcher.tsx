@@ -4,17 +4,22 @@ import { useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
 import { routing } from "@/lib/i18n/routing";
+import {
+  activateBusyflixLoading,
+  reloadAfterBusyflixLoadingPaint,
+} from "@/lib/busyflix-loading";
 import { Flag } from "@/components/Flags";
 
 // Full document reload on purpose: a soft locale switch re-renders the root
 // layout in place, which remounts the inline theme-init <script> and triggers
 // React's dev warning ("Encountered a script tag while rendering"). With
 // localePrefix "never" the locale lives in the NEXT_LOCALE cookie, so set it
-// directly and reload — the theme script re-runs natively and the correct
+// directly and reload. The theme script re-runs natively and the correct
 // theme comes from localStorage.
 function applyLocaleAndReload(next: string) {
+  activateBusyflixLoading("locale");
   document.cookie = `NEXT_LOCALE=${next};path=/;max-age=31536000;samesite=lax`;
-  window.location.reload();
+  reloadAfterBusyflixLoadingPaint();
 }
 
 export function LocaleSwitcher() {

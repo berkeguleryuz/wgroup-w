@@ -166,7 +166,10 @@ export function HeroSlider() {
     >
       <Rain />
       <GridOverlay />
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-px z-0 overflow-hidden rounded-11"
+      >
         <LightRays
           raysOrigin="top-center"
           raysColor={theme.accent}

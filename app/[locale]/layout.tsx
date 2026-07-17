@@ -16,6 +16,7 @@ import { resolvePublicAppUrl } from "@/lib/app-url";
 import { routing, type Locale } from "@/lib/i18n/routing";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { ThemeInitScript } from "@/components/providers/ThemeInitScript";
+import { BusyflixLoadingScreen } from "@/components/providers/BusyflixLoadingScreen";
 
 const geistSans = Geist({ variable: "--font-geist-sans", subsets: ["latin"] });
 const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
@@ -89,6 +90,7 @@ export default async function LocaleLayout({
             the script and logging the React dev warning — body children are
             reconciled normally, so the constant element never remounts. */}
         <ThemeInitScript />
+        <BusyflixLoadingScreen />
         {/* The page frame (inset rounded card) lives in the (marketing)/(auth)
             layouts; /app uses a full-screen shell. This root only sets up the
             providers so each section can choose its own chrome. */}
