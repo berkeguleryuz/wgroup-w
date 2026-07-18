@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import Image from "next/image";
 
 import type { Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
@@ -60,10 +61,13 @@ export default async function TitleDetailPage({
       <section className="relative -mx-4 -mt-[104px] overflow-hidden md:-mx-6 lg:-mx-8">
         <div className="relative min-h-[60vh]">
           {title.heroImageUrl ? (
-            <img
+            <Image
               src={title.heroImageUrl}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover"
+              fill
+              preload
+              sizes="100vw"
+              className="object-cover"
             />
           ) : (
             <div
@@ -71,7 +75,7 @@ export default async function TitleDetailPage({
               className="absolute inset-0"
               style={{
                 background:
-                  "radial-gradient(140% 120% at 0% 0%, #1c150d 0%, #14100a 45%, #0b0906 100%)",
+                  "radial-gradient(140% 120% at 0% 0%, var(--cinema-850) 0%, var(--cinema-900) 45%, var(--cinema-950) 100%)",
               }}
             />
           )}

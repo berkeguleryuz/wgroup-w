@@ -31,10 +31,10 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
     <div className="fixed inset-0 overflow-hidden bg-background">
       <div className="h-full w-full overflow-y-auto overflow-x-hidden">
         <QueryProvider>
-          {/* Light theme: the page opens near-white (#feffff) and drifts very
+          {/* Light theme: the page opens near-white and drifts very
               softly into the cream background over the first screen. Dark
               theme keeps the flat token background. */}
-          <div className="flex min-h-full flex-col bg-background bg-[linear-gradient(to_bottom,#feffff_0,var(--background)_100vh)] bg-no-repeat dark:bg-none">
+          <div className="flex min-h-full flex-col bg-background bg-[linear-gradient(to_bottom,var(--near-white)_0,var(--background)_100vh)] bg-no-repeat dark:bg-none">
             <AppTopbar
               userName={user.name || user.email}
               userEmail={user.email}

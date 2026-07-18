@@ -9,11 +9,11 @@ export function ClosingCTA() {
   const t = useTranslations("closing");
   return (
     <section className="relative overflow-hidden rounded-11 bg-surface-dark text-surface-dark-foreground">
-      <GradientDotMesh patternColor="rgba(255,255,255,0.12)" />
+      <GradientDotMesh patternColor="rgb(var(--white-rgb) / 0.12)" />
       <div aria-hidden className="pointer-events-none absolute inset-0">
         <LightRays
           raysOrigin="top-center"
-          raysColor="#edddb9"
+          raysColor="var(--primary)"
           raysSpeed={1}
           lightSpread={0.7}
           rayLength={1.8}

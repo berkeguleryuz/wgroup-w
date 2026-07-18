@@ -12,8 +12,9 @@ import {
   type CorporatePackage,
 } from "@/lib/stripe";
 import { localizedPath } from "@/lib/i18n/routing";
+import { resolvePublicAppUrl } from "@/lib/app-url";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = resolvePublicAppUrl();
 
 async function returnUrl() {
   const locale = await getLocale();

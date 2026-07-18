@@ -38,34 +38,34 @@ type Theme = {
 const THEMES: Theme[] = [
   {
     name: "cream",
-    bg: "radial-gradient(120% 80% at 70% 30%, #2b2016 0%, #14100a 55%, #0b0906 100%)",
-    text: "#f3e9d0",
-    headlineFrom: "#edddb9",
-    headlineTo: "#c9a86a",
-    accent: "#edddb9",
-    letter: "#edddb9",
+    bg: "radial-gradient(120% 80% at 70% 30%, var(--cinema-800) 0%, var(--cinema-900) 55%, var(--cinema-950) 100%)",
+    text: "var(--hero-cream-text)",
+    headlineFrom: "var(--primary)",
+    headlineTo: "var(--gold-700)",
+    accent: "var(--primary)",
+    letter: "var(--primary)",
     href: "/register",
     mark: "S",
   },
   {
     name: "amber",
-    bg: "radial-gradient(120% 80% at 30% 40%, #3a2010 0%, #1a0f08 55%, #090604 100%)",
-    text: "#ffe0b7",
-    headlineFrom: "#eaa742",
-    headlineTo: "#ffca79",
-    accent: "#eaa742",
-    letter: "#eaa742",
+    bg: "radial-gradient(120% 80% at 30% 40%, var(--hero-amber-800) 0%, var(--hero-amber-900) 55%, var(--hero-amber-950) 100%)",
+    text: "var(--hero-amber-text)",
+    headlineFrom: "var(--hero-amber)",
+    headlineTo: "var(--hero-amber-light)",
+    accent: "var(--hero-amber)",
+    letter: "var(--hero-amber)",
     href: "/register",
     mark: "F",
   },
   {
     name: "sky",
-    bg: "radial-gradient(120% 80% at 50% 30%, #0f2236 0%, #0a1420 55%, #050a10 100%)",
-    text: "#d6e8ff",
-    headlineFrom: "#8ec9ff",
-    headlineTo: "#c6e5ff",
-    accent: "#8ec9ff",
-    letter: "#8ec9ff",
+    bg: "radial-gradient(120% 80% at 50% 30%, var(--hero-sky-800) 0%, var(--hero-sky-900) 55%, var(--hero-sky-950) 100%)",
+    text: "var(--hero-sky-text)",
+    headlineFrom: "var(--hero-sky)",
+    headlineTo: "var(--hero-sky-light)",
+    accent: "var(--hero-sky)",
+    letter: "var(--hero-sky)",
     href: "/register",
     mark: "T",
   },
@@ -166,7 +166,10 @@ export function HeroSlider() {
     >
       <Rain />
       <GridOverlay />
-      <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-px z-0 overflow-hidden rounded-11"
+      >
         <LightRays
           raysOrigin="top-center"
           raysColor={theme.accent}
@@ -285,7 +288,7 @@ export function HeroSlider() {
                       style={{
                         background: theme.accent,
                         borderColor: theme.accent,
-                        color: "#0b0906",
+                        color: "var(--primary-foreground)",
                       }}
                     >
                       {t("startWatching")}
@@ -314,11 +317,14 @@ export function HeroSlider() {
                 onClick={() => swiperRef.current?.slideToLoop(i)}
                 className="group flex h-12 w-12 items-center justify-center rounded-11 border transition-all md:h-14 md:w-14"
                 style={{
-                  borderColor: i === active ? s.theme.accent : "rgba(255,255,255,0.15)",
+                  borderColor:
+                    i === active
+                      ? s.theme.accent
+                      : "rgb(var(--white-rgb) / 0.15)",
                   background:
                     i === active
                       ? `linear-gradient(135deg, ${s.theme.headlineFrom}33, transparent)`
-                      : "rgba(255,255,255,0.03)",
+                      : "rgb(var(--white-rgb) / 0.03)",
                   boxShadow:
                     i === active
                       ? `0 0 0 1px ${s.theme.accent}, 0 10px 40px -10px ${s.theme.accent}`
@@ -329,7 +335,9 @@ export function HeroSlider() {
                 <HeroGlyphIcon
                   mark={s.theme.mark}
                   color={
-                    i === active ? s.theme.accent : "rgba(255,255,255,0.55)"
+                    i === active
+                      ? s.theme.accent
+                      : "rgb(var(--white-rgb) / 0.55)"
                   }
                   className="h-7 w-7 md:h-9 md:w-9"
                 />
@@ -625,7 +633,7 @@ function Rain() {
 function GridOverlay() {
   return (
     <GradientDotMesh
-      patternColor="rgba(255,255,255,0.14)"
+      patternColor="rgb(var(--white-rgb) / 0.14)"
       className="z-0 [mask-image:radial-gradient(ellipse_70%_60%_at_50%_40%,black_40%,transparent_100%)]"
     />
   );

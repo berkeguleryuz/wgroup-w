@@ -13,7 +13,7 @@ const variants: Record<Variant, string> = {
   // gradient plus a soft lift, so the state change is obvious on both cream
   // and dark surfaces.
   shine:
-    "bf-shine border border-white/10 bg-[linear-gradient(110deg,#100d08,45%,#3f352a,55%,#100d08)] bg-[length:400%_100%] text-surface-dark-foreground transition-[filter,border-color] hover:brightness-[1.25] hover:border-primary/40 dark:border-white/15",
+    "bf-shine border border-white/10 bg-[linear-gradient(110deg,var(--surface-dark),45%,var(--cinema-700),55%,var(--surface-dark))] bg-[length:400%_100%] text-surface-dark-foreground transition-[filter,border-color] hover:brightness-[1.25] hover:border-primary/40 dark:border-white/15",
 };
 
 const sizes: Record<Size, string> = {

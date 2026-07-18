@@ -3,19 +3,13 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/access";
 import { getSelfServeOrgId } from "@/lib/corporate";
 import { getStorage, isR2Configured } from "@/lib/storage";
+import { parseUploadRequest } from "@/lib/security/upload-policy";
 import {
   createImageUploadSignedUrl,
   getImagePublicUrl,
 } from "@/lib/supabase-storage";
 
 const STAFF = new Set(["admin", "platform_editor"]);
-const ALLOWED_TYPES = new Set([
-  "image/jpeg",
-  "image/png",
-  "image/webp",
-  "image/avif",
-]);
-
 export async function POST(request: Request) {
   const session = await getSession();
   if (!session) {
@@ -30,20 +24,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
 
-  const body = (await request.json().catch(() => null)) as
-    | { filename?: string; contentType?: string }
-    | null;
-  const filename = body?.filename?.trim();
-  const contentType = body?.contentType?.trim() || "image/jpeg";
-  if (!filename) {
-    return NextResponse.json({ error: "filename required" }, { status: 400 });
+  const upload = parseUploadRequest(
+    "image",
+    await request.json().catch(() => null),
+  );
+  if (!upload.success) {
+    return NextResponse.json({ error: "invalid upload" }, { status: 400 });
   }
-  if (!ALLOWED_TYPES.has(contentType)) {
-    return NextResponse.json(
-      { error: "unsupported image type" },
-      { status: 400 },
-    );
-  }
+  const { filename, contentType, size } = upload.data;
 
   const safe = filename.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-80);
   const orgPrefix = selfServeOrgId ? `org/${selfServeOrgId}/` : "";
@@ -52,7 +40,7 @@ export async function POST(request: Request) {
   try {
     if (isR2Configured()) {
       const { uploadUrl, key, headers } =
-        await getStorage().createSignedUploadUrl(path, contentType);
+        await getStorage().createSignedUploadUrl(path, contentType, size);
       return NextResponse.json({
         uploadUrl,
         headers,
@@ -66,7 +54,7 @@ export async function POST(request: Request) {
       headers: { "content-type": contentType },
       publicUrl: getImagePublicUrl(key),
     });
-  } catch (e) {
-    return NextResponse.json({ error: (e as Error).message }, { status: 500 });
+  } catch {
+    return NextResponse.json({ error: "upload unavailable" }, { status: 500 });
   }
 }

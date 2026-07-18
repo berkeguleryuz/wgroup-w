@@ -16,7 +16,7 @@ export function MarketingHeader({ user }: { user?: MarketingUser | null }) {
   const t = useTranslations();
   return (
     <header className="pointer-events-none fixed inset-x-0 top-4 z-40 px-4 md:top-6 md:px-6">
-      <div className="pointer-events-auto mx-auto flex h-12 max-w-7xl items-center justify-between rounded-11 border border-border/60 bg-background/95 px-3 shadow-[0_10px_40px_-20px_rgba(16,13,8,0.25)] backdrop-blur md:h-[50px] md:px-4">
+      <div className="pointer-events-auto mx-auto flex h-12 max-w-7xl items-center justify-between rounded-11 border border-border/60 bg-background/95 px-3 shadow-[0_10px_40px_-20px_rgb(var(--shadow-rgb)/0.25)] backdrop-blur md:h-[50px] md:px-4">
         <Wordmark href="/" />
 
         <nav className="hidden items-center gap-8 md:flex lg:gap-10">

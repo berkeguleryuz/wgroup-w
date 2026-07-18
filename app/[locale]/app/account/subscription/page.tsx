@@ -137,7 +137,7 @@ function PlanOption({
         ))}
       </ul>
       <div className="mt-6">
-        <SubscribeButton plan={plan} highlight={highlight} />
+        <SubscribeButton plan={plan} />
       </div>
     </div>
   );

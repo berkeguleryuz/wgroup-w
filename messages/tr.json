@@ -359,6 +359,8 @@
     "continueWatching": "İzlemeye devam et",
     "newReleases": "Yeni eklenenler",
     "newReleasesSub": "Bu hafta yayınlandı",
+    "thisMonth": "Bu ay eklenenler",
+    "thisMonthSub": "Bu ay yayınlananlar",
     "minutesWatched": "{name} · {minutes}dk izlendi",
     "timeLeft": "{name} · {time} kaldı",
     "removeFromList": "İzleme listesinden kaldır",

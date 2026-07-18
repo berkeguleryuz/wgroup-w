@@ -73,7 +73,7 @@ export function ConfirmButton({
             role="alertdialog"
             aria-modal="true"
             aria-label={confirmTitle ?? t("confirmTitle")}
-            className="relative w-full max-w-md rounded-11 border border-border bg-background p-6 text-foreground shadow-[0_30px_80px_-20px_rgba(16,13,8,0.45)]"
+            className="relative w-full max-w-md rounded-11 border border-border bg-background p-6 text-foreground shadow-[0_30px_80px_-20px_rgb(var(--shadow-rgb)/0.45)]"
           >
             <div className="flex items-start gap-4">
               <span

@@ -135,6 +135,7 @@ export function VideoUpload({ name, required, durationName, currentUrl }: Props)
         body: JSON.stringify({
           filename: file.name,
           contentType: file.type || "video/mp4",
+          size: file.size,
         }),
       });
       const data = (await res.json()) as {
@@ -196,7 +197,7 @@ export function VideoUpload({ name, required, durationName, currentUrl }: Props)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           folderName: entries[0].root || "hls",
-          files: entries.map((e) => ({ name: e.name })),
+          files: entries.map((e) => ({ name: e.name, size: e.file.size })),
         }),
       });
       const data = (await res.json()) as {

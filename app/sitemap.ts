@@ -1,6 +1,8 @@
 import type { MetadataRoute } from "next";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+import { resolvePublicAppUrl } from "@/lib/app-url";
+
+const APP_URL = resolvePublicAppUrl();
 
 // Public marketing routes only — /app/* and /api/* are private/non-indexable.
 export default function sitemap(): MetadataRoute.Sitemap {

@@ -1,5 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
 import { cacheLife, cacheTag } from "next/cache";
+import Image from "next/image";
 
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
@@ -29,12 +30,12 @@ async function loadFeatured() {
 }
 
 const gradients = [
-  "linear-gradient(135deg, #100D08 0%, #3a2e1f 100%)",
-  "linear-gradient(135deg, #edddb9 0%, #d9c08a 100%)",
-  "linear-gradient(135deg, #2b2016 0%, #5b4630 100%)",
-  "linear-gradient(135deg, #5b534a 0%, #100D08 100%)",
-  "linear-gradient(135deg, #100D08 0%, #5b4630 100%)",
-  "linear-gradient(135deg, #edddb9 0%, #c9a86a 100%)",
+  "linear-gradient(135deg, var(--surface-dark) 0%, var(--cinema-700) 100%)",
+  "linear-gradient(135deg, var(--primary) 0%, var(--gold-600) 100%)",
+  "linear-gradient(135deg, var(--cinema-800) 0%, var(--cinema-600) 100%)",
+  "linear-gradient(135deg, var(--muted-foreground) 0%, var(--surface-dark) 100%)",
+  "linear-gradient(135deg, var(--surface-dark) 0%, var(--cinema-600) 100%)",
+  "linear-gradient(135deg, var(--primary) 0%, var(--gold-700) 100%)",
 ];
 
 export async function FeaturedLibrary() {
@@ -78,12 +79,12 @@ export async function FeaturedLibrary() {
                   className="group relative aspect-video overflow-hidden rounded-11 border border-border/60 text-surface-dark-foreground"
                 >
                   {title.heroImageUrl ? (
-                    <img
+                    <Image
                       src={title.heroImageUrl}
                       alt={title.title}
-                      loading="lazy"
-                      decoding="async"
-                      className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                   ) : (
                     <div

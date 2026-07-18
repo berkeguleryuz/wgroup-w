@@ -14,7 +14,7 @@
  * R2_SECRET_ACCESS_KEY, R2_BUCKET, R2_PUBLIC_BASE_URL.
  *
  * Deliberately Prisma-free (raw SQL via `pg`) so a run needs only two small
- * npm packages — no prisma generate, no full app install. The ffmpeg ladder
+ * npm packages, no prisma generate and no full app install. The ffmpeg ladder
  * mirrors public/tools/busyflix-hls-encode.mjs; keep the two in sync.
  */
 
@@ -27,6 +27,7 @@ import { pipeline } from "node:stream/promises";
 
 import pg from "pg";
 import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { resolvePostgresSsl } from "../lib/security/postgres-tls.mjs";
 
 const MAX_ATTEMPTS = 3;
 const STALE_LOCK_MINUTES = 45;
@@ -58,7 +59,12 @@ const PUBLIC_BASE = process.env.R2_PUBLIC_BASE_URL.replace(/\/+$/, "");
 
 const db = new pg.Client({
   connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false },
+  ssl: resolvePostgresSsl({
+    connectionString: process.env.DATABASE_URL,
+    mode: process.env.DATABASE_SSL_MODE,
+    caBase64: process.env.DATABASE_CA_CERT_BASE64,
+    onWarning: (message) => console.warn(`[worker] ${message}`),
+  }),
 });
 const s3 = new S3Client({
   region: "auto",
@@ -107,7 +113,7 @@ async function probe(input) {
 
 async function buildLadder(input, outDir, info) {
   // Pick renditions by the source's 16:9-equivalent height so ultrawide
-  // (cinemascope) sources still get their full ladder — a 1280x536 film is
+  // (cinemascope) sources still get their full ladder. A 1280x536 film is
   // 720p-class by width even though it is only 536px tall.
   const effectiveHeight = Math.max(info.height, Math.round((info.width * 9) / 16));
   let renditions = LADDER.filter((r) => r.height <= effectiveHeight).map((r) => ({
@@ -262,7 +268,7 @@ async function processJob(job) {
       );
     }
 
-    // 4) Flip the episode to HLS — guarded so a concurrent re-upload wins.
+    // 4) Flip the episode to HLS, guarded so a concurrent re-upload wins.
     const masterUrl = `${PUBLIC_BASE}/${treePrefix}/master.m3u8`;
     const upd = await db.query(
       `UPDATE "Episode"
@@ -277,7 +283,7 @@ async function processJob(job) {
     }
     await finishJob(job.id, "DONE");
 
-    // 5) The raw MP4 was only a transport artifact — drop it.
+    // 5) The raw MP4 was only a transport artifact, drop it.
     await s3
       .send(new DeleteObjectCommand({ Bucket: BUCKET, Key: job.sourceKey }))
       .catch((e) => log(`  source delete failed (non-fatal): ${e.message}`));

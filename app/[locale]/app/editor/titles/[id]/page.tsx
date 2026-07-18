@@ -20,6 +20,7 @@ import { TrailerUpload } from "@/components/editor/TrailerUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
 import { TranscodeRefresh } from "@/components/editor/TranscodeRefresh";
 import { formatDuration } from "@/lib/utils";
+import { requireValidMediaReference } from "@/lib/security/media-url-policy";
 
 const LANG_LABELS: Record<string, string> = {
   tr: "Türkçe",
@@ -43,8 +44,14 @@ async function updateTitle(formData: FormData) {
   const id = String(formData.get("id"));
   const title = String(formData.get("title") || "").trim();
   const synopsis = String(formData.get("synopsis") || "").trim();
-  const heroImageUrl = String(formData.get("heroImageUrl") || "").trim() || null;
-  const trailerUrl = String(formData.get("trailerUrl") || "").trim() || null;
+  const rawHeroImageUrl = String(formData.get("heroImageUrl") || "").trim();
+  const rawTrailerUrl = String(formData.get("trailerUrl") || "").trim();
+  const heroImageUrl = rawHeroImageUrl
+    ? requireValidMediaReference(rawHeroImageUrl)
+    : null;
+  const trailerUrl = rawTrailerUrl
+    ? requireValidMediaReference(rawTrailerUrl)
+    : null;
 
   const before = await prisma.title.findUnique({
     where: { id },
@@ -141,6 +148,7 @@ async function addEpisode(formData: FormData) {
   const videoPath = String(formData.get("videoPath") || "").trim();
 
   if (!name || !videoPath) throw new Error("Missing fields");
+  const safeVideoPath = requireValidMediaReference(videoPath);
 
   const created = await prisma.episode.create({
     data: {
@@ -151,10 +159,10 @@ async function addEpisode(formData: FormData) {
       episodeNumber,
       durationSec,
       previewSec,
-      videoPath,
+      videoPath: safeVideoPath,
     },
   });
-  await enqueueTranscode(created.id, videoPath);
+  await enqueueTranscode(created.id, safeVideoPath);
   await backToTitle(titleId);
 }
 
@@ -175,6 +183,9 @@ async function updateEpisode(formData: FormData) {
   const videoPath = String(formData.get("videoPath") || "").trim();
 
   if (!name) throw new Error("Missing fields");
+  const safeVideoPath = videoPath
+    ? requireValidMediaReference(videoPath)
+    : null;
 
   const before = videoPath
     ? await prisma.episode.findUnique({ where: { id }, select: { videoPath: true } })
@@ -188,14 +199,14 @@ async function updateEpisode(formData: FormData) {
       episodeNumber,
       previewSec,
       ...(durationRaw ? { durationSec: Number(durationRaw) } : {}),
-      ...(videoPath ? { videoPath } : {}),
+      ...(safeVideoPath ? { videoPath: safeVideoPath } : {}),
     },
   });
   // Drop the replaced video from storage once nothing references it.
-  if (before && before.videoPath !== videoPath) {
+  if (before && before.videoPath !== safeVideoPath) {
     await cleanupStorageRefs([before.videoPath]);
   }
-  if (videoPath) await enqueueTranscode(id, videoPath);
+  if (safeVideoPath) await enqueueTranscode(id, safeVideoPath);
   await backToTitle(titleId);
 }
 
@@ -288,6 +299,7 @@ async function addSubtitle(formData: FormData) {
   const lang = String(formData.get("lang") || "").trim().toLowerCase();
   const vttPath = String(formData.get("vttPath") || "").trim();
   if (!episodeId || !lang || !vttPath) throw new Error("Missing fields");
+  const safeVttPath = requireValidMediaReference(vttPath);
 
   const label = LANG_LABELS[lang] ?? lang.toUpperCase();
   const before = await prisma.subtitle.findUnique({
@@ -296,10 +308,10 @@ async function addSubtitle(formData: FormData) {
   });
   await prisma.subtitle.upsert({
     where: { episodeId_lang: { episodeId, lang } },
-    create: { episodeId, lang, label, vttPath },
-    update: { vttPath, label },
+    create: { episodeId, lang, label, vttPath: safeVttPath },
+    update: { vttPath: safeVttPath, label },
   });
-  if (before && before.vttPath !== vttPath) {
+  if (before && before.vttPath !== safeVttPath) {
     await cleanupStorageRefs([before.vttPath]);
   }
   await backToTitle(titleId);

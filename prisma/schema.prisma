@@ -29,6 +29,7 @@ model User {
   individualSubscription  IndividualSubscription?
   instructorProfile       Instructor?
   agentConversations      AgentConversation[]
+  agentQuota              AgentQuota?
 
   @@map("user")
 }
@@ -81,6 +82,15 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model RateLimit {
+  id          String @id
+  key         String @unique
+  count       Int
+  lastRequest BigInt
+
+  @@map("rateLimit")
 }
 
 model Organization {
@@ -437,6 +447,15 @@ model AgentMessage {
   @@index([conversationId, createdAt])
 }
 
+model AgentQuota {
+  userId          String   @id
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  windowStartedAt DateTime @default(now())
+  requestCount    Int      @default(0)
+  activeCount     Int      @default(0)
+  updatedAt       DateTime @updatedAt
+}
+
 model CorporateLead {
   id          String   @id @default(cuid())
   companyName String
@@ -451,6 +470,14 @@ model CorporateLead {
   updatedAt   DateTime @updatedAt
 
   company CompanyProfile?
+}
+
+model PublicRateLimit {
+  key         String   @id
+  count       Int      @default(0)
+  windowStart DateTime @default(now())
+
+  @@index([windowStart])
 }
 
 // ---------------------------------------------------------------------------

@@ -14,6 +14,55 @@
   --muted: #f1ebe7;
   --muted-foreground: #5b534a;
   --border: #e6dccc;
+
+  /* Fixed visual-system colors for cinematic surfaces and illustrations.
+     Components consume these variables instead of defining their own colors. */
+  --near-white: #feffff;
+  --cinema-950: #0b0906;
+  --cinema-900: #14100a;
+  --cinema-850: #1c150d;
+  --cinema-800: #2b2016;
+  --cinema-700: #3a2e1f;
+  --cinema-600: #5b4630;
+  --gold-700: #c9a86a;
+  --gold-600: #d9c08a;
+  --hero-cream-text: #f3e9d0;
+  --hero-amber-950: #090604;
+  --hero-amber-900: #1a0f08;
+  --hero-amber-800: #3a2010;
+  --hero-amber-text: #ffe0b7;
+  --hero-amber: #eaa742;
+  --hero-amber-light: #ffca79;
+  --hero-sky-950: #050a10;
+  --hero-sky-900: #0a1420;
+  --hero-sky-800: #0f2236;
+  --hero-sky-text: #d6e8ff;
+  --hero-sky: #8ec9ff;
+  --hero-sky-light: #c6e5ff;
+  --feature-art-white: #ffffff;
+  --feature-cyan-bg: #d4f1f4;
+  --feature-cyan-bg-soft: #e8f9fb;
+  --feature-cyan-text: #0d3b44;
+  --feature-cyan-accent: #1aa3b5;
+  --feature-cyan-soft: #7dd3dd;
+  --feature-green-bg: #dcf2dc;
+  --feature-green-bg-soft: #edf9ed;
+  --feature-green-text: #14401f;
+  --feature-green-accent: #2f8f4f;
+  --feature-green-soft: #8fd6a6;
+  --feature-violet-bg: #dcd9f5;
+  --feature-violet-bg-soft: #edeafa;
+  --feature-violet-text: #271f5a;
+  --feature-violet-accent: #5a47c9;
+  --feature-violet-soft: #a89bf0;
+  --feature-pink-bg: #f7d9ea;
+  --feature-pink-bg-soft: #fbe9f2;
+  --feature-pink-text: #5e1737;
+  --feature-pink-accent: #c24c87;
+  --feature-pink-soft: #eaa8c9;
+  --white-rgb: 255 255 255;
+  --black-rgb: 0 0 0;
+  --shadow-rgb: 16 13 8;
 }
 
 /* Dark theme — the inverse of the light palette. Background/foreground swap;
@@ -55,6 +104,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
+  --color-near-white: var(--near-white);
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -71,6 +121,156 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.bf-loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--surface-dark);
+  color: var(--surface-dark-foreground);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    opacity 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 180ms;
+  contain: layout paint;
+}
+
+html[data-busyflix-loading] .bf-loading-screen {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition:
+    opacity 140ms cubic-bezier(0.22, 1, 0.36, 1),
+    visibility 0s linear 0s;
+}
+
+.bf-loading-screen__content {
+  display: grid;
+  justify-items: center;
+  gap: 1.25rem;
+  transform: translateZ(0);
+}
+
+.bf-loading-screen__logo {
+  width: clamp(5.5rem, 12vw, 8rem);
+  height: auto;
+  object-fit: contain;
+  opacity: 1;
+  transform: translateZ(0) scale(1);
+}
+
+html[data-busyflix-loading] .bf-loading-screen__logo {
+  animation: bf-loading-logo-in 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bf-loading-screen__track {
+  position: relative;
+  display: block;
+  width: clamp(5rem, 14vw, 8.75rem);
+  height: 2px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgb(var(--white-rgb) / 0.12);
+}
+
+.bf-loading-screen__progress {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 42%;
+  border-radius: inherit;
+  background: var(--primary);
+  transform: translateX(-160%) scaleX(0.7);
+  transform-origin: center;
+}
+
+html[data-busyflix-loading] .bf-loading-screen__progress {
+  animation: bf-loading-progress 900ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+@keyframes bf-loading-logo-in {
+  from {
+    opacity: 0;
+    transform: translateZ(0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateZ(0) scale(1);
+  }
+}
+
+@keyframes bf-loading-progress {
+  from {
+    transform: translateX(-160%) scaleX(0.7);
+  }
+  to {
+    transform: translateX(340%) scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-loading-screen {
+    transition-duration: 100ms, 0s;
+  }
+
+  html[data-busyflix-loading] .bf-loading-screen__logo,
+  html[data-busyflix-loading] .bf-loading-screen__progress {
+    animation: none;
+  }
+
+  .bf-loading-screen__progress {
+    left: 29%;
+    transform: scaleX(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes bf-title-preview-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.bf-title-preview > article {
+  animation: bf-title-preview-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: center center;
+}
+
+@keyframes bf-tooltip-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--bf-tooltip-offset, 3px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bf-tooltip {
+  --bf-tooltip-offset: 3px;
+  animation: bf-tooltip-in 140ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.bf-tooltip[data-side="bottom"] {
+  --bf-tooltip-offset: -3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bf-title-preview > article,
+  .bf-tooltip {
+    animation: none;
+  }
 }
 
 h1 {

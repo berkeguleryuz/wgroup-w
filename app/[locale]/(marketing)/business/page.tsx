@@ -1,9 +1,12 @@
 import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { headers } from "next/headers";
 import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 
 import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { sendCorporateLeadNotification } from "@/lib/email";
+import { consumeCorporateLeadRateLimit } from "@/lib/security/public-rate-limit";
 import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 
@@ -49,17 +52,33 @@ async function submitLead(formData: FormData) {
     fail();
   }
   const seatTarget = seatTargetRaw ? Number(seatTargetRaw) : null;
+  if (
+    seatTarget !== null &&
+    (!Number.isSafeInteger(seatTarget) || seatTarget < 1)
+  ) {
+    fail();
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    const allowed = await consumeCorporateLeadRateLimit(await headers());
+    if (!allowed) fail();
+  }
 
   try {
     await prisma.corporateLead.create({
       data: { companyName, contactName, email, phone, seatTarget, message },
     });
-    void sendCorporateLeadNotification({
-      companyName,
-      contactName,
-      email,
-      seatTarget,
-      message,
+    after(async () => {
+      const sent = await sendCorporateLeadNotification({
+        companyName,
+        contactName,
+        email,
+        seatTarget,
+        message,
+      });
+      if (!sent) {
+        console.error("[corporate-lead] notification delivery failed");
+      }
     });
   } catch {
     redirect(`${localizedPath(locale, "/business")}?err=1`);
@@ -148,6 +167,7 @@ export default async function BusinessPage({
                   name="seatTarget"
                   type="number"
                   min={1}
+                  step={1}
                   placeholder="25"
                 />
               </div>

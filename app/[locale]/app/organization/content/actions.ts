@@ -11,6 +11,7 @@ import { requireOrgContentStudio } from "@/lib/corporate";
 import { cleanupStorageRefs } from "@/lib/storage-cleanup";
 import { enqueueTranscode } from "@/lib/transcode";
 import { slugify, isNextRedirect } from "@/lib/utils";
+import { requireValidMediaReference } from "@/lib/security/media-url-policy";
 
 /** Resolve the caller's org and assert it owns the title. */
 async function requireOwnedTitle(titleId: string) {
@@ -114,7 +115,10 @@ export async function updateOrgTitle(formData: FormData) {
 
   const title = String(formData.get("title") || "").trim();
   const synopsis = String(formData.get("synopsis") || "").trim();
-  const heroImageUrl = String(formData.get("heroImageUrl") || "").trim() || null;
+  const rawHeroImageUrl = String(formData.get("heroImageUrl") || "").trim();
+  const heroImageUrl = rawHeroImageUrl
+    ? requireValidMediaReference(rawHeroImageUrl)
+    : null;
   if (!title || !synopsis) throw new Error("Missing fields");
 
   const before = await prisma.title.findUnique({
@@ -182,6 +186,7 @@ export async function addOrgEpisode(formData: FormData) {
   const previewSec = Number(formData.get("previewSec") || 0);
   const videoPath = String(formData.get("videoPath") || "").trim();
   if (!name || !videoPath) throw new Error("Missing fields");
+  const safeVideoPath = requireValidMediaReference(videoPath);
 
   const created = await prisma.episode.create({
     data: {
@@ -192,10 +197,10 @@ export async function addOrgEpisode(formData: FormData) {
       episodeNumber,
       durationSec,
       previewSec,
-      videoPath,
+      videoPath: safeVideoPath,
     },
   });
-  await enqueueTranscode(created.id, videoPath);
+  await enqueueTranscode(created.id, safeVideoPath);
   await backToContent(titleId, "created");
   } catch (e) {
     if (isNextRedirect(e)) throw e;
@@ -222,6 +227,9 @@ export async function updateOrgEpisode(formData: FormData) {
   // Empty = keep the current video; the upload field is optional on edit.
   const videoPath = String(formData.get("videoPath") || "").trim();
   if (!name) throw new Error("Missing fields");
+  const safeVideoPath = videoPath
+    ? requireValidMediaReference(videoPath)
+    : null;
 
   await prisma.episode.update({
     where: { id },
@@ -232,14 +240,14 @@ export async function updateOrgEpisode(formData: FormData) {
       episodeNumber,
       previewSec,
       ...(durationRaw ? { durationSec: Number(durationRaw) } : {}),
-      ...(videoPath ? { videoPath } : {}),
+      ...(safeVideoPath ? { videoPath: safeVideoPath } : {}),
     },
   });
   // Drop the replaced video from storage once nothing references it.
-  if (videoPath && episode.videoPath !== videoPath) {
+  if (safeVideoPath && episode.videoPath !== safeVideoPath) {
     await cleanupStorageRefs([episode.videoPath]);
   }
-  if (videoPath) await enqueueTranscode(id, videoPath);
+  if (safeVideoPath) await enqueueTranscode(id, safeVideoPath);
   await backToContent(titleId, "saved");
 }
 
@@ -265,7 +273,8 @@ export async function createOrgInstructor(formData: FormData) {
   const { membership } = await requireOrgContentStudio();
   const name = String(formData.get("name") || "").trim();
   const bio = String(formData.get("bio") || "").trim() || null;
-  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
+  const rawPhotoUrl = String(formData.get("photoUrl") || "").trim();
+  const photoUrl = rawPhotoUrl ? requireValidMediaReference(rawPhotoUrl) : null;
   if (!name) throw new Error("Missing fields");
 
   await prisma.instructor.create({
@@ -279,7 +288,8 @@ export async function updateOrgInstructor(formData: FormData) {
   const id = String(formData.get("id"));
   const name = String(formData.get("name") || "").trim();
   const bio = String(formData.get("bio") || "").trim() || null;
-  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
+  const rawPhotoUrl = String(formData.get("photoUrl") || "").trim();
+  const photoUrl = rawPhotoUrl ? requireValidMediaReference(rawPhotoUrl) : null;
   if (!name) throw new Error("Missing fields");
 
   const { count } = await prisma.instructor.updateMany({

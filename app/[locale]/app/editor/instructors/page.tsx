@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { ImageUpload } from "@/components/editor/ImageUpload";
 import { ConfirmButton } from "@/components/editor/ConfirmButton";
+import { requireValidMediaReference } from "@/lib/security/media-url-policy";
 
 async function backToList(error?: string) {
   const locale = await getLocale();
@@ -61,7 +62,8 @@ async function createInstructor(formData: FormData) {
   await requireRole(["platform_editor", "admin"]);
   const name = String(formData.get("name") || "").trim();
   const bio = String(formData.get("bio") || "").trim() || null;
-  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
+  const rawPhotoUrl = String(formData.get("photoUrl") || "").trim();
+  const photoUrl = rawPhotoUrl ? requireValidMediaReference(rawPhotoUrl) : null;
   if (!name) throw new Error("Missing fields");
 
   const linked = await resolveLinkedUser(formData);
@@ -79,7 +81,8 @@ async function updateInstructor(formData: FormData) {
   const id = String(formData.get("id"));
   const name = String(formData.get("name") || "").trim();
   const bio = String(formData.get("bio") || "").trim() || null;
-  const photoUrl = String(formData.get("photoUrl") || "").trim() || null;
+  const rawPhotoUrl = String(formData.get("photoUrl") || "").trim();
+  const photoUrl = rawPhotoUrl ? requireValidMediaReference(rawPhotoUrl) : null;
   if (!name) throw new Error("Missing fields");
 
   const linked = await resolveLinkedUser(formData, id);

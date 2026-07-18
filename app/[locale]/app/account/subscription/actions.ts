@@ -12,8 +12,9 @@ import {
   type PlanInterval,
 } from "@/lib/stripe";
 import { localizedPath } from "@/lib/i18n/routing";
+import { resolvePublicAppUrl } from "@/lib/app-url";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+const APP_URL = resolvePublicAppUrl();
 
 export async function startCheckout(plan: PlanInterval): Promise<string | null> {
   const [session, locale] = await Promise.all([
