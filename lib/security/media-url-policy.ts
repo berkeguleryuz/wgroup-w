@@ -128,6 +128,11 @@ export function configuredMediaOrigins(env: NodeJS.ProcessEnv = process.env): st
     env.R2_ACCOUNT_ID
       ? `https://${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
       : undefined,
+    // Signed URLs use the virtual-hosted style (bucket as subdomain), so that
+    // origin must be allowed alongside the path-style endpoint above.
+    env.R2_ACCOUNT_ID && env.R2_BUCKET
+      ? `https://${env.R2_BUCKET}.${env.R2_ACCOUNT_ID}.r2.cloudflarestorage.com`
+      : undefined,
     env.NEXT_PUBLIC_SUPABASE_URL,
     ...(env.MEDIA_ALLOWED_ORIGINS ?? "").split(","),
   ];
