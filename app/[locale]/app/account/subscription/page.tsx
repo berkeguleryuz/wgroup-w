@@ -57,7 +57,7 @@ export default async function SubscriptionPage({
       ) : null}
 
       {individual ? (
-        <section className="rounded-11 border border-border/60 bg-background p-6 md:p-8">
+        <section className="rounded-11 border border-border/60 bg-background p-6 dark:bg-surface-dark md:p-8">
           <h2 className="font-display text-2xl">{t("activeTitle")}</h2>
           <dl className="mt-6 grid gap-4 text-sm md:grid-cols-3">
             <Field

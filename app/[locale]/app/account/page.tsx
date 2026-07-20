@@ -64,6 +64,13 @@ export default async function AccountPage({
     role?: string | null;
     image?: string | null;
   };
+  const roleLabels: Record<string, string> = {
+    individual: t("roleIndividual"),
+    platform_editor: t("rolePlatformEditor"),
+    admin: t("roleAdmin"),
+    instructor: t("roleInstructor"),
+  };
+  const roleLabel = roleLabels[user.role ?? "individual"] ?? user.role ?? "";
 
   return (
     <div className="space-y-10">
@@ -74,7 +81,7 @@ export default async function AccountPage({
         <h1 className="mt-1 text-4xl md:text-6xl">{t("heading")}</h1>
       </header>
 
-      <section className="rounded-11 border border-border/60 bg-background p-6 md:p-8">
+      <section className="rounded-11 border border-border/60 bg-background p-6 dark:bg-surface-dark md:p-8">
         <h2 className="font-display text-2xl">{t("profile")}</h2>
         <form action={updateProfile} className="mt-6 space-y-5">
           <div className="grid gap-4 md:grid-cols-2">
@@ -99,7 +106,7 @@ export default async function AccountPage({
 
         <dl className="mt-8 grid gap-4 border-t border-border/60 pt-6 text-sm md:grid-cols-3">
           <Field label={t("email")} value={user.email} />
-          <Field label={t("role")} value={user.role || "individual"} />
+          <Field label={t("role")} value={roleLabel} />
           <Field
             label={t("verified")}
             value={user.emailVerified ? tc("yes") : tc("no")}
@@ -107,7 +114,7 @@ export default async function AccountPage({
         </dl>
       </section>
 
-      <section className="rounded-11 border border-border/60 bg-background p-6 md:p-8">
+      <section className="rounded-11 border border-border/60 bg-background p-6 dark:bg-surface-dark md:p-8">
         <h2 className="font-display text-2xl">{t("subscription")}</h2>
         <Link href="/app/account/subscription" className="mt-4 inline-block">
           <Button variant="dark">{t("manage")}</Button>
