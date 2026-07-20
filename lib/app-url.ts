@@ -13,6 +13,7 @@ function normalizeHttpUrl(value: string, variableName: string) {
     throw new Error(`${variableName} must be an absolute URL`);
   }
 
+  
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new Error(`${variableName} must use http or https`);
   }
