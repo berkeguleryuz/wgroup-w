@@ -9,10 +9,12 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+/.superpowers/
 
 # testing
 /coverage
 
+/docs
 # next.js
 /.next/
 .agents/
@@ -25,6 +27,7 @@
 
 # production
 /build
+/scripts/
 
 # misc
 .DS_Store
