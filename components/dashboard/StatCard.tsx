@@ -8,6 +8,7 @@ import { Link } from "@/lib/i18n/navigation";
 
 gsap.registerPlugin(useGSAP);
 
+
 export type StatIcon =
   | "users"
   | "play"
