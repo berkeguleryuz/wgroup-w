@@ -18,6 +18,7 @@
 # next.js
 /.next/
 .agents/
+skills-lock.json
 .claude/
 .windsurf/
 *.md

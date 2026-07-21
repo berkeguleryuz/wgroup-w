@@ -5,7 +5,7 @@ import { getLocale, getTranslations, setRequestLocale } from "next-intl/server";
 import { localizedPath, type Locale } from "@/lib/i18n/routing";
 import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
-import { requireSession } from "@/lib/access";
+import { requireFreshSession, requireSession } from "@/lib/access";
 import { cleanupStorageRefs } from "@/lib/storage-cleanup";
 import { Button } from "@/components/ui/Button";
 import { Input, Label } from "@/components/ui/Input";
@@ -23,7 +23,7 @@ export async function generateMetadata({
 
 async function updateProfile(formData: FormData) {
   "use server";
-  const session = await requireSession();
+  const session = await requireFreshSession();
   const name = String(formData.get("name") || "").trim();
   const image = String(formData.get("image") || "").trim() || null;
   if (!name) throw new Error("Missing fields");

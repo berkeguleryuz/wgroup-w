@@ -79,19 +79,28 @@
    for surfaces that should follow the theme. */
 .dark {
   color-scheme: dark;
-  /* Warm, layered dark — not a flat pure-black. The page sits slightly above
-     pure black; --surface-dark is kept a touch deeper so cinematic panels
-     (hero, video, dark sections) recede and read with real depth; --muted is
-     clearly elevated for cards. The bej --primary accent is preserved. */
-  --background: #17120a;
-  --foreground: #f4efe6;
+  /* Neutral layered dark palette. The #212121 page background anchors the
+     theme, deeper cinematic surfaces recede, and elevated cards remain clear.
+     The beige --primary accent is intentionally preserved. */
+  --background: #212121;
+  --foreground: #f5f5f5;
   --primary: #edddb9;
-  --primary-foreground: #100d08;
-  --surface-dark: #0e0b07;
-  --surface-dark-foreground: #f4efe6;
-  --muted: #221b11;
-  --muted-foreground: #a89d8b;
-  --border: #2d2617;
+  --primary-foreground: #212121;
+  --surface-dark: #181818;
+  --surface-dark-foreground: #f5f5f5;
+  --muted: #2a2a2a;
+  --muted-foreground: #a3a3a3;
+  --border: #383838;
+  --cinema-950: #111111;
+  --cinema-900: #171717;
+  --cinema-850: #1c1c1c;
+  --cinema-800: #242424;
+  --cinema-700: #303030;
+  --cinema-600: #424242;
+  --hero-amber-950: #111111;
+  --hero-amber-900: #171717;
+  --hero-amber-800: #242424;
+  --shadow-rgb: 0 0 0;
 }
 
 @theme inline {
@@ -230,10 +239,12 @@ html[data-busyflix-loading] .bf-loading-screen__progress {
   }
 }
 
+/* Expanded preview entrance is intentionally stronger than tooltip motion so
+   the portal keeps a clear visual relationship with its source card. */
 @keyframes bf-title-preview-in {
   from {
     opacity: 0;
-    transform: translateY(8px) scale(0.97);
+    transform: translateY(12px) scale(0.94);
   }
   to {
     opacity: 1;
@@ -242,8 +253,9 @@ html[data-busyflix-loading] .bf-loading-screen__progress {
 }
 
 .bf-title-preview > article {
-  animation: bf-title-preview-in 180ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: bf-title-preview-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
   transform-origin: center center;
+  will-change: transform, opacity;
 }
 
 @keyframes bf-tooltip-in {

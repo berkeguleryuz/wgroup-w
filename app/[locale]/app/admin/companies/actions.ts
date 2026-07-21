@@ -10,7 +10,7 @@ import { resolvePublicAppUrl } from "@/lib/app-url";
 
 import { auth, resetEmailContext } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/access";
+import { requireFreshRole } from "@/lib/access";
 import { isNextRedirect } from "@/lib/utils";
 
 /** Refresh the companies page and flash a one-shot toast (`?toast=<key>`). */
@@ -24,7 +24,7 @@ async function backToCompanies(toast: string, emsg?: string) {
 const APP_URL = resolvePublicAppUrl();
 
 export async function markLeadContacted(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   const id = String(formData.get("id"));
   await prisma.corporateLead.update({
     where: { id },
@@ -34,7 +34,7 @@ export async function markLeadContacted(formData: FormData) {
 }
 
 export async function activateCompany(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   try {
 
   const companyName = String(formData.get("companyName") || "").trim();
@@ -194,7 +194,7 @@ export async function activateCompany(formData: FormData) {
 }
 
 export async function updateCompany(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   const organizationId = String(formData.get("organizationId"));
   const billingEmail = String(formData.get("billingEmail") || "").trim();
   const seatCount = Number(formData.get("seatCount") || 0);
@@ -220,7 +220,7 @@ export async function updateCompany(formData: FormData) {
 }
 
 export async function deactivateCompany(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   const organizationId = String(formData.get("organizationId"));
   await prisma.companyProfile.update({
     where: { organizationId },
@@ -230,7 +230,7 @@ export async function deactivateCompany(formData: FormData) {
 }
 
 export async function reactivateCompany(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   const organizationId = String(formData.get("organizationId"));
   await prisma.companyProfile.update({
     where: { organizationId },

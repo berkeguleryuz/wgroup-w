@@ -1,6 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { redirect } from "next/navigation";
-import { requireSession } from "./access";
+import { requireFreshSession } from "./access";
 import { prisma } from "./prisma";
 
 export async function withOrganizationMutationLock<T>(
@@ -16,7 +16,7 @@ export async function withOrganizationMutationLock<T>(
 }
 
 export async function requireOrgOwner() {
-  const session = await requireSession();
+  const session = await requireFreshSession();
   const userId = session.user.id;
   const ownerMembership = await prisma.member.findFirst({
     where: { userId, role: "owner" },

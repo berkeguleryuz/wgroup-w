@@ -6,11 +6,12 @@ import { Link } from "@/lib/i18n/navigation";
 import { prisma } from "@/lib/prisma";
 import { categoryTitle } from "@/lib/i18n/category-title";
 import { formatDuration } from "@/lib/utils";
+import { FEATURED_TITLES_TAG } from "@/lib/public-home-catalog";
 
 async function loadFeatured() {
   "use cache";
   cacheLife("minutes");
-  cacheTag("featured-titles");
+  cacheTag(FEATURED_TITLES_TAG);
 
   try {
     const titles = await prisma.title.findMany({

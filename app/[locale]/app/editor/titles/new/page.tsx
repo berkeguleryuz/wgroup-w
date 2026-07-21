@@ -9,6 +9,11 @@ import { Button } from "@/components/ui/Button";
 import { Input, Textarea, Label } from "@/components/ui/Input";
 import { slugify } from "@/lib/utils";
 import { TitleType } from "@prisma/client";
+import {
+  FEATURED_TITLES_TAG,
+  PUBLIC_CATALOG_TAG,
+  publicTitleCatalogTag,
+} from "@/lib/public-home-catalog";
 
 async function createTitle(formData: FormData) {
   "use server";
@@ -24,7 +29,18 @@ async function createTitle(formData: FormData) {
   const created = await prisma.title.create({
     data: { slug, title, synopsis, type, categoryId, published: false },
   });
-  updateTag("featured-titles");
+  const titleTag = publicTitleCatalogTag(created.id);
+  try {
+    updateTag(FEATURED_TITLES_TAG);
+    updateTag(PUBLIC_CATALOG_TAG);
+    updateTag(titleTag);
+  } catch (error) {
+    console.error("catalog cache invalidation failed", {
+      titleId: created.id,
+      tags: [FEATURED_TITLES_TAG, PUBLIC_CATALOG_TAG, titleTag],
+      error,
+    });
+  }
   const locale = await getLocale();
   redirect(localizedPath(locale, `/app/editor/titles/${created.id}`));
 }

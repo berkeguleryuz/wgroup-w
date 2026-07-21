@@ -28,6 +28,13 @@ export const getSession = cache(async () => {
   return auth.api.getSession({ headers: await headers() });
 });
 
+export async function getFreshSession() {
+  return auth.api.getSession({
+    headers: await headers(),
+    query: { disableCookieCache: true },
+  });
+}
+
 async function currentLocale(): Promise<Locale> {
   const h = await headers();
   const fromHeader = h.get("x-next-intl-locale");
@@ -46,6 +53,25 @@ export async function requireSession() {
   if (!session) {
     const locale = await currentLocale();
     redirect(localizedPath(locale, "/login"));
+  }
+  return session;
+}
+
+export async function requireFreshSession() {
+  const session = await getFreshSession();
+  if (!session) {
+    const locale = await currentLocale();
+    redirect(localizedPath(locale, "/login"));
+  }
+  return session;
+}
+
+export async function requireFreshRole(roles: UserRole[]) {
+  const session = await requireFreshSession();
+  const role = userRole(session);
+  if (!role || !roles.includes(role)) {
+    const locale = await currentLocale();
+    redirect(localizedPath(locale, "/"));
   }
   return session;
 }

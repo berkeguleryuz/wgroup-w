@@ -16,7 +16,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { categoryTitle } from "@/lib/i18n/category-title";
 import { Link } from "@/lib/i18n/navigation";
 import { Tooltip } from "@/components/ui/Tooltip";
-import { canAutoplayTitlePreview } from "@/lib/title-card-behavior";
+import {
+  canAutoplayTitlePreview,
+  shouldOpenTitlePreviewFromFocus,
+} from "@/lib/title-card-behavior";
 import { formatDuration } from "@/lib/utils";
 import type { TitleCardTitle } from "./TitleCard";
 import { TitleCardArtwork } from "./TitleCardArtwork";
@@ -153,11 +156,18 @@ export function ExpandedTitlePreview({
     },
     [cancelClose, measureAndOpen],
   );
-  const openFromKeyboard = useCallback(() => {
-    clearTimer(openTimerRef);
-    cancelClose();
-    measureAndOpen();
-  }, [cancelClose, measureAndOpen]);
+  const handleFocus = useCallback(
+    (event: ReactFocusEvent<HTMLDivElement>) => {
+      const focusVisible =
+        event.target instanceof HTMLElement &&
+        event.target.matches(":focus-visible");
+      if (!shouldOpenTitlePreviewFromFocus(focusVisible)) return;
+      clearTimer(openTimerRef);
+      cancelClose();
+      measureAndOpen();
+    },
+    [cancelClose, measureAndOpen],
+  );
   const handleBlur = useCallback(
     (event: ReactFocusEvent<HTMLElement>) => {
       const next = event.relatedTarget;
@@ -205,7 +215,7 @@ export function ExpandedTitlePreview({
         className="relative"
         onPointerEnter={handlePointerEnter}
         onPointerLeave={scheduleClose}
-        onFocus={openFromKeyboard}
+        onFocus={handleFocus}
         onBlur={handleBlur}
       >
         <Link
@@ -262,7 +272,12 @@ export function ExpandedTitlePreview({
               onBlur={handleBlur}
             >
               <article className="overflow-hidden rounded-11 border border-primary/25 bg-surface-dark text-surface-dark-foreground shadow-[0_28px_80px_rgb(var(--shadow-rgb)/0.48)]">
-                <PreviewMedia title={title} index={index} />
+                <PreviewMedia
+                  title={title}
+                  index={index}
+                  playHref={playHref}
+                  playLabel={playLabel}
+                />
                 <div className="p-5">
                   <h3 className="text-2xl font-semibold tracking-tight">
                     {title.title}
@@ -323,9 +338,13 @@ export function ExpandedTitlePreview({
 function PreviewMedia({
   title,
   index,
+  playHref,
+  playLabel,
 }: {
   title: TitleCardTitle;
   index: number;
+  playHref: string;
+  playLabel: string;
 }) {
   const [videoFailed, setVideoFailed] = useState(false);
   const reducedMotion = useReducedMotion();
@@ -336,32 +355,38 @@ function PreviewMedia({
   );
 
   return (
-    <div className="relative aspect-video overflow-hidden bg-surface-dark">
-      <TitleCardArtwork
-        src={title.heroImageUrl}
-        alt=""
-        index={index}
-        sizes="480px"
-        className="object-cover"
-      />
-      {canPlayTrailer ? (
-        <video
-          className="absolute inset-0 h-full w-full object-cover"
-          src={title.trailerUrl ?? undefined}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="metadata"
-          poster={title.heroImageUrl ?? undefined}
-          onError={() => setVideoFailed(true)}
+    <Link
+      href={playHref}
+      aria-label={`${playLabel}: ${title.title}`}
+      className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary"
+    >
+      <div className="relative aspect-video overflow-hidden bg-surface-dark">
+        <TitleCardArtwork
+          src={title.heroImageUrl}
+          alt=""
+          index={index}
+          sizes="480px"
+          className="object-cover"
         />
-      ) : null}
-      <div
-        aria-hidden
-        className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-surface-dark/65 to-transparent"
-      />
-    </div>
+        {canPlayTrailer ? (
+          <video
+            className="absolute inset-0 h-full w-full object-cover"
+            src={title.trailerUrl ?? undefined}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster={title.heroImageUrl ?? undefined}
+            onError={() => setVideoFailed(true)}
+          />
+        ) : null}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-surface-dark/65 to-transparent"
+        />
+      </div>
+    </Link>
   );
 }
 

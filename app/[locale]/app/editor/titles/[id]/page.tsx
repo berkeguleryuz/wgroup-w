@@ -21,6 +21,11 @@ import { ConfirmButton } from "@/components/editor/ConfirmButton";
 import { TranscodeRefresh } from "@/components/editor/TranscodeRefresh";
 import { formatDuration } from "@/lib/utils";
 import { requireValidMediaReference } from "@/lib/security/media-url-policy";
+import {
+  FEATURED_TITLES_TAG,
+  PUBLIC_CATALOG_TAG,
+  publicTitleCatalogTag,
+} from "@/lib/public-home-catalog";
 
 const LANG_LABELS: Record<string, string> = {
   tr: "Türkçe",
@@ -31,8 +36,24 @@ const LANG_LABELS: Record<string, string> = {
   ar: "العربية",
 };
 
+function invalidatePublicCatalog(titleId: string) {
+  const titleTag = publicTitleCatalogTag(titleId);
+
+  try {
+    updateTag(FEATURED_TITLES_TAG);
+    updateTag(PUBLIC_CATALOG_TAG);
+    updateTag(publicTitleCatalogTag(titleId));
+  } catch (error) {
+    console.error("catalog cache invalidation failed", {
+      titleId,
+      tags: [FEATURED_TITLES_TAG, PUBLIC_CATALOG_TAG, titleTag],
+      error,
+    });
+  }
+}
+
 async function backToTitle(titleId: string, toast = "saved") {
-  updateTag("featured-titles");
+  invalidatePublicCatalog(titleId);
   const locale = await getLocale();
   // `?toast=<key>` is picked up client-side by the Toaster and shown once.
   redirect(localizedPath(locale, `/app/editor/titles/${titleId}?toast=${toast}`));
@@ -130,7 +151,7 @@ async function deleteTitle(formData: FormData) {
       ...doomed.episodes.flatMap((e) => [e.videoPath, ...e.subtitles.map((s) => s.vttPath)]),
     ]);
   }
-  updateTag("featured-titles");
+  invalidatePublicCatalog(id);
   const locale = await getLocale();
   redirect(localizedPath(locale, "/app/editor/titles?toast=deleted"));
 }
@@ -236,7 +257,6 @@ async function setVisibility(formData: FormData) {
   const visibility =
     String(formData.get("visibility")) === "ORG_ONLY" ? "ORG_ONLY" : "PUBLIC";
   await prisma.title.update({ where: { id }, data: { visibility } });
-  updateTag("featured-titles");
   await backToTitle(id);
 }
 

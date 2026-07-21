@@ -7,10 +7,10 @@ import { getLocale } from "next-intl/server";
 import { localizedPath } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
 import { USER_ROLES } from "@/lib/auth";
-import { requireRole } from "@/lib/access";
+import { requireFreshRole } from "@/lib/access";
 
 export async function updateUserRole(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   const userId = String(formData.get("userId"));
   const role = String(formData.get("role"));
   if (!(USER_ROLES as readonly string[]).includes(role)) {

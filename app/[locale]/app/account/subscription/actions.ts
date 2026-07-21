@@ -1,9 +1,8 @@
 "use server";
 
-import { headers } from "next/headers";
 import { getLocale } from "next-intl/server";
 
-import { auth } from "@/lib/auth";
+import { getFreshSession } from "@/lib/access";
 import { prisma } from "@/lib/prisma";
 import {
   stripe,
@@ -18,7 +17,7 @@ const APP_URL = resolvePublicAppUrl();
 
 export async function startCheckout(plan: PlanInterval): Promise<string | null> {
   const [session, locale] = await Promise.all([
-    auth.api.getSession({ headers: await headers() }),
+    getFreshSession(),
     getLocale(),
   ]);
   if (!session) return null;
@@ -70,7 +69,7 @@ export async function startCheckout(plan: PlanInterval): Promise<string | null> 
 
 export async function openBillingPortal(): Promise<string | null> {
   const [session, locale] = await Promise.all([
-    auth.api.getSession({ headers: await headers() }),
+    getFreshSession(),
     getLocale(),
   ]);
   if (!session) return null;

@@ -6,7 +6,7 @@ import { getLocale } from "next-intl/server";
 
 import { localizedPath } from "@/lib/i18n/routing";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/access";
+import { requireFreshRole } from "@/lib/access";
 import { isNextRedirect } from "@/lib/utils";
 import {
   stripe,
@@ -30,7 +30,7 @@ async function backToBilling(toast: string, emsg?: string) {
  * the hosted invoice / PDF link.
  */
 export async function createCompanyInvoice(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   try {
     if (!stripe) throw new Error("Stripe yapılandırılmamış");
 
