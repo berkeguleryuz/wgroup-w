@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 
 import { localizedPath } from "@/lib/i18n/routing";
-import { requireRole } from "@/lib/access";
+import { requireFreshRole } from "@/lib/access";
 import { getStorage, isR2Configured } from "@/lib/storage";
 import { getStorageInventory, isManagedKey, isOrphanKey, isTreeKey } from "./inventory";
 
@@ -25,7 +25,7 @@ async function backToStorage(toast: string) {
 }
 
 export async function deleteStorageObject(formData: FormData) {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   if (!isR2Configured()) throw new Error("R2 is not configured");
 
   const key = String(formData.get("key") || "");
@@ -39,7 +39,7 @@ export async function deleteStorageObject(formData: FormData) {
 }
 
 export async function deleteAllOrphans() {
-  await requireRole(["admin"]);
+  await requireFreshRole(["admin"]);
   if (!isR2Configured()) throw new Error("R2 is not configured");
 
   const inventory = await getStorageInventory();

@@ -6,6 +6,10 @@ export function isCompactTitleCard(variant: TitleCardBehavior) {
   return variant === "compact";
 }
 
+export function shouldOpenTitlePreviewFromFocus(focusVisible: boolean) {
+  return focusVisible;
+}
+
 export function canAutoplayTitlePreview(
   trailerUrl: string | null,
   reducedMotion: boolean,

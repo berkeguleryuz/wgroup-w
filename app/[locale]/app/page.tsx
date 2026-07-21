@@ -11,25 +11,18 @@ import {
 } from "@/lib/content-visibility";
 import { prisma } from "@/lib/prisma";
 import { episodePath } from "@/lib/episode-path";
+import { mergeCatalogTitles } from "@/lib/home-catalog-merge";
 import {
-  getContentDateWindows,
-  publishedAtWhere,
-} from "@/lib/content-date-windows";
-import { Section } from "@prisma/client";
+  getPublicHomeCatalog,
+  getSupplementalHomeCatalog,
+  homeCatalogTitleInclude,
+} from "@/lib/public-home-catalog";
 import { AppHero } from "@/components/app/AppHero";
 import { Carousel } from "@/components/app/Carousel";
 import { TitleCard } from "@/components/app/TitleCard";
 import { ContinueWatchingCard } from "@/components/app/ContinueWatchingCard";
 import { Button } from "@/components/ui/Button";
 import { formatDuration } from "@/lib/utils";
-
-const titleInclude = {
-  category: true,
-  episodes: { select: { durationSec: true } },
-  orgAudience: { select: { organizationId: true } },
-  hiddenBy: { select: { organizationId: true } },
-  departmentAudience: { select: { departmentId: true } },
-} as const;
 
 export default async function AppHomePage({
   params,
@@ -43,30 +36,22 @@ export default async function AppHomePage({
   const user = session.user as typeof session.user & { role?: string | null };
   const viewer = await getViewerAudience(user.id);
   const audience = audienceWhere(user.role, viewer);
-  const contentWindows = getContentDateWindows(new Date());
 
   const [
     t,
     tNav,
     tLib,
     access,
-    featured,
+    publicCatalog,
+    supplementalCatalog,
     continueRaw,
-    newReleases,
-    thisMonthReleases,
-    series,
-    movies,
-    talent,
   ] = await Promise.all([
     getTranslations("appHome"),
     getTranslations("nav"),
     getTranslations("featuredLibrary"),
     getEffectiveAccess(user.id, user.role),
-    prisma.title.findFirst({
-      where: { published: true, AND: [audience] },
-      orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-      include: { category: true },
-    }),
+    getPublicHomeCatalog(),
+    getSupplementalHomeCatalog(user.role, viewer),
     prisma.progress.findMany({
       where: {
         userId: user.id,
@@ -80,62 +65,53 @@ export default async function AppHomePage({
       include: {
         episode: {
           include: {
-            title: { include: titleInclude },
+            title: { include: homeCatalogTitleInclude },
           },
         },
       },
     }),
-    prisma.title.findMany({
-      where: {
-        published: true,
-        ...publishedAtWhere(contentWindows.week),
-        AND: [audience],
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 12,
-      include: titleInclude,
-    }),
-    prisma.title.findMany({
-      where: {
-        published: true,
-        ...publishedAtWhere(contentWindows.month),
-        AND: [audience],
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 12,
-      include: titleInclude,
-    }),
-    prisma.title.findMany({
-      where: {
-        published: true,
-        category: { section: Section.SERIES },
-        AND: [audience],
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 12,
-      include: titleInclude,
-    }),
-    prisma.title.findMany({
-      where: {
-        published: true,
-        category: { section: Section.MOVIE },
-        AND: [audience],
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 12,
-      include: titleInclude,
-    }),
-    prisma.title.findMany({
-      where: {
-        published: true,
-        category: { section: Section.TALENT },
-        AND: [audience],
-      },
-      orderBy: { publishedAt: "desc" },
-      take: 12,
-      include: titleInclude,
-    }),
   ]);
+
+  const canRender = (title: (typeof publicCatalog.series)[number]) =>
+    canViewTitle(title, user.role, viewer);
+
+  const featured =
+    mergeCatalogTitles(
+      [
+        publicCatalog.featured ? [publicCatalog.featured] : [],
+        supplementalCatalog.featured ? [supplementalCatalog.featured] : [],
+      ],
+      canRender,
+      1,
+    )[0] ?? null;
+  const newReleases = mergeCatalogTitles(
+    [publicCatalog.newReleases, supplementalCatalog.newReleases],
+    canRender,
+    12,
+  );
+  const thisMonthReleases = mergeCatalogTitles(
+    [
+      publicCatalog.thisMonthReleases,
+      supplementalCatalog.thisMonthReleases,
+    ],
+    canRender,
+    12,
+  );
+  const series = mergeCatalogTitles(
+    [publicCatalog.series, supplementalCatalog.series],
+    canRender,
+    12,
+  );
+  const movies = mergeCatalogTitles(
+    [publicCatalog.movies, supplementalCatalog.movies],
+    canRender,
+    12,
+  );
+  const talent = mergeCatalogTitles(
+    [publicCatalog.talent, supplementalCatalog.talent],
+    canRender,
+    12,
+  );
 
   // One card per series: keep only the most recently watched in-progress
   // episode for each title (rows are already ordered by updatedAt desc).

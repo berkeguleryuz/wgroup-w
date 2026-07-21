@@ -19,6 +19,8 @@ import {
 
 const AUTH_BASE_URL = resolveAuthBaseUrl();
 const PUBLIC_APP_URL = resolvePublicAppUrl();
+const DATABASE_RATE_LIMIT_ENABLED =
+  process.env.AUTH_DISABLE_DATABASE_RATE_LIMIT !== "true";
 
 /**
  * Request-scoped override for the shared `sendResetPassword` callback. When an
@@ -49,8 +51,17 @@ export const auth = betterAuth({
 
   database: prismaAdapter(prisma, { provider: "postgresql" }),
 
+  session: {
+    cookieCache: {
+      enabled: true,
+      maxAge: 60,
+      strategy: "compact",
+    },
+  },
+
   rateLimit: {
-    enabled: process.env.NODE_ENV === "production",
+    enabled:
+      process.env.NODE_ENV === "production" && DATABASE_RATE_LIMIT_ENABLED,
     storage: "database",
     window: 60,
     max: 100,

@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
-import { updateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 import { prisma } from "@/lib/prisma";
+import {
+  FEATURED_TITLES_TAG,
+  PUBLIC_CATALOG_TAG,
+} from "@/lib/public-home-catalog";
 
 /**
  * Publishes titles whose scheduled time has passed. Triggered by Vercel Cron
@@ -24,7 +28,17 @@ export async function GET(request: Request) {
     data: { published: true, publishedAt: now, scheduledFor: null },
   });
 
-  if (result.count > 0) updateTag("featured-titles");
+  if (result.count > 0) {
+    try {
+      revalidateTag(FEATURED_TITLES_TAG, "max");
+      revalidateTag(PUBLIC_CATALOG_TAG, "max");
+    } catch (error) {
+      console.error("catalog cache invalidation failed", {
+        tags: [FEATURED_TITLES_TAG, PUBLIC_CATALOG_TAG],
+        error,
+      });
+    }
+  }
 
   return NextResponse.json({ published: result.count });
 }
